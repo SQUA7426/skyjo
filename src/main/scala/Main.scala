@@ -1,7 +1,21 @@
-package de.htwg.se
+object Main {
+  def main(args: Array[String]): Unit = {
 
-@main def hello(): Unit =
-  println("Hello World!")
-  print(msg)
 
-val msg = "This is a message \n"
+    val scal:Int = 5
+    val hor: String = "_"
+    val vert: String = "|"
+    val plus: String = "+"
+    val empt: String = " "
+
+
+    for(i<- 1 to 3) {
+      for (i <- 0 to scal) {
+        println(empt * scal + vert + empt * scal + vert)
+      }
+      if(i!=3) {
+        println(hor * (scal * 3))
+      }
+    }
+  }
+}
