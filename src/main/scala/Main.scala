@@ -1,4 +1,5 @@
 package de.htwg.se
+<<<<<<< HEAD
 
 //aaaaaaaaaaaaaaaaaaaaaaaa
 object main {
@@ -22,3 +23,12 @@ object main {
     }
   }
 }
+=======
+
+import scala.io.StdIn.readInt
+
+@main def starting(): Unit =
+  println("Enter number of players:")
+  val playerCount = readInt()
+  println("ok")
+>>>>>>> origin/main
