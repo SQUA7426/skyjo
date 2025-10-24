@@ -1,6 +1,6 @@
-package de.htwg.se
+package scala
 
-import de.htwg.se.Card
+import scala.Card
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 

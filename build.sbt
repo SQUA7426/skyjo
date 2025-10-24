@@ -7,6 +7,7 @@ ThisBuild / scalacOptions ++= Seq("-release:21")
 
 libraryDependencies ++= Seq(
   "org.scalafx" %% "scalafx" % "21.0.0-R32",
+  "org.scalactic" %% "scalactic" % "3.2.14",
   "org.scalatest" %% "scalatest" % "3.2.10" % Test,
   "org.scalameta" %% "munit" % "1.0.0"
 )

@@ -1,4 +1,4 @@
-package de.htwg.se
+package scala
 
 def len(x: Int): Int = x.toString().size
 

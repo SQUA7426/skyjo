@@ -1,14 +1,14 @@
-package de.htwg.se
+package scala
 
-import de.htwg.se.Card
-import de.htwg.se.Deck
+import scala.Card
+import scala.Deck
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 import scala.util.control._
 import scala.collection.mutable.Seq
 
-abstract class Board2 {
+abstract class Board {
   val ySize = 3
   val xSize = 4
   var brd: ArrayBuffer[ArrayBuffer[Card]] = new ArrayBuffer(ySize)

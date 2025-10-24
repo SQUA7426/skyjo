@@ -1,6 +1,9 @@
-package de.htwg.se
+package scalBoard
 
-val msg = "This is a message \n"
+import scala.Board
+import scala.Deck
+import scala.DiscardPile
+import scala.Hand
 
 def printInteract(
     b: Board,
