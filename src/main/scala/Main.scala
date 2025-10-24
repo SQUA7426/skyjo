@@ -1,9 +1,6 @@
 package de.htwg.se
 
-import de.htwg.se.Card
-import de.htwg.se.Deck
-import de.htwg.se.Board
-import scala.io.StdIn.readInt
+val msg = "This is a message \n"
 
 def printInteract(
     b: Board,
