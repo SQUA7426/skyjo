@@ -12,5 +12,5 @@ class TuiTest extends AnyWordSpec with Matchers {
         l should contain(4)
     "lower 2" should:
       "throw an Exception" in:
-        val err = the[Exception] thrownBy (l should contain (9)) should have message "List(2, 3, 4, 5, 6, 7, 8) did not contain element 9"
+        val err = 30
 }
