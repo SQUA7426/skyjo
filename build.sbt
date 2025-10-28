@@ -12,6 +12,16 @@ libraryDependencies ++= Seq(
   "org.scalameta" %% "munit" % "1.0.0"
 )
 
+coverageEnabled := true
+coverageHighlighting := true
+coverageFailOnMinimum := false
+coverageMinimumStmtTotal := 70
+coverageMinimumBranchTotal := 70
+coverageMinimumStmtPerPackage := 70
+coverageMinimumBranchPerPackage := 70
+coverageMinimumStmtPerFile := 70
+coverageMinimumBranchPerFile := 70
+
 lazy val root = (project in file("."))
   .settings(
     name := "skyjo"
