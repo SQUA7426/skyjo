@@ -5,7 +5,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalactic.StringNormalizations._
 
 class TuiTest extends AnyWordSpec with Matchers {
-  val l = List(2, 3, 4, 5, 6, 8)
+  val l = List(2, 3, 4, 5, 6, 7, 8)
   "A Tui PlayerCount" when:
     "between 2 and 8" should:
       "throw no Exceptions" in:
