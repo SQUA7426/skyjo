@@ -12,5 +12,5 @@ class TuiTest extends AnyWordSpec with Matchers {
         l should contain(4)
     "lower 2" should:
       "throw an Exception" in:
-        val err = 30
+        val err = "30"
 }
