@@ -5,7 +5,7 @@ import de.htwg.se.Deck
 import de.htwg.se.Board
 import scala.io.StdIn.readInt
 
-def chose(): Unit = println("Hello, world!")
+def chose(): Unit = println("world!")
 
 def printInteract(
     b: Board,
