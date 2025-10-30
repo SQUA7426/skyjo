@@ -15,12 +15,12 @@ libraryDependencies ++= Seq(
 coverageEnabled := true
 coverageHighlighting := true
 coverageFailOnMinimum := false
-coverageMinimumStmtTotal := 70
-coverageMinimumBranchTotal := 70
-coverageMinimumStmtPerPackage := 70
-coverageMinimumBranchPerPackage := 70
-coverageMinimumStmtPerFile := 70
-coverageMinimumBranchPerFile := 70
+coverageMinimumStmtTotal := 100
+coverageMinimumBranchTotal := 100
+coverageMinimumStmtPerPackage := 100
+coverageMinimumBranchPerPackage := 100
+coverageMinimumStmtPerFile := 100
+coverageMinimumBranchPerFile := 100
 
 lazy val root = (project in file("."))
   .settings(
