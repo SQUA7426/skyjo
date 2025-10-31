@@ -25,6 +25,7 @@ val v1: Vector[Field] =
   (for {
     i <- 1 to 10
     j <- -2 to 12
+    if j != -2
   } yield Field(j)).toVector
 
 val v2: Vector[Field] =
@@ -36,8 +37,4 @@ val v2: Vector[Field] =
 
 val v: Vector[Field] = v1++v2
 
-class Dock(d: Vector[Field]) { val deck = d }
-val s:String = "Deck"
-val upperCard: String = { if (s.compareTo("Deck")==0) { "Deck" } else { s } }
-val dd = new Dock(v)
-println(noStr(upperCard))
+val x = v.groupBy(identity).map(t => (t._1, t._2.size))

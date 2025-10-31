@@ -23,10 +23,10 @@ class Deck(d: Vector[Card], s: String) {
     if upperCard.size == 4 then s"|${upperCard}| " else s"${upperCard}"
 
   def upperCardInt(): Int = {
-    var random = Random.between(-2, 12)
-    while Card(random).toString.compareTo(upperCard.toString()) == 0 do
-      random = Random.between(-2, 12)
-    random
+    val cardList: List[String] = (for i <- -2 to 12 yield Card(i).toString()).toList
+    val c = upperCard.toString()
+    val ret =  cardList.indexOf(c)
+    ret - 2
   }
 
   def turnUpperCard(): Seq[Card] = {
