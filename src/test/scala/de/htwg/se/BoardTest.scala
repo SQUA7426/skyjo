@@ -1,5 +1,4 @@
 package de.htwg.se
-
 import de.htwg.se.Card
 import de.htwg.se.Deck
 import de.htwg.se.Board
