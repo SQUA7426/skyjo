@@ -13,36 +13,21 @@ def fillDeck(seqCards: Seq[Card]): Vector[Card] =
   } yield Card(j)).toVector
   val fullDeck: Vector[Card] = v1 ++ v2
   val diffs: Vector[Card] = fullDeck.diff(seqCards)
-  diffs
+  val shuffled = Random.shuffle(diffs)
+  shuffled
 
-class Deck(d: Vector[Card], s: String) {
-  val deck: Vector[Card] = d
-  val upperCard: String = s
-
-  override def toString(): String =
-    if upperCard.size == 4 then s"|${upperCard}| " else s"${upperCard}"
-
-  def upperCardInt(): Int = {
-    val cardList: List[String] = (for i <- -2 to 12 yield Card(i).toString()).toList
-    val c = upperCard.toString()
-    val ret =  cardList.indexOf(c)
-    ret - 2
-  }
-
-  def turnUpperCard(): Seq[Card] = {
-    if upperCard.compareTo("Deck")!= 0 || deck.size==0 then Seq.empty[Card]
-    else {
-      var random = Random.between(-2, 12)
-      while cardsLeftOf(random) == 0 do random = Random.between(-2, 12)
-      removeCardFromDeck(random, deck)
+case class Deck(deck: Vector[Card], upperCard: String) {
+  def turnUpperCard(): String =
+    upperCard.compareTo("Deck") match {
+      case 0 => deck.last.toString()
+      case _ => "Deck"
     }
-  }
+  def remove(amount: Int): Vector[Card] =
+    val nDeck = deck.dropRight(amount)
+    nDeck
+  def leftOf(worth: Int): Int = deck.count(_ == Card(worth))
+  def getUpperCard(): Card = if upperCard.compareTo("Deck") != 0 then
+    toCard(upperCard.toInt)
+    else throw new IllegalArgumentException(s"Invalid upperCard:${upperCard}")
 
-  def cardsLeftOf(v: Int): Int =
-    deck.count(_.value.toInt == v)
-
-  def removeCardFromDeck(worth: Int, deck: Vector[Card]): Seq[Card] =
-    val aDiffSeq: Seq[Card] = Seq(Card(worth))
-    val seqDiff: Seq[Card] = deck.diff(aDiffSeq)
-    seqDiff
 }

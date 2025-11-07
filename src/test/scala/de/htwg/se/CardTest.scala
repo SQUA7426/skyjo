@@ -17,12 +17,17 @@ class CardTest extends AnyWordSpec with Matchers {
       val num: Int = 11
       val card11: Card = Card(num)
       "as string" in:
-        card11.toString() should (be (f"|  ${num}  | ") or be (f"| ${num}  | "))
+        card11.toString() shouldBe (f"${num}")
     "A Card with value 9" should:
-      val num: Int = 9
-      val card9: Card = Card(num)
-      "as string" in:
-        card9.toString() should (be (f"|  ${num}  | ") or be (f"| ${num}  | "))
+      val num9: Int = 9
+      val card9: Card = Card(num9)
+      "as string 9 be converted correctly" in:
+        val n9 = "9"
+        toCard(n9) shouldBe Card(9)
+      "as int 9 be converted correctly" in:
+        toCard(num9) shouldBe Card(9)
+      "not be acceptable from boolean" in:
+        val highCardErr = the [IllegalArgumentException] thrownBy(toCard(true))
       "it's digit length" in:
         len(card9.value) should (be (1) or be (2))
       "is from type: Card" in:

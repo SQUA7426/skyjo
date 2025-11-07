@@ -1,5 +1,7 @@
 package de.htwg.se
 
+import de.htwg.se.Card
+import de.htwg.se.Hand
 import de.htwg.se.Deck
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -14,23 +16,16 @@ class DeckTest extends AnyWordSpec with Matchers {
     "Initialized" should:
       "have the size of 150" in:
         d.deck.size shouldBe (150)
-      "Should have UpperCard == Deck" in:
-        d.toString() should (be (s"|${d.upperCard}| ") or be (s"${d.upperCard}"))
-    "Initalized and UpperCard Taken" should:
-      val h = new Hand()
-      val d2: Deck = new Deck(h.takeFromDeck(d), "Deck")
-      "be printed correctly" in:
-        d2.toString()should (be (s"|${d2.upperCard}| ") or be (s"${d2.upperCard}")) 
-      "have when upperCard==1 as Int" in:
-        d2.upperCardInt() should (be >= -2 and be <= 12)
-      "have upperCard.size != 4" in:
-        d.toString().size should not be 4
-
-    "it has no Cards left" should:
-      val d3: Deck = new Deck(fillDeck(d.deck.toSeq), "Deck")
-      "have a different toString" in:
-        d3.toString() should (be (s"|${d.upperCard}| ") or be (s"${d.upperCard}"))
-      "shoukd throw no Exception" in:
-        noException shouldBe thrownBy(d3.turnUpperCard())
+      "should have left more then one Card with a Number left" in:
+        d.leftOf(1) shouldBe > (0)
+      "when get upperCard throw an IllegalArgumentException" in:
+        val throwError = the [IllegalArgumentException] thrownBy(d.getUpperCard())
+      "when initialized one turned" in:
+        d.turnUpperCard() should not be ("Deck")
+      val turnedDeck: Deck = new Deck(d.deck,d.turnUpperCard())
+      "when initialized one turned be a Card" in:
+        turnedDeck.getUpperCard() shouldBe a[Card]
+      "when turned again" in:
+        turnedDeck.turnUpperCard() should be ("Deck")
   }
 }
