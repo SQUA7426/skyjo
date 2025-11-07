@@ -47,18 +47,4 @@ case class Board(x: Int, y: Int, board: Vector[Vector[Card]]) {
   val brd: Vector[Vector[Card]]= board
 
   override def toString(): String = brd.flatten.toSeq.map(t => s" ${t} |").mkString
-
-  // override def toString(): String =
-  //   val s1: Seq[String] = Seq("+-----+ ", "|     | ").map(t => t.repeat(xSize))
-  //   val s2: Seq[String] = Seq("|     | ", "+-----+ ").map(t => t.repeat(xSize))
-  //   val s3 = (s1 ++ s2).mkString
-  //   s3
-  // override def toString(): String = {
-  //   var br = brd.map(t => t.toList).flatten
-  //   for i <- 0 until ySize do
-  //     Seq("+-----+ ", "|     | ").foreach(t => println(t * xSize))
-  //     for j <- 0 until xSize do print(br(i * xSize + j))
-  //     println()
-  //     Seq("|     | ", "+-----+ ").foreach(t => println(t * xSize))
-  // }
 }
