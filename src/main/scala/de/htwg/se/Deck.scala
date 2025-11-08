@@ -4,7 +4,6 @@ import de.htwg.se.Card
 import scala.collection.immutable.Vector
 import scala.util.Random
 import scala.collection.immutable.Seq
-
 def fillDeck(seqCards: Seq[Card]): Vector[Card] =
   val v1: Vector[Card] =
     (for { i <- 1 to 10; j <- -1 to 12 } yield Card(j)).toVector
@@ -16,6 +15,7 @@ def fillDeck(seqCards: Seq[Card]): Vector[Card] =
   val shuffled = Random.shuffle(diffs)
   shuffled
 
+def fullDeck() : (Vector[Card], String) = (fillDeck(Seq.empty[Card]), "Deck")
 case class Deck(deck: Vector[Card], upperCard: String) {
   def turnUpperCard(): String =
     upperCard.compareTo("Deck") match {
@@ -29,5 +29,5 @@ case class Deck(deck: Vector[Card], upperCard: String) {
   def getUpperCard(): Card = if upperCard.compareTo("Deck") != 0 then
     toCard(upperCard.toInt)
     else throw new IllegalArgumentException(s"Invalid upperCard:${upperCard}")
-
+  override def toString(): String = if upperCard.compareTo("Deck")==0 then "Deck" else upperCard
 }

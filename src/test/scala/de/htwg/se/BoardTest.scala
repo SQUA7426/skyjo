@@ -1,7 +1,5 @@
 package de.htwg.se
-import de.htwg.se.Card
-import de.htwg.se.Deck
-import de.htwg.se.Board
+import de.htwg.se.{Card,Board,Deck,Hand,DiscardPile}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalactic.StringNormalizations._
@@ -11,20 +9,29 @@ import scala.collection.immutable.Seq
 class BoardTest extends AnyWordSpec with Matchers {
   "A Board" when {
     val d = new Deck(fillDeck(Seq.empty[Card]), "Deck")
-    "not filled" should:
+    val b:Vector[Vector[Card]] = fillBoard(4,3,d)._1
+    "initialized and not filled" should:
       "create a New filled Board even when filled with x=0 and y=0" in:
-        fillBoard(4,3,Deck(Seq.empty[Card].toVector,"Deck")) shouldBe a[Vector[Vector[Card]]]
-    val b:Vector[Vector[Card]] = fillBoard(4,3,d)
-    "filled" should:
-      "create a New filled Board when filled x=4 and y=3" in:
-        b shouldBe a[Vector[Vector[Card]]]
-      "still be a filled Board when UpperCard of Deck was turned" in:
+        fillBoard(4,3,Deck(Seq.empty[Card].toVector,"Deck"))._1 shouldBe a[Vector[Vector[Card]]]
+    "initialized and filled" should:
+      "return a Board when UpperCard of Deck was turned" in:
         val turnedDeck = Deck(d.deck,d.turnUpperCard())
-        val bTurnedUpperCard:Vector[Vector[Card]] = fillBoard(4,3,turnedDeck)
+        val bTurnedUpperCard:Vector[Vector[Card]] = fillBoard(4,3,turnedDeck)._1
         bTurnedUpperCard shouldBe a[Vector[Vector[Card]]]
-    "initialized" should:
       val aBoard = new Board(4,3,b)
       "be as String" in:
-        aBoard.toString() shouldBe aBoard.brd.flatten.toSeq.map(t => s" ${t} |").mkString
+        aBoard.toString() shouldBe aBoard.brd.flatten.toSeq.zipWithIndex.map {case(aCard,idx) => if ((idx+1)%4==0) ((" " * (2-len(aCard.toString()))) + s"${aCard.toString()}\n") else ((" " * (2-len(aCard.toString()))) + s"${aCard.toString()}|")}.mkString
+      "when a BoardCard is turned (e.g. 3rd) return a Board" in:
+        aBoard.turnBoardCard(3) shouldBe a[Board]
+      "return a new Deck when switched with DeckUpperCard" in:
+        val d2: Deck = new Deck(d.deck, d.turnUpperCard())
+        aBoard.switch(d2,3)._1 shouldBe a[Deck]
+      val h: Hand = new Hand(d.turnUpperCard())
+      "return a new Hand when switched with HandCard" in:
+        aBoard.switch(h,3)._1 shouldBe a[Hand]
+      "return a new DiscardPile when switched with the DiscardPile" in:
+        val disc: DiscardPile = new DiscardPile("Disc")
+        val disc2: DiscardPile = new DiscardPile(disc.putToDiscardPile(h)._1.toString())
+        aBoard.switch(disc2,3)._1 shouldBe a[DiscardPile]
   }
 }

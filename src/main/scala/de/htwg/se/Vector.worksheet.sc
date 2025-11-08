@@ -81,17 +81,13 @@ println(a3rdhDeck.upper)
 val seqCards = Seq.empty[Field]
 val diffs: Vector[Field] = v3.diff(seqCards)
 val shuffled = Random.shuffle(diffs)
-// def fillDeck(seqCards: Seq[Field]): Vector[Field] =
-//   shuffled
 
 def fillBoard(xSize: Int, ySize: Int, d: dDeck): Vector[Vector[Field]] =
   if (d.deck.isEmpty) {
     val deck2 = /*fillDeck(Seq.empty[Field])*/ shuffled
     fillBoard(xSize, ySize, dDeck(deck2, "Deck"))
   } else {
-    // draw one Field and produce updated deck
     def drawField(deck: dDeck): (Field, dDeck) = {
-      // if upper is "Deck", flip it and make a new dDeck
       val turnedDeck =
         if (deck.upper == "Deck") dDeck(deck.deck, deck.turnUpper())
         else deck
@@ -101,7 +97,6 @@ def fillBoard(xSize: Int, ySize: Int, d: dDeck): Vector[Vector[Field]] =
       (topCard, newDeck)
     }
 
-    // fill one row
     def fillRow(deck: dDeck, n: Int): (Vector[Field], dDeck) =
       if (n == 0) (Vector.empty, deck)
       else {
@@ -110,7 +105,6 @@ def fillBoard(xSize: Int, ySize: Int, d: dDeck): Vector[Vector[Field]] =
         (field +: rest, finalDeck)
       }
 
-    // fill all rows
     def fillRows(deck: dDeck, n: Int): (Vector[Vector[Field]], dDeck) =
       if (n == 0) (Vector.empty, deck)
       else {
@@ -119,14 +113,11 @@ def fillBoard(xSize: Int, ySize: Int, d: dDeck): Vector[Vector[Field]] =
         (row +: rows, finalDeck)
       }
 
-    // build full board
     val (board, _) = fillRows(d, ySize)
     board
   }
 
 val s = fillBoard(4, 3, aDeck)
-s.flatten.foreach(t=> printf(s"${t} | "))
- s.flatten.toSeq.map(t => s"${t}")
-val l1 = s.flatten.toSeq.map(t => t.value)
-s.flatten.toSeq.map(t => s" ${t} |").mkString
-// val nLine = l1.zipWithIndex.map {case(value,idx) => if (idx%4==0) s"${value}\n" else s"${value}"}
+def len(x: Any): Int = x.toString().size
+val s1 = s.flatten.toSeq.zipWithIndex.map {case(aField,idx) => if ((idx+1)%4==0) ((" " * (2-len(aField.value))) + s"${aField.value}\n") else ((" " * (2-len(aField.value))) + s"${aField.value}|")}.mkString
+print(s1)

@@ -1,6 +1,6 @@
 package de.htwg.se
 
-import de.htwg.se.Deck
+import de.htwg.se.{Board, Deck}
 
 case class Hand(val handCard: String):
   override def toString(): String = s"${handCard}"

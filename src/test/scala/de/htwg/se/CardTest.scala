@@ -26,6 +26,10 @@ class CardTest extends AnyWordSpec with Matchers {
         toCard(n9) shouldBe Card(9)
       "as int 9 be converted correctly" in:
         toCard(num9) shouldBe Card(9)
+      "return # if a False Copy of it is created" in:
+        card9.falseCopy().toString() should be ("#")
+      "return the number if a True Copy of it is created" in:
+        card9.trueCopy() shouldBe Card(9, true)
       "not be acceptable from boolean" in:
         val highCardErr = the [IllegalArgumentException] thrownBy(toCard(true))
       "it's digit length" in:
