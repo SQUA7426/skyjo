@@ -14,6 +14,11 @@ def fillDeck(seqCards: Seq[Card]): Vector[Card] =
   val fullDeck: Vector[Card] = v1 ++ v2
   val diffs: Vector[Card] = fullDeck.diff(seqCards)
   diffs
+  
+    class Deck(d: Vector[Card]) {
+        val deck: Vector[Card] = d
+        val uppercard: String = ().toString
+  }
 
 class Deck(d: Vector[Card], s: String) {
   val deck: Vector[Card] = d

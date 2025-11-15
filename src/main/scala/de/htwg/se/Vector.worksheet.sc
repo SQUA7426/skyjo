@@ -40,4 +40,4 @@ class Dock(d: Vector[Field]) { val deck = d }
 val s:String = "Deck"
 val upperCard: String = { if (s.compareTo("Deck")==0) { "Deck" } else { s } }
 val dd = new Dock(v)
-println(noStr(upperCard))
+//println(noStr(upperCard))

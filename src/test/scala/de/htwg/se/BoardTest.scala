@@ -22,3 +22,19 @@
 //         b.brd shouldBe a[Vector[Vector[Card]]]
 //   }
 // }
+package  de.htwg.se
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalactic.StringNormalizations._
+import de.htwg.se.Deck
+
+class BoardTest extends AnyWordSpec with Matchers {
+  "A Board" when {
+    "initialized" should :
+      val fDeck = fillDeck(Seq.empty[Card])
+      val tDeck = new Deck(fDeck, "4")
+      val fBoard = fillBoard(4, 3, tDeck)
+
+  }
+
+}
