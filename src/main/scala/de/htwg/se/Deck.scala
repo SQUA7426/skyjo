@@ -1,19 +1,20 @@
 package de.htwg.se
-
+import scala.util.Random
 import de.htwg.se.Card
 import scala.collection.immutable.Vector
 import scala.util.Random
 import scala.collection.immutable.Seq
+val seqCards: Seq[Card] = Vector.empty[Card]
 
-def fillDeck(seqCards: Seq[Card]): Vector[Card] =
+def fillDeck(): Vector[Card] =
   val v1: Vector[Card] =
     (for { i <- 1 to 10; j <- -1 to 12 } yield Card(j)).toVector
   val v2: Vector[Card] = (for {
-    i <- 1 to 5; j <- -2 to 0; if j == -2 || j == 0
-  } yield Card(j)).toVector
+    i <- 1 to 5; j <- -2 to 0; if j == -2 || j == 0} yield Card(j)).toVector
   val fullDeck: Vector[Card] = v1 ++ v2
+  println(fullDeck)
   val diffs: Vector[Card] = fullDeck.diff(seqCards)
-  diffs
+  Random.shuffle(fullDeck)
 
 class Deck(d: Vector[Card], s: String) {
   val deck: Vector[Card] = d

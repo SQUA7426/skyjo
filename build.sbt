@@ -2,8 +2,7 @@ val scala3Version = "3.3.7"
 
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / scalaVersion := scala3Version
-ThisBuild / javacOptions += "--release=21"
-ThisBuild / scalacOptions ++= Seq("-release:21")
+ThisBuild / javacOptions ++= Seq("--release", "21")
 
 libraryDependencies ++= Seq(
   "org.scalafx" %% "scalafx" % "21.0.0-R32",
