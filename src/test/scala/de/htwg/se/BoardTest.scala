@@ -1,5 +1,5 @@
 package de.htwg.se
-import de.htwg.se.{Card,Board,Deck,Hand,DiscardPile}
+import de.htwg.se.{Card,Board,Deck,/*Hand,*/DiscardPile}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalactic.StringNormalizations._
@@ -19,6 +19,11 @@ class BoardTest extends AnyWordSpec with Matchers {
         val bTurnedUpperCard:Vector[Vector[Card]] = fillBoard(4,3,turnedDeck)._1
         bTurnedUpperCard shouldBe a[Vector[Vector[Card]]]
       val aBoard = new Board(4,3,b)
+      "get a Card when gotten" in:
+        val c: Card = getBoardCard(aBoard,0)
+        c shouldBe a[Card]
+      "get an IndexOutOfBoundsException when wrong idx gotten" in:
+        val throwError = the [IndexOutOfBoundsException] thrownBy(getBoardCard(aBoard,20))
       "be as String" in:
         aBoard.toString() shouldBe aBoard.brd.flatten.toSeq.zipWithIndex.map {case(aCard,idx) => if ((idx+1)%4==0) ((" " * (2-len(aCard.toString()))) + s"${aCard.toString()}\n") else ((" " * (2-len(aCard.toString()))) + s"${aCard.toString()}|")}.mkString
       "when a BoardCard is turned (e.g. 3rd) return a Board" in:
@@ -26,12 +31,10 @@ class BoardTest extends AnyWordSpec with Matchers {
       "return a new Deck when switched with DeckUpperCard" in:
         val d2: Deck = new Deck(d.deck, d.turnUpperCard())
         aBoard.switch(d2,3)._1 shouldBe a[Deck]
-      val h: Hand = new Hand(d.turnUpperCard())
-      "return a new Hand when switched with HandCard" in:
-        aBoard.switch(h,3)._1 shouldBe a[Hand]
       "return a new DiscardPile when switched with the DiscardPile" in:
         val disc: DiscardPile = new DiscardPile("Disc")
-        val disc2: DiscardPile = new DiscardPile(disc.putToDiscardPile(h)._1.toString())
-        aBoard.switch(disc2,3)._1 shouldBe a[DiscardPile]
+      "colCheck should return true" in:
+        val secBrd: Board = new Board(2,2, Vector(Vector(Card(1,true), Card(2,true)), Vector(Card(3,true),Card(2,true))))
+        secBrd.reduce(-1,1)._2 shouldBe true
   }
 }

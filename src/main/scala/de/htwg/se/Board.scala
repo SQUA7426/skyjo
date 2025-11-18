@@ -1,11 +1,17 @@
 package de.htwg.se
 
-import de.htwg.se.{Card, Hand, Deck}
+import de.htwg.se.{Card, /*Hand,*/ Deck}
 
 import scala.collection.immutable.Vector
 import scala.util.Random
 import scala.util.control._
 import scala.collection.immutable.Seq
+def getBoardCard(b: Board, input: Int): Card =
+  if input < 0 || input > (b.ySize*b.ySize-1) then
+    throw new IndexOutOfBoundsException(
+      s"Idx: ${input} is not a valid Board entry!"
+    )
+  b.brd.flatten.apply(input).trueCopy()
 
 def fillBoard(xSize: Int, ySize: Int, d: Deck): (Vector[Vector[Card]], Deck) =
   if (d.deck.size == 0) then
@@ -41,7 +47,7 @@ def fillBoard(xSize: Int, ySize: Int, d: Deck): (Vector[Vector[Card]], Deck) =
       case (vectorRow, vectorNum) =>
         vectorRow.zipWithIndex.map { case (cCard, idx) => cCard.falseCopy() }
     }
-    (turnedBrd, new Deck(d.remove(xSize*ySize), "Deck"))
+    (turnedBrd, new Deck(d.remove(xSize * ySize), "Deck"))
   }
 
 case class Board(
@@ -51,7 +57,11 @@ case class Board(
 ) {
 
   override def toString(): String =
-   brd.flatten.toSeq.zipWithIndex.map {case(aCard,idx) => if ((idx+1)%4==0) ((" " * (2-len(aCard.toString()))) + s"${aCard.toString()}\n") else ((" " * (2-len(aCard.toString()))) + s"${aCard.toString()}|")}.mkString 
+    brd.flatten.toSeq.zipWithIndex.map { case (aCard, idx) =>
+      if ((idx + 1) % xSize == 0)
+        ((" " * (2 - len(aCard.toString()))) + s"${aCard.toString()}\n")
+      else ((" " * (2 - len(aCard.toString()))) + s"${aCard.toString()}|")
+    }.mkString
 
   def turnBoardCard(input: Int): Board =
     val turnedIdxBrd: Vector[Vector[Card]] = brd.zipWithIndex.map {
@@ -64,20 +74,13 @@ case class Board(
     new Board(xSize, ySize, turnedIdxBrd)
 
   def switch(that: Any, input: Int): (Any, Board) =
-    val x: String = brd.zipWithIndex
-      .map { case (vectorRow, vectorNum) =>
-        vectorRow.zipWithIndex.map { case (cCard, idx) =>
-          if (vectorNum * xSize + idx == input) cCard.value.toString()
-        }
-      }
-      .toString()
+    val x: String = brd.flatten.apply(input).trueCopy().toString()
     val sw: Vector[Vector[Card]] = brd.zipWithIndex.map {
       case (vectorRow, vectorNum) =>
         vectorRow.zipWithIndex.map { case (cCard, idx) =>
           if (vectorNum * xSize + idx == input) then
             that match {
-              case d: Deck         => toCard(d.upperCard)
-              case h: Hand         => toCard(h.toString())
+              case d: Deck => toCard(d.upperCard)
               case d2: DiscardPile => toCard(d2.toString())
             }
           else cCard
@@ -85,16 +88,39 @@ case class Board(
     }
     (
       that match {
-        case h: Hand           => new Hand(x)
         case d: Deck           => new Deck(d.remove(1), "Deck")
         case disc: DiscardPile => new DiscardPile(x)
       },
       new Board(xSize, ySize, sw)
     )
+  def isEmpty(): Boolean = brd.size == 0
+
+  def reduce(row: Int, col: Int): (Board, Boolean) = {
+    if (col != -1) {
+      val checkCol: Vector[Boolean] = (0 until xSize).toVector.map { colIdx =>
+         brd.map(_(colIdx)).distinct.size == 1 && brd.size != 1
+      }
+      if checkCol(col) == true then
+        val slicedBoard = brd.map(_.patch(col, Nil, 1))
+        return (new Board(xSize - 1, ySize, slicedBoard), true)
+      else {
+        (new Board(xSize, ySize, brd), false)
+      }
+    }
+
+    if (row != -1) {
+      val checkRow: Vector[Boolean] = brd.map { r =>
+        r.forall(_ == r.head)
+      }
+
+      if checkRow(row) == true then
+        return (
+          new Board(xSize, ySize - 1, brd.slice(0, row) ++ brd.drop(row + 1)),
+          true)
+      else {
+        (new Board(xSize, ySize, brd), false)
+      }
+    }
+    (new Board(xSize, ySize, brd), false)
+  }
 }
-// object Board
-// def apply(xSize: Int, ySize: Int, brd: Vector[Vector[Card]]): Board = new Board(
-//   xSize,
-//   ySize,
-//   fillBoard(xSize, ySize, Deck(fillDeck(Seq.empty[Card]), "Deck"))
-// )
