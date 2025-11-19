@@ -6,7 +6,6 @@ case class DiscardPile(val discPile: String) {
 
   def putToDiscardPile(from: Any): (DiscardPile, Any) =
     from match {
-      // case h: Hand => (new DiscardPile(h.handCard), new Hand("Hand"))
       case d: Deck =>
         (new DiscardPile(d.toString()), new Deck(d.remove(1), "Deck"))
     }
