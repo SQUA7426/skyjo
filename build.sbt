@@ -15,6 +15,10 @@ libraryDependencies ++= Seq(
 coverageEnabled := true
 coverageHighlighting := true
 coverageFailOnMinimum := false
+<<<<<<< HEAD
+
+=======
+>>>>>>> facc67539681fef8a6149b36fe447b06aaf707b2
 coverageMinimumStmtTotal := 100
 coverageMinimumBranchTotal := 100
 coverageMinimumStmtPerPackage := 100
