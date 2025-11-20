@@ -1,4 +1,4 @@
-package de.htwg.se
+package de.htwg.se.skyjo.model
 
 def len(x: Any): Int = x.toString().size
 

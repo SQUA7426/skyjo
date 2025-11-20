@@ -1,11 +1,13 @@
-package de.htwg.se
+package de.htwg.se.skyjo.model
 
-import de.htwg.se.{Card, /*Hand,*/ Deck}
+import de.htwg.se.skyjo.model.{Deck}
 
 import scala.collection.immutable.Vector
 import scala.util.Random
 import scala.util.control._
 import scala.collection.immutable.Seq
+
+
 def getBoardCard(b: Board, input: Int): Card =
   if input < 0 || input > (b.ySize*b.ySize-1) then
     throw new IndexOutOfBoundsException(
@@ -13,7 +15,7 @@ def getBoardCard(b: Board, input: Int): Card =
     )
   b.brd.flatten.apply(input).trueCopy()
 
-def fillBoard(xSize: Int, ySize: Int, d: Deck): (Vector[Vector[Card]], Deck) =
+def fillBoard(xSize: Int, ySize: Int, d: Deck): (Board, Deck) =
   if (d.deck.size == 0) then
     val deck2 = fillDeck(Seq.empty[Card])
     fillBoard(4, 3, Deck(fillDeck(Seq.empty[Card]), "Deck"))
@@ -47,7 +49,7 @@ def fillBoard(xSize: Int, ySize: Int, d: Deck): (Vector[Vector[Card]], Deck) =
       case (vectorRow, vectorNum) =>
         vectorRow.zipWithIndex.map { case (cCard, idx) => cCard.falseCopy() }
     }
-    (turnedBrd, new Deck(d.remove(xSize * ySize), "Deck"))
+    (new Board(xSize,ySize,turnedBrd), new Deck(d.remove(xSize * ySize), "Deck"))
   }
 
 case class Board(
@@ -93,7 +95,6 @@ case class Board(
       },
       new Board(xSize, ySize, sw)
     )
-  def isEmpty(): Boolean = brd.size == 0
 
   def reduce(row: Int, col: Int): (Board, Boolean) = {
     if (col != -1) {

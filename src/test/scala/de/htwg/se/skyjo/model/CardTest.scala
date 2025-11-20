@@ -1,8 +1,9 @@
-package de.htwg.se
+package de.htwg.se.skyjo.model
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalactic.StringNormalizations._
+import de.htwg.se.skyjo.model.{Card, isCard, len, toCard}
 
 class CardTest extends AnyWordSpec with Matchers {
   "A Card" when {

@@ -1,6 +1,7 @@
-package de.htwg.se
-import de.htwg.se.{/*Hand,*/ Deck, Card, Board}
+package de.htwg.se.skyjo.model
+import de.htwg.se.skyjo.model.{Card}
 import scala.collection.immutable.Vector
+
 case class DiscardPile(val discPile: String) {
   override def toString(): String = s"${discPile}"
 

@@ -1,6 +1,6 @@
-package de.htwg.se
+package de.htwg.se.skyjo.model
 
-import de.htwg.se.{/*Hand,*/Card,Deck}
+import de.htwg.se.skyjo.model.{Card, Deck, fullDeck}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalactic.StringNormalizations._
@@ -9,8 +9,6 @@ import java.io.ByteArrayOutputStream
 class DeckTest extends AnyWordSpec with Matchers {
   "A Deck" when {
     val initSeq: Seq[Card] = Seq.empty[Card]
-    // val dVec: Vector[Card] = fillDeck(initSeq)
-    // val d: Deck = new Deck(dVec, "Deck")
     val d: Deck = new Deck(fullDeck()._1, fullDeck()._2)
     "Initialized" should:
       "have the size of 150" in:
