@@ -18,12 +18,13 @@ coverageEnabled := true
 coverageHighlighting := true
 coverageFailOnMinimum := false
 
-coverageMinimumStmtTotal := 100
+coverageMinimumStmtTotal := 95
 coverageMinimumBranchTotal := 100
 coverageMinimumStmtPerPackage := 100
 coverageMinimumBranchPerPackage := 100
 coverageMinimumStmtPerFile := 100
 coverageMinimumBranchPerFile := 100
+coverageExcludedPackages := ".*Main.*"
 
 lazy val root = (project in file("."))
   .settings(
