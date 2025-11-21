@@ -36,7 +36,6 @@ class Tui {
     )
     for j <- 0 until updatedBoard.xSize do
       reducedBoards(j) = updatedBoard.reduce(-1, j)
-    for j <- 0 until updatedBoard.ySize do
       reducedBoards(j + updatedBoard.xSize) = updatedBoard.reduce(j, -1)
     val r = reducedBoards.map(_._2).exists(_ == true)
     val endBoard: Board = if r == true then

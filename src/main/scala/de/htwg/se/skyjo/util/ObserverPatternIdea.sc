@@ -4,10 +4,9 @@ class TestObserver extends Observer {
   def update:Unit = println("Ping")
 }
 
-class TestObservable extends Observable
+object ObservablePattern:
+  val observable = new TestObservable()
+  val observer = new TestObserver
 
-val observable = new TestObservable()
-val observer = new TestObserver
-
-observable.add(observer)
-observable.notifyObservers
+  observable.add(observer)
+  observable.notifyObservers

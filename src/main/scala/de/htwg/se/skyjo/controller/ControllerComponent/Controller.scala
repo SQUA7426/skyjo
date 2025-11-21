@@ -1,1 +1,1 @@
-// package de.htwg.se.skyjo.controller.ControllerConponent
+package de.htwg.se.skyjo.controller.ControllerConponent
