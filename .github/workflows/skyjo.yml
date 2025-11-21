@@ -1,9 +1,9 @@
 name: skyjo
 on:
  push:
-   branches: [ master, develop]
+   branches: [ main, dev1]
  pull_request:
-   branches: [ master ]
+   branches: [ main ]
 jobs:
  build:
    runs-on: ubuntu-latest
@@ -17,15 +17,8 @@ jobs:
    - name: compile
      run: sbt compile
    - name: run tests
-run_tests:
-   runs-on: ubuntu-latest
-   steps:
-     - uses: actions/checkout@v2
-     - name: Build Project and export Coverage
-       env:
-         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-       run: |
-         export CI_BRANCH="${GITHUB_REF#refs/heads/}"
-         sbt clean jacoco jacocoCoveralls
-     run: sbt test
+     run:  sbt test
+   - name: coverageReport
+     run: sbt coverage test coverageReport
+   - name: Report coverage to Coveralls
+     run: sbt coveralls -repo-token ${{ secrets.COVERALLS_REPO_TOKEN }}
