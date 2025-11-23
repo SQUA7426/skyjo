@@ -1,0 +1,127 @@
+package de.htwg.se.skyjo.model
+
+import de.htwg.se.skyjo.model.{Deck}
+
+import scala.collection.immutable.Vector
+import scala.util.Random
+import scala.util.control._
+import scala.collection.immutable.Seq
+
+
+def getBoardCard(b: Board, input: Int): Card =
+  if input < 0 || input > (b.ySize*b.ySize-1) then
+    throw new IndexOutOfBoundsException(
+      s"Idx: ${input} is not a valid Board entry!"
+    )
+  b.brd.flatten.apply(input).trueCopy()
+
+def fillBoard(xSize: Int, ySize: Int, d: Deck): (Board, Deck) =
+  if (d.deck.size == 0) then
+    val deck2 = fillDeck(Seq.empty[Card])
+    fillBoard(4, 3, Deck(fillDeck(Seq.empty[Card]), "Deck"))
+  else {
+    def drawField(deck: Deck): (Card, Deck) = {
+      val turnedDeck =
+        if (deck.upperCard == "Deck") Deck(deck.deck, deck.turnUpperCard())
+        else deck
+
+      val topCard = turnedDeck.getUpperCard()
+      val newDeck =
+        Deck(turnedDeck.remove(1), "Deck")
+      (topCard, newDeck)
+    }
+    def fillRow(deck: Deck, n: Int): (Vector[Card], Deck) =
+      if (n == 0) (Vector.empty, deck)
+      else {
+        val (field, nextDeck) = drawField(deck)
+        val (rest, finalDeck) = fillRow(nextDeck, n - 1)
+        (field +: rest, finalDeck)
+      }
+    def fillRows(deck: Deck, n: Int): (Vector[Vector[Card]], Deck) =
+      if (n == 0) (Vector.empty, deck)
+      else {
+        val (row, nextDeck) = fillRow(deck, xSize)
+        val (rows, finalDeck) = fillRows(nextDeck, n - 1)
+        (row +: rows, finalDeck)
+      }
+    val (board, _) = fillRows(d, ySize)
+    val turnedBrd: Vector[Vector[Card]] = board.zipWithIndex.map {
+      case (vectorRow, vectorNum) =>
+        vectorRow.zipWithIndex.map { case (cCard, idx) => cCard.falseCopy() }
+    }
+    (new Board(xSize,ySize,turnedBrd), new Deck(d.remove(xSize * ySize), "Deck"))
+  }
+
+case class Board(
+    val xSize: Int,
+    val ySize: Int,
+    val brd: Vector[Vector[Card]]
+) {
+
+  override def toString(): String =
+    brd.flatten.toSeq.zipWithIndex.map { case (aCard, idx) =>
+      if ((idx + 1) % xSize == 0)
+        ((" " * (2 - len(aCard.toString()))) + s"${aCard.toString()}\n")
+      else ((" " * (2 - len(aCard.toString()))) + s"${aCard.toString()}|")
+    }.mkString
+
+  def turnBoardCard(input: Int): Board =
+    val turnedIdxBrd: Vector[Vector[Card]] = brd.zipWithIndex.map {
+      case (vectorRow, vectorNum) =>
+        vectorRow.zipWithIndex.map { case (cCard, idx) =>
+          if (vectorNum * xSize + idx == input) new Card(cCard.value, true)
+          else cCard
+        }
+    }
+    new Board(xSize, ySize, turnedIdxBrd)
+
+  def switch(that: Any, input: Int): (Any, Board) =
+    val x: String = brd.flatten.apply(input).trueCopy().toString()
+    val sw: Vector[Vector[Card]] = brd.zipWithIndex.map {
+      case (vectorRow, vectorNum) =>
+        vectorRow.zipWithIndex.map { case (cCard, idx) =>
+          if (vectorNum * xSize + idx == input) then
+            that match {
+              case d: Deck => toCard(d.upperCard)
+              case d2: DiscardPile => toCard(d2.toString())
+            }
+          else cCard
+        }
+    }
+    (
+      that match {
+        case d: Deck           => new Deck(d.remove(1), "Deck")
+        case disc: DiscardPile => new DiscardPile(x)
+      },
+      new Board(xSize, ySize, sw)
+    )
+
+  def reduce(row: Int, col: Int): (Board, Boolean) = {
+    if (col != -1) {
+      val checkCol: Vector[Boolean] = (0 until xSize).toVector.map { colIdx =>
+         brd.map(_(colIdx)).distinct.size == 1 && brd.size != 1
+      }
+      if checkCol(col) == true then
+        val slicedBoard = brd.map(_.patch(col, Nil, 1))
+        return (new Board(xSize - 1, ySize, slicedBoard), true)
+      else {
+        (new Board(xSize, ySize, brd), false)
+      }
+    }
+
+    if (row != -1) {
+      val checkRow: Vector[Boolean] = brd.map { r =>
+        r.forall(_ == r.head)
+      }
+
+      if checkRow(row) == true then
+        return (
+          new Board(xSize, ySize - 1, brd.slice(0, row) ++ brd.drop(row + 1)),
+          true)
+      else {
+        (new Board(xSize, ySize, brd), false)
+      }
+    }
+    (new Board(xSize, ySize, brd), false)
+  }
+}
