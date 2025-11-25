@@ -14,9 +14,9 @@ class Tui(cont : Controller) {
   def cardTurnRq(b:Board)=(
     s"Which BoardCard [0-${b.xSize * b.ySize - 1}] do you want to turn around?")
 
-
   def turnOfPlayer(i:Int)=(
     println(s"Player ${i}:"))
+
   def finishedConf()=(
     println(s"someone is finished: \n")
     )

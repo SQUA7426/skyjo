@@ -9,4 +9,3 @@ trait ControllerInterface {
   def getSize: (Int,Int)
   def reduceSize(row:Int,col:Int): Boolean
 }
-

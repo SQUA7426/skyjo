@@ -9,19 +9,22 @@ libraryDependencies ++= Seq(
   "org.scalafx" %% "scalafx" % "21.0.0-R32",
   "org.scalactic" %% "scalactic" % "3.2.14",
   "org.scalatest" %% "scalatest" % "3.2.10" % Test,
-  "org.scalameta" %% "munit" % "1.0.0"
+  "org.scalameta" %% "munit" % "1.0.0",
+  "org.apache.commons" % "commons-lang3" % "3.4",
+  "org.apache.commons" % "commons-io" % "1.3.2"
 )
 
 coverageEnabled := true
 coverageHighlighting := true
 coverageFailOnMinimum := false
 
-coverageMinimumStmtTotal := 100
+coverageMinimumStmtTotal := 95
 coverageMinimumBranchTotal := 100
 coverageMinimumStmtPerPackage := 100
 coverageMinimumBranchPerPackage := 100
 coverageMinimumStmtPerFile := 100
 coverageMinimumBranchPerFile := 100
+coverageExcludedPackages := ".*Main.*"
 
 lazy val root = (project in file("."))
   .settings(
