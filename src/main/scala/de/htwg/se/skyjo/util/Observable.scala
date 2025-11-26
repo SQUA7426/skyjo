@@ -2,7 +2,7 @@ package de.htwg.se.skyjo.util
 
 import scalafx.event.Event
 trait Observer {
-   def update: Unit
+   def update: Boolean
 }
 
 class Observable:

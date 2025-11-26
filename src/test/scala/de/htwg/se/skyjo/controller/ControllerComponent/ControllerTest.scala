@@ -100,4 +100,12 @@ class ControllerTest extends AnyWordSpec with Matchers {
           val gl = ctrl.gameLoop(1,plBoards,d,disc)
           gl._3 shouldBe a[DiscardPile]
         }
+      "manage some gameLoop" in:
+        val biggerPlBoards = Array(fillBoard(2,2,d)._1)
+        val simulatedInput = "1\n1\n3\n1\n1\n2\n1\n1\n1\n1\n1\n0\n"
+        val in = new ByteArrayInputStream(simulatedInput.getBytes())
+        Console.withIn(in) {
+          val gl = ctrl.gameLoop(1,biggerPlBoards,d,disc)
+          gl._3 shouldBe a[DiscardPile]
+        }
 }

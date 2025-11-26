@@ -1,13 +1,18 @@
 import de.htwg.se.skyjo.util.{Observable, Observer}
 
 class TestObserver extends Observer {
-  def update:Unit = println("Ping")
+  def update:Boolean = true
 }
+object ObserverPattern {
+  val observable = new Observable
+  val observer1 = new TestObject
+  val observer2 = new TestObject
+  observable.add(observer1)
+  observable.add(observer2)
+  observable.notifyObservers
 
-class TestObservable extends Observable
-
-val observable = new TestObservable()
-val observer = new TestObserver
-
-observable.add(observer)
-observable.notifyObservers
+  observable.remove(observer1)
+  observable.notifyObservers
+  observable.remove(observer2)
+  observable.notifyObservers
+}
