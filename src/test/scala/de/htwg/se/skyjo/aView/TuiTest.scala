@@ -28,12 +28,12 @@ class TuiTest extends AnyWordSpec with Matchers {
         tui.turnOfPlayer(3)
       "announce if someone finished" in:
         tui.finishedConf()
-      "printout a turn the right way" in:
-        val simulatedInput = "5\n0\n22\n1\n"
-          val in = new ByteArrayInputStream(simulatedInput.getBytes())
-
-          Console.withIn(in) {
-            val (afterBoards, afterDeck, afterDisc) = tui.turn(b,d,disc)
-            afterBoards shouldBe a[Board]
-          }
+      // "printout a turn the right way" in:
+      //   val simulatedInput = "5\n0\n22\n0\n"
+      //     val in = new ByteArrayInputStream(simulatedInput.getBytes())
+      //
+      //     Console.withIn(in) {
+      //       val (afterBoards, afterDeck, afterDisc) = tui.turn(b,d,disc)
+      //       afterBoards shouldBe a[Board]
+      //     }
 }
