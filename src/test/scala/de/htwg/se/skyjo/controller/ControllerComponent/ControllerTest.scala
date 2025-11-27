@@ -49,11 +49,14 @@ class ControllerTest extends AnyWordSpec with Matchers {
         ctrl.getReducedBrd(updatedBoard) shouldBe a[Board]
 
       "be unable to take a Card from the DiscardPile, when there's no Card" in:
-        val simulatedInput = "1\n1\n0\n"
+        val brdArr = Array(b)
+        val simulatedInput = "4\n0\n1\n1\n0\n"
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
         Console.withIn(in) {
-          val (bTakeDisc, dTakeDisc, discTakeDisc) =
-            ctrl.takeFromDisc(b, d, disc)
+          val (bTakeDisc, dTakeDisc, discTakeDisc, end) =
+            ctrl.firstRound(1,brdArr, d, disc)
+          dTakeDisc shouldBe a[Deck]
+          discTakeDisc shouldBe a[DiscardPile]
         }
       // "be able to take a Card from the DiscardPile" in:
       //   val disc2 = DiscardPile("3")
