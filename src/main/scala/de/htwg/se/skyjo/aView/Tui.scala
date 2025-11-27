@@ -3,6 +3,9 @@ import de.htwg.se.skyjo.model
 import de.htwg.se.skyjo.model.{Board, Deck, DiscardPile}
 import de.htwg.se.skyjo.controller.ControllerComponent.Controller
 import scala.io.StdIn.readLine
+
+
+
 class Tui(cont : Controller) {
 
   def inputRequest(b:Board, disc : String)=(

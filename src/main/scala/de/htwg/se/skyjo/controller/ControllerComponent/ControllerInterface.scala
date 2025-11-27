@@ -1,4 +1,4 @@
-package de.htwg.se.skyjo.controller.ControllerConponent
+package de.htwg.se.skyjo.controller.ControllerComponent
 
 import de.htwg.se.skyjo.model.Card
 import scala.collection.immutable.Vector

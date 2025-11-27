@@ -13,6 +13,7 @@ def main(args: Array[String]): Unit = {
   val disc: DiscardPile = new DiscardPile("Disc")
   val plBoards =
     Array.fill(plCount)(new Board(2, 2, Vector())) // Empty Boards
+  //val t = new Tui(Ctr)
   val t = new Tui(Ctr)
   Ctr.gameLoop(plCount, plBoards, deck, disc)
 }

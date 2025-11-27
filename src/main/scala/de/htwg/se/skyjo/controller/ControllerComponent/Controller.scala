@@ -32,8 +32,10 @@ import scala.util.Random
 //   case LightRed extends Color("\u001b[91m")
 //   case LightGreen extends Color("\u001b[92m")
 // }
+
 class Controller extends Observable {
   val tui = new Tui(this)
+
   def getReducedBrd(updatedBoard: Board): Board = {
     val reducedBoards: Array[(Board, Boolean)] = new Array(
       updatedBoard.xSize + updatedBoard.ySize
@@ -49,6 +51,7 @@ class Controller extends Observable {
       allUpdatedBrds(0)
     else updatedBoard
     println(endBoard)
+    notifyObservers
     endBoard
   }
   def takeFromDisc(
@@ -56,17 +59,19 @@ class Controller extends Observable {
       d: Deck,
       disc: DiscardPile
   ): (Board, Deck, DiscardPile) = {
-    if disc.toString() == "Disc" then tui.turn(b, d, disc)
+    if (disc.toString() == "Disc") { notifyObservers; tui.turn(b, d, disc)}
     else {
       println(
         tui.inputRequest(b, disc.toString())
         // s"Which BoardCard [0-${b.xSize * b.ySize - 1}] do you want to switch with ${disc.toString()}?"
       )
       val c2 = readInt()
+
       if c2 < b.xSize * b.ySize && c2 >= 0 then
         val (disc2: DiscardPile, b2) = (b.switch(disc, c2): @unchecked)
         (b2, d, disc2)
-      else takeFromDisc(b, d, disc)
+
+      else notifyObservers; takeFromDisc(b, d, disc)
     }
   }
 
@@ -85,11 +90,14 @@ class Controller extends Observable {
         val c = readInt()
         val disc2: DiscardPile = new DiscardPile(getBoardCard(b, c).toString())
         val (d2: Deck, b2) = (b.switch(tempD, c): @unchecked)
+        notifyObservers
         (b2, d2, disc2)
       }
       case "2" => {
-        val (disc2: DiscardPile, d2: Deck) =
+        val (disc2: DiscardPile, d2: Deck) = {
+          notifyObservers
           (disc.putToDiscardPile(tempD): @unchecked)
+        }
         tui.cardTurnRq(b)
 
         // println(s"Which BoardCard [0-${b.xSize * b.ySize - 1}] do you want to turn around?")
@@ -100,9 +108,12 @@ class Controller extends Observable {
       }
       case i if i != "2" && i != "1" => {
         // println("You need to enter either 1 or 2!");
+        notifyObservers
         takeFromDeck(b, d, disc)
       } /*throw new IllegalArgumentException("You need to enter either 1 or 2!\n")*/
+
     }
+
   }
 
   def firstRound(
@@ -134,6 +145,7 @@ class Controller extends Observable {
       plBoards(i) = getReducedBrd(updatedBoard)
       curDeck = deckAfterTurn
       curDisc = discAfterTurn
+      notifyObservers
     (plBoards, curDeck, curDisc, false)
   }
 
@@ -155,6 +167,7 @@ class Controller extends Observable {
       plBoards(i) = getReducedBrd(updatedBoard)
       curDeck = deckAfterTurn
       curDisc = discAfterTurn
+      notifyObservers
     (plBoards, curDeck, curDisc, false)
   }
 
@@ -183,11 +196,13 @@ class Controller extends Observable {
     // TEST END
     if isFinished then
       // println("Game finished! (a player finished)")
+      notifyObservers
       tui.finishedConf()
       (boardsAfter, deckAfter, discAfter)
     else gameLoop(numPlayers, boardsAfter, deckAfter, discAfter, round + 1)
   }
 
   def finished(b: Board): Boolean =
+    notifyObservers
     b.brd.forall(row => row.forall(c => c._2 == true))
 }
