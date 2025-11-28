@@ -68,7 +68,6 @@ class Controller extends Observable {
       val c2 = readLine()
       val container = (for{i <- 0 until b.xSize*b.ySize} yield i.toString()).toVector
       if container contains c2 then
-        if c2 < (b.xSize * b.ySize).toString() && c2 >= "0" then
           val (disc2: DiscardPile, b2) = (b.switch(disc, c2.toInt): @unchecked)
           return (b2, d, disc2)
       else notifyObservers; takeFromDisc(b, d, disc)
