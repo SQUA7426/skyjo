@@ -68,7 +68,7 @@ class DiscardPile(private val _mediator: Mediator, val discPile: String)
     from match { case d: Deck => _mediator.send("Put To DiscardPile") }
 }
 
-def fillBoard(xSize: Int, ySize: Int, d: Deck): (Board, Deck) =
+def fillBoard(xSize: Int, ySize: Int, d: Deck): Board =
   if (d.deck.size == 0) then
     val deck: Deck = Deck(_mediator)
     fillBoard(4, 3, deck)
@@ -116,4 +116,4 @@ class Board(
 }
 
 object Board:
-  def apply(_mediator: Mediator): Board = {}
+  def apply(_mediator: Mediator): Board = { fillBoard() }
