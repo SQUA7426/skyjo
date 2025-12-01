@@ -54,23 +54,33 @@ class ControllerTest extends AnyWordSpec with Matchers {
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
         Console.withIn(in) {
           val (bTakeDisc, dTakeDisc, discTakeDisc, end) =
-            ctrl.firstRound(1,brdArr, d, disc)
+            ctrl.firstRound(1, brdArr, d, disc)
           dTakeDisc shouldBe a[Deck]
           discTakeDisc shouldBe a[DiscardPile]
         }
-      // "be able to take a Card from the DiscardPile" in:
-      //   val disc2 = DiscardPile("3")
-      //   val simulatedInput = "1\n"
-      //   val in = new ByteArrayInputStream(simulatedInput.getBytes())
-      //
-      //   Console.withIn(in) {
-      //     val bTemp: Board = fillBoard(2,1,d)._1
-      //     val (bTakeDisc, dTakeDisc, discTakeDisc) =
-      //       ctrl.takeFromDisc(bTemp, d, disc2)
-      //     bTakeDisc shouldBe a[Board]
-      //     dTakeDisc shouldBe a[Deck]
-      //     discTakeDisc shouldBe a[DiscardPile]
-      //   }
+      val bTemp: Board = fillBoard(2, 1, d)._1
+      val disc2 = DiscardPile("4")
+      "be unable to take a Card from the DiscardPile" in:
+        val simulatedInput = "40\n0\n"
+        val in = new ByteArrayInputStream(simulatedInput.getBytes())
+
+        Console.withIn(in) {
+          val (bTakeDisc, dTakeDisc, discTakeDisc) =
+            ctrl.takeFromDisc(bTemp, d, disc2)
+          dTakeDisc shouldBe a[Deck]
+          discTakeDisc shouldBe a[DiscardPile]
+        }
+
+      "be able to take a Card from the DiscardPile" in:
+        val simulatedInput = "0\n"
+        val in = new ByteArrayInputStream(simulatedInput.getBytes())
+
+        Console.withIn(in) {
+          val (bTakeDisc, dTakeDisc, discTakeDisc) =
+            ctrl.takeFromDisc(bTemp, d, disc2)
+          dTakeDisc shouldBe a[Deck]
+          discTakeDisc shouldBe a[DiscardPile]
+        }
       "be able to take a Card from the Deck Option 1" in:
         val simulatedInput = "3\n1\n0\n"
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
