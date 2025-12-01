@@ -1,35 +1,36 @@
-package de.htwg.se.skyjo.model
+package de.htwg.se.skyjo.Model
 
-import de.htwg.se.skyjo.model.{Deck}
+import de.htwg.se.skyjo.Model.{Deck}
 
-import scala.collection.immutable.Vector
 import scala.util.Random
 import scala.util.control._
 import scala.collection.immutable.Seq
+import de.htwg.se.util.Mediator
+import de.htwg.se.util.ConcreteMediator
 
-
-def getBoardCard(b: Board, input: Int): Card =
-  if input < 0 || input > (b.ySize*b.ySize-1) then
-    throw new IndexOutOfBoundsException(
-      s"Idx: ${input} is not a valid Board entry!"
-    )
-  b.brd.flatten.apply(input).trueCopy()
-
-def fillBoard(xSize: Int, ySize: Int, d: Deck): (Board, Deck) =
+def fillBoard(
+    _mediator: Mediator,
+    xSize: Int,
+    ySize: Int,
+    d: Deck
+): (Board, Deck) = {
   if (d.deck.size == 0) then
-    val deck2 = fillDeck(Seq.empty[Card])
-    fillBoard(4, 3, Deck(fillDeck(Seq.empty[Card]), "Deck"))
+    val deck: Deck = Deck(_mediator)
+    fillBoard(_mediator, 4, 3, deck)
   else {
+
     def drawField(deck: Deck): (Card, Deck) = {
       val turnedDeck =
-        if (deck.upperCard == "Deck") Deck(deck.deck, deck.turnUpperCard())
+        if (deck.upperCard == "Deck")
+          new Deck(_mediator, deck.deck, deck.turnUpperCard())
         else deck
 
       val topCard = turnedDeck.getUpperCard()
       val newDeck =
-        Deck(turnedDeck.remove(1), "Deck")
+        new Deck(_mediator, turnedDeck.remove(1), "Deck")
       (topCard, newDeck)
     }
+
     def fillRow(deck: Deck, n: Int): (Vector[Card], Deck) =
       if (n == 0) (Vector.empty, deck)
       else {
@@ -37,6 +38,7 @@ def fillBoard(xSize: Int, ySize: Int, d: Deck): (Board, Deck) =
         val (rest, finalDeck) = fillRow(nextDeck, n - 1)
         (field +: rest, finalDeck)
       }
+
     def fillRows(deck: Deck, n: Int): (Vector[Vector[Card]], Deck) =
       if (n == 0) (Vector.empty, deck)
       else {
@@ -44,20 +46,26 @@ def fillBoard(xSize: Int, ySize: Int, d: Deck): (Board, Deck) =
         val (rows, finalDeck) = fillRows(nextDeck, n - 1)
         (row +: rows, finalDeck)
       }
+
     val (board, _) = fillRows(d, ySize)
     val turnedBrd: Vector[Vector[Card]] = board.zipWithIndex.map {
       case (vectorRow, vectorNum) =>
         vectorRow.zipWithIndex.map { case (cCard, idx) => cCard.falseCopy() }
     }
-    (new Board(xSize,ySize,turnedBrd), new Deck(d.remove(xSize * ySize), "Deck"))
+    (
+      new Board(_mediator, xSize, ySize, turnedBrd),
+      new Deck(_mediator, d.remove(xSize * ySize), "Deck")
+    )
   }
+}
+
 
 case class Board(
+    private val _mediator: Mediator,
     val xSize: Int,
     val ySize: Int,
-    val brd: Vector[Vector[Card]]
-) {
-
+    brd: Vector[Vector[Card]]
+) extends Mediator {
   override def toString(): String =
     brd.flatten.toSeq.zipWithIndex.map { case (aCard, idx) =>
       if ((idx + 1) % xSize == 0)
@@ -69,11 +77,12 @@ case class Board(
     val turnedIdxBrd: Vector[Vector[Card]] = brd.zipWithIndex.map {
       case (vectorRow, vectorNum) =>
         vectorRow.zipWithIndex.map { case (cCard, idx) =>
-          if (vectorNum * xSize + idx == input) new Card(cCard.value, true)
+          if (vectorNum * xSize + idx == input)
+            new Card(_mediator, cCard.value, true)
           else cCard
         }
     }
-    new Board(xSize, ySize, turnedIdxBrd)
+    new Board(_mediator, xSize, ySize, turnedIdxBrd)
 
   def switch(that: Any, input: Int): (Any, Board) =
     val x: String = brd.flatten.apply(input).trueCopy().toString()
@@ -82,7 +91,7 @@ case class Board(
         vectorRow.zipWithIndex.map { case (cCard, idx) =>
           if (vectorNum * xSize + idx == input) then
             that match {
-              case d: Deck => toCard(d.upperCard)
+              case d: Deck         => toCard(d.upperCard)
               case d2: DiscardPile => toCard(d2.toString())
             }
           else cCard
@@ -90,22 +99,22 @@ case class Board(
     }
     (
       that match {
-        case d: Deck           => new Deck(d.remove(1), "Deck")
-        case disc: DiscardPile => new DiscardPile(x)
+        case d: Deck           => new Deck(_mediator, d.remove(1), "Deck")
+        case disc: DiscardPile => new DiscardPile(_mediator, x)
       },
-      new Board(xSize, ySize, sw)
+      new Board(_mediator, xSize, ySize, sw)
     )
 
   def reduce(row: Int, col: Int): (Board, Boolean) = {
     if (col != -1) {
       val checkCol: Vector[Boolean] = (0 until xSize).toVector.map { colIdx =>
-         brd.map(_(colIdx)).distinct.size == 1 && brd.size != 1
+        brd.map(_(colIdx)).distinct.size == 1 && brd.size != 1
       }
       if checkCol(col) == true then
         val slicedBoard = brd.map(_.patch(col, Nil, 1))
-        return (new Board(xSize - 1, ySize, slicedBoard), true)
+        return (new Board(_mediator, xSize - 1, ySize, slicedBoard), true)
       else {
-        (new Board(xSize, ySize, brd), false)
+        (new Board(_mediator, xSize, ySize, brd), false)
       }
     }
 
@@ -116,12 +125,31 @@ case class Board(
 
       if checkRow(row) == true then
         return (
-          new Board(xSize, ySize - 1, brd.slice(0, row) ++ brd.drop(row + 1)),
-          true)
+          new Board(
+            _mediator,
+            xSize,
+            ySize - 1,
+            brd.slice(0, row) ++ brd.drop(row + 1)
+          ),
+          true
+        )
       else {
-        (new Board(xSize, ySize, brd), false)
+        (new Board(_mediator, xSize, ySize, brd), false)
       }
     }
-    (new Board(xSize, ySize, brd), false)
+    (new Board(_mediator, xSize, ySize, brd), false)
   }
 }
+def getBoardCard(b: Board, input: Int): Card = {
+  if input < 0 || input > (b.ySize * b.ySize - 1) then
+    throw new IndexOutOfBoundsException(
+      s"Idx: ${input} is not a valid Board entry!"
+    )
+  b.brd.flatten.apply(input).trueCopy()
+}
+
+object Board:
+  def apply(_mediator: Mediator): Board = {
+    fillBoard(_mediator, 4, 3, Deck(_mediator))._1
+  }
+

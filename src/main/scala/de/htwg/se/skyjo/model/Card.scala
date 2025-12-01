@@ -1,20 +1,35 @@
-package de.htwg.se.skyjo.model
+package de.htwg.se.skyjo.Model
+
+import de.htwg.se.util.Mediator
+import de.htwg.se.util.ConcreteMediator
 
 def len(x: Any): Int = x.toString().size
 
-case class Card(val value: Int, val turned: Boolean):
-  override def toString(): String = if turned==true then s"${value}" else "#"
-  def falseCopy(): Card = new Card(value, false)
-  def trueCopy(): Card = new Card(value, true)
-object Card:
-  def apply(value: Int): Card = if value>(-3)&&value<(13) then new Card(value, true) else throw new IllegalArgumentException(s"Invalid Card number: ${value}")
+class Card(
+    private val _mediator: Mediator,
+    val value: Int,
+    turned: Boolean = false
+) extends Mediator {
+  def apply(mediator: Mediator, value: Int): Card = new Card(mediator, value)
+
+  override def notify(sender: Mediator, event: String): Unit = {
+    _mediator.notify(this, "Created Card")
+  }
+
+  override def send(msg: String): Unit = _mediator.send(msg)
+
+  def falseCopy(): Card = new Card(_mediator, value, false)
+
+  def trueCopy(): Card = new Card(_mediator, value, true)
+}
 
 def toCard(x: Any): Card = {
+  val med = new Mediator {}
   val val1d =
     (for { j <- -2 to 12 } yield j.toString()).toVector
   x match {
-    case a: Int                      => Card(a.toInt,true)
-    case b: String if val1d.contains(b) => Card(Integer.parseInt(b),true)
+    case a: Int                         => Card(med, a.toInt, true)
+    case b: String if val1d.contains(b) => Card(med, Integer.parseInt(b), true)
     case other =>
       throw new IllegalArgumentException(s"Invalid input:$other")
   }
