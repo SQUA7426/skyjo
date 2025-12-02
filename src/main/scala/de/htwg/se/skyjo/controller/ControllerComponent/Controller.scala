@@ -10,15 +10,10 @@ import de.htwg.se.skyjo.Model.{
 }
 import de.htwg.se.skyjo.aView.Tui
 import de.htwg.se.skyjo.controller.ControllerComponent._
-import de.htwg.se.skyjo.util.Observable
+import de.htwg.se.skyjo.util.{Observable,Mediator}
 
 import scala.io.StdIn.{readInt, readLine}
-// import annotation.tailrec
 import scala.util.Random
-/*turn:
-  Deck umdrehen -> aufHand -> Fall1: austauschen ; Fall2: auf DiscardPile & BoardKarte umdrehen
-  DiscardPile -> aufHand -> muss mit BoardKarte Tauschen -> ausgetauschte BoardKarte auf DiscardPile
- */
 
 // enum Color(color: String) {
 //   def getValue(): String = color
@@ -33,7 +28,7 @@ import scala.util.Random
 //   case LightGreen extends Color("\u001b[92m")
 // }
 
-class Controller extends Observable {
+class Controller(val _mediator: Mediator) extends Observable {
   val tui = new Tui(this)
 
   def getReducedBrd(updatedBoard: Board): Board = {
@@ -80,14 +75,14 @@ class Controller extends Observable {
       disc: DiscardPile
   ): (Board, Deck, DiscardPile) = {
 
-    val tempD: Deck = new Deck(d.deck, d.turnUpperCard())
+    val tempD: Deck = new Deck(_mediator,d.deck, d.turnUpperCard())
     val c1 = readLine()
 
     c1 match {
       case "1" => {
         tui.inputRequest(b, tempD.getUpperCard().toString())
         val c = readInt()
-        val disc2: DiscardPile = new DiscardPile(getBoardCard(b, c).toString())
+        val disc2: DiscardPile = new DiscardPile(_mediator,getBoardCard(b, c).toString())
         val (d2: Deck, b2) = (b.switch(tempD, c): @unchecked)
         notifyObservers
         (b2, d2, disc2)
@@ -127,7 +122,7 @@ class Controller extends Observable {
 
     for i <- 0 until numPlayers do
       val (cardsOnBoard, deckAfterFill) =
-        fillBoard(plBoards(i).xSize, plBoards(i).ySize, curDeck)
+        fillBoard(_mediator,plBoards(i).xSize, plBoards(i).ySize, curDeck)
       val beforeTurned = cardsOnBoard
       val initSize = plBoards(i).xSize * plBoards(i).ySize
       val arr: Array[Int] =
@@ -203,5 +198,5 @@ class Controller extends Observable {
 
   def finished(b: Board): Boolean =
     notifyObservers
-    b.brd.forall(row => row.forall(c => c._2 == true))
+    b.brd.forall(row => row.forall(c => c.isTurned() == true))
 }

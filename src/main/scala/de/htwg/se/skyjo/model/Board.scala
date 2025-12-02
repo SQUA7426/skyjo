@@ -5,8 +5,7 @@ import de.htwg.se.skyjo.Model.{Deck}
 import scala.util.Random
 import scala.util.control._
 import scala.collection.immutable.Seq
-import de.htwg.se.util.Mediator
-import de.htwg.se.util.ConcreteMediator
+import de.htwg.se.skyjo.util.{Mediator, Colleague}
 
 def fillBoard(
     _mediator: Mediator,
@@ -59,13 +58,12 @@ def fillBoard(
   }
 }
 
-
 case class Board(
     private val _mediator: Mediator,
     val xSize: Int,
     val ySize: Int,
     brd: Vector[Vector[Card]]
-) extends Mediator {
+) {
   override def toString(): String =
     brd.flatten.toSeq.zipWithIndex.map { case (aCard, idx) =>
       if ((idx + 1) % xSize == 0)
@@ -91,8 +89,8 @@ case class Board(
         vectorRow.zipWithIndex.map { case (cCard, idx) =>
           if (vectorNum * xSize + idx == input) then
             that match {
-              case d: Deck         => toCard(d.upperCard)
-              case d2: DiscardPile => toCard(d2.toString())
+              case d: Deck         => toCard(_mediator, d.upperCard)
+              case d2: DiscardPile => toCard(_mediator, d2.toString())
             }
           else cCard
         }
@@ -148,8 +146,8 @@ def getBoardCard(b: Board, input: Int): Card = {
   b.brd.flatten.apply(input).trueCopy()
 }
 
-object Board:
+object Board {
   def apply(_mediator: Mediator): Board = {
     fillBoard(_mediator, 4, 3, Deck(_mediator))._1
   }
-
+}

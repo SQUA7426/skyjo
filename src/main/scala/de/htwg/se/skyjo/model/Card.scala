@@ -1,30 +1,25 @@
 package de.htwg.se.skyjo.Model
 
-import de.htwg.se.util.Mediator
-import de.htwg.se.util.ConcreteMediator
+import de.htwg.se.skyjo.util.{Mediator, Colleague}
 
 def len(x: Any): Int = x.toString().size
 
 class Card(
-    private val _mediator: Mediator,
+    val _mediator: Mediator,
     val value: Int,
     turned: Boolean = false
-) extends Mediator {
+) extends Colleague {
   def apply(mediator: Mediator, value: Int): Card = new Card(mediator, value)
 
-  override def notify(sender: Mediator, event: String): Unit = {
-    _mediator.notify(this, "Created Card")
-  }
-
-  override def send(msg: String): Unit = _mediator.send(msg)
+  def isTurned(): Boolean = turned
 
   def falseCopy(): Card = new Card(_mediator, value, false)
 
   def trueCopy(): Card = new Card(_mediator, value, true)
+
 }
 
-def toCard(x: Any): Card = {
-  val med = new Mediator {}
+def toCard(med: Mediator, x: Any): Card = {
   val val1d =
     (for { j <- -2 to 12 } yield j.toString()).toVector
   x match {

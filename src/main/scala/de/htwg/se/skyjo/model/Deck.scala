@@ -4,19 +4,13 @@ import de.htwg.se.skyjo.Model.Card
 import scala.collection.immutable.Vector
 import scala.util.Random
 import scala.collection.immutable.Seq
-import de.htwg.se.util.Mediator
-import de.htwg.se.util.ConcreteMediator
+import de.htwg.se.skyjo.util.{Mediator, Colleague}
 
 class Deck(
-    private val _mediator: Mediator,
+    val _mediator: Mediator,
     val deck: Vector[Card],
     val upperCard: String
-) extends Mediator {
-
-  override def notify(sender: Mediator, event: String): Unit =
-    _mediator.notify(this, "Created Deck")
-
-  override def send(msg: String): Unit = _mediator.send(msg)
+) extends Colleague {
 
   def turnUpperCard(): String =
     upperCard.compareTo("Deck") match {
@@ -31,7 +25,7 @@ class Deck(
   def leftOf(worth: Int): Int = deck.count(_ == Card(_mediator, worth))
 
   def getUpperCard(): Card = if upperCard.compareTo("Deck") != 0 then
-    toCard(upperCard.toInt)
+    toCard(_mediator, upperCard.toInt)
   else throw new IllegalArgumentException(s"Invalid upperCard:${upperCard}")
   override def toString(): String =
     if upperCard.compareTo("Deck") == 0 then "Deck" else upperCard
