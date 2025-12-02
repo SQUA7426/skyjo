@@ -59,11 +59,15 @@ def fillBoard(
 }
 
 case class Board(
-    private val _mediator: Mediator,
+    val _mediator: Mediator,
     val xSize: Int,
     val ySize: Int,
     brd: Vector[Vector[Card]]
-) {
+) extends Colleague {
+  override def send(msg: String): Unit = _mediator.send(this,msg)
+
+  override def receive(msg: String): Unit = println(s"Board Received Message: ${msg}")
+
   override def toString(): String =
     brd.flatten.toSeq.zipWithIndex.map { case (aCard, idx) =>
       if ((idx + 1) % xSize == 0)

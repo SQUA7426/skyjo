@@ -4,12 +4,13 @@ import de.htwg.se.skyjo.util.{Mediator, Colleague}
 
 def len(x: Any): Int = x.toString().size
 
-class Card(
+case class Card(
     val _mediator: Mediator,
     val value: Int,
-    turned: Boolean = false
+    val turned: Boolean
 ) extends Colleague {
-  def apply(mediator: Mediator, value: Int): Card = new Card(mediator, value)
+  override def receive(msg: String): Unit = println(s"Card Received Message: ${msg}")
+  override def send(msg: String): Unit = _mediator.send(this,msg)
 
   def isTurned(): Boolean = turned
 
@@ -17,7 +18,10 @@ class Card(
 
   def trueCopy(): Card = new Card(_mediator, value, true)
 
+  override def toString(): String = if turned then s"${value}" else "#"
 }
+object Card:
+  def apply(_mediator: Mediator, value: Int): Card = if value>(-3)&&value<(13) then new Card(_mediator,value, true) else throw new IllegalArgumentException(s"Invalid Card number: ${value}") 
 
 def toCard(med: Mediator, x: Any): Card = {
   val val1d =

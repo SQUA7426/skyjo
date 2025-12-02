@@ -11,6 +11,8 @@ class Deck(
     val deck: Vector[Card],
     val upperCard: String
 ) extends Colleague {
+  override def receive(msg: String): Unit = println(s"Deck Received Message: ${msg}")
+  override def send(msg: String): Unit = _mediator.send(this,msg)
 
   def turnUpperCard(): String =
     upperCard.compareTo("Deck") match {
@@ -25,7 +27,7 @@ class Deck(
   def leftOf(worth: Int): Int = deck.count(_ == Card(_mediator, worth))
 
   def getUpperCard(): Card = if upperCard.compareTo("Deck") != 0 then
-    toCard(_mediator, upperCard.toInt)
+    _mediator.send(this, "GET UPPERCARD"); toCard(_mediator, upperCard.toInt)
   else throw new IllegalArgumentException(s"Invalid upperCard:${upperCard}")
   override def toString(): String =
     if upperCard.compareTo("Deck") == 0 then "Deck" else upperCard

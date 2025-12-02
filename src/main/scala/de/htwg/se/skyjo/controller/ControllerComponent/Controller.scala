@@ -173,7 +173,6 @@ class Controller(val _mediator: Mediator) extends Observable {
       disc: DiscardPile,
       round: Int = 1
   ): (Array[Board], Deck, DiscardPile) = {
-
     val (boardsAfter, deckAfter, discAfter, stopBetween) =
       if round == 1 then firstRound(numPlayers, plBoards, deck, disc)
       else nextRounds(numPlayers, plBoards, deck, disc)
@@ -186,10 +185,8 @@ class Controller(val _mediator: Mediator) extends Observable {
       .map(_._1)
       .exists(_ == true)
 
-    // println(s"Someone finished: ${isFinished}\n")
     // TEST END
     if isFinished then
-      // println("Game finished! (a player finished)")
       notifyObservers
       tui.finishedConf()
       (boardsAfter, deckAfter, discAfter)
