@@ -9,7 +9,11 @@ case class Card(
     val value: Int,
     val turned: Boolean
 ) extends Colleague {
-  override def receive(msg: String): Unit = println(s"Card Received Message: ${msg}")
+  override def receive(msg: String): Boolean = {
+      msg match
+        case "REQUEST GET UPPERCARD" => {println(s"Card Received Message: ${msg}"); true}
+        case _ => false
+  }
   override def send(msg: String): Unit = _mediator.send(this,msg)
 
   def isTurned(): Boolean = turned

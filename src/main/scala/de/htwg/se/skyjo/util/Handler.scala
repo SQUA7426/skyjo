@@ -1,34 +1,34 @@
-// import de.htwg.se.skyjo.util
-// import
-//
-// trait Handler {
-//   var next: Handler = null
-//   def handle(request: String): Unit = {
-//     if (next != null) next.handle(request)
-//     else println(s"No handler for: $request")
-//   }
-// }
-//
-// class DiscHandler extends Handler {
-//   override def handle(request: String) {
-//     if request.compareTo("0") then
-//   }
-// }
-// class DeckHandler extends Handler {
-//   override def handle(request: String) {
-//     if request.compareTo("1") then
-//   }
-// }
-//
-//
-// object SupportHandler extends Handler {
-//   val discHandler = new DiscHandler
-//   val deckHandler = new DeckHandler
-//
-//   discHandler.next = DeckHandler
+package de.htwg.se.skyjo.util
+import de.htwg.se.skyjo.controller.ControllerComponent.Controller
+import de.htwg.se.skyjo.Model.{Board,Deck,DiscardPile}
 
-  // Test requests
-  // discHandler.handle("123")
-  // discHandler.handle("abc")
-  // discHandler.handle("abc123")
-// }
+trait Handler:
+  val next: Handler
+  def handle(request: String): Option[(Board,Deck,DiscardPile)] =
+    if (next != null) next.handle(request)
+    else println(s"No handler for: $request"); None
+
+class DiscHandler(ctrl: Controller, val b:Board, val d: Deck, val disc: DiscardPile) extends Handler:
+  override val next: Handler = DeckHandler(ctrl,b,d,disc)
+
+  override def handle(request: String): Option[(Board,Deck,DiscardPile)] =
+    if request.compareTo("0")==0 then { println(s"DiscHandler handled request: ${request}"); ctrl.takeFromDisc(b,d,disc) }
+    else this.next.handle(request)
+
+class DeckHandler(ctrl: Controller, val b:Board, val d: Deck, val disc: DiscardPile) extends Handler:
+  override val next: Handler = LastHandler()
+
+  override def handle(request: String): Option[(Board,Deck,DiscardPile)] =
+    if request.compareTo("1")==0 then { println(s"DeckHandler handled request: ${request}");Some(ctrl.takeFromDeck(b,d,disc)) }
+    else this.next.handle(request)
+
+class LastHandler extends Handler:
+  override val next: Handler = this
+
+  override def handle(request: String): Option[(Board,Deck,DiscardPile)] = { println(s"The request: '${request}' arrived at the LastHandler"); None }
+
+
+case class SupportHandler(ctrl: Controller, b:Board, d:Deck, disc:DiscardPile):
+  private val h = new DiscHandler(ctrl,b,d,disc)
+
+  def handle(request: String): Option[(Board,Deck,DiscardPile)] = h.handle(request)

@@ -66,7 +66,10 @@ case class Board(
 ) extends Colleague {
   override def send(msg: String): Unit = _mediator.send(this,msg)
 
-  override def receive(msg: String): Unit = println(s"Board Received Message: ${msg}")
+  override def receive(msg: String): Boolean = {
+    println(s"Board Received Message: ${msg}")
+    true
+  }
 
   override def toString(): String =
     brd.flatten.toSeq.zipWithIndex.map { case (aCard, idx) =>

@@ -28,7 +28,7 @@ import scala.util.Random
 //   case LightGreen extends Color("\u001b[92m")
 // }
 
-class Controller(val _mediator: Mediator) extends Observable {
+class Controller(val _mediator: Mediator, var disBoards: Array[Board], var disDeck: Deck, var discard: DiscardPile) extends Observable {
   val tui = new Tui(this)
 
   def getReducedBrd(updatedBoard: Board): Board = {
@@ -53,7 +53,7 @@ class Controller(val _mediator: Mediator) extends Observable {
       b: Board,
       d: Deck,
       disc: DiscardPile
-  ): (Board, Deck, DiscardPile) = {
+  ): Option[(Board, Deck, DiscardPile)] = {
     if (disc.toString() == "Disc") { notifyObservers; tui.turn(b, d, disc)}
     else {
       println(
@@ -64,7 +64,10 @@ class Controller(val _mediator: Mediator) extends Observable {
       val container = (for{i <- 0 until b.xSize*b.ySize} yield i.toString()).toVector
       if container contains c2 then
           val (disc2: DiscardPile, b2) = (b.switch(disc, c2.toInt): @unchecked)
-          return (b2, d, disc2)
+
+          discard = disc2
+          return Option(b2, d, disc2)
+
       else notifyObservers; takeFromDisc(b, d, disc)
     }
   }
@@ -85,26 +88,30 @@ class Controller(val _mediator: Mediator) extends Observable {
         val disc2: DiscardPile = new DiscardPile(_mediator,getBoardCard(b, c).toString())
         val (d2: Deck, b2) = (b.switch(tempD, c): @unchecked)
         notifyObservers
+
+        disDeck = d2
+        discard = disc2
         (b2, d2, disc2)
       }
       case "2" => {
         val (disc2: DiscardPile, d2: Deck) = {
           notifyObservers
+
           (disc.putToDiscardPile(tempD): @unchecked)
         }
         tui.cardTurnRq(b)
 
-        // println(s"Which BoardCard [0-${b.xSize * b.ySize - 1}] do you want to turn around?")
         val c = readInt()
         val (dd, b2) = b.switch(disc2, c)
-        // println(s"You turned BoardCard: ${disc2}")
+
+        disDeck = d2
+        discard = disc2
         (b2, d2, disc2)
       }
       case i if i != "2" && i != "1" => {
-        // println("You need to enter either 1 or 2!");
         notifyObservers
         takeFromDeck(b, d, disc)
-      } /*throw new IllegalArgumentException("You need to enter either 1 or 2!\n")*/
+      }
 
     }
 
@@ -117,7 +124,7 @@ class Controller(val _mediator: Mediator) extends Observable {
       disc: DiscardPile
   ): (Array[Board], Deck, DiscardPile, Boolean) = {
 
-    var curDeck = deck
+    var curDeck:Deck = deck
     var curDisc = disc
 
     for i <- 0 until numPlayers do
@@ -134,12 +141,14 @@ class Controller(val _mediator: Mediator) extends Observable {
     for i <- 0 until numPlayers do
       tui.turnOfPlayer(i)
       // println(s"Player ${i}:")
-      val (updatedBoard, deckAfterTurn, discAfterTurn) =
-        tui.turn(plBoards(i), curDeck, curDisc)
+      val (updatedBoard: Board, deckAfterTurn: Deck, discAfterTurn: DiscardPile) =
+        tui.turn(plBoards(i), curDeck, curDisc).getOrElse((plBoards(i), curDeck, curDisc))
       plBoards(i) = getReducedBrd(updatedBoard)
       curDeck = deckAfterTurn
       curDisc = discAfterTurn
       notifyObservers
+
+    disBoards = plBoards
     (plBoards, curDeck, curDisc, false)
   }
 
@@ -150,18 +159,20 @@ class Controller(val _mediator: Mediator) extends Observable {
       disc: DiscardPile
   ): (Array[Board], Deck, DiscardPile, Boolean) = {
 
-    var curDeck = deck
-    var curDisc = disc
+    var curDeck:Deck = deck
+    var curDisc:DiscardPile = disc
 
     for i <- 0 until numPlayers do
       tui.turnOfPlayer(i)
       // println(s"Player ${i}:")
-      val (updatedBoard, deckAfterTurn, discAfterTurn) =
-        tui.turn(plBoards(i), curDeck, curDisc)
+      val (updatedBoard: Board, deckAfterTurn: Deck, discAfterTurn: DiscardPile) =
+        tui.turn(plBoards(i), curDeck, curDisc).getOrElse((plBoards(i), curDeck, curDisc))
       plBoards(i) = getReducedBrd(updatedBoard)
       curDeck = deckAfterTurn
       curDisc = discAfterTurn
       notifyObservers
+
+    disBoards = plBoards
     (plBoards, curDeck, curDisc, false)
   }
 
@@ -176,6 +187,8 @@ class Controller(val _mediator: Mediator) extends Observable {
     val (boardsAfter, deckAfter, discAfter, stopBetween) =
       if round == 1 then firstRound(numPlayers, plBoards, deck, disc)
       else nextRounds(numPlayers, plBoards, deck, disc)
+    disBoards = boardsAfter
+
     // TEST START
     val finishedBoards: Array[Boolean] =
       (for { i <- 0 until numPlayers } yield finished(boardsAfter(i))).toArray
