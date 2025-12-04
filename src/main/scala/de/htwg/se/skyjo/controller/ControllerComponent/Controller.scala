@@ -10,7 +10,8 @@ import de.htwg.se.skyjo.model.{
 }
 import de.htwg.se.skyjo.aView.Tui
 import de.htwg.se.skyjo.controller.ControllerComponent._
-import de.htwg.se.skyjo.util.Observable
+import de.htwg.se.skyjo.util.{Memento,MoveCaretaker,Observable}
+import de.htwg.se.skyjo.util
 
 import scala.io.StdIn.{readInt, readLine}
 // import annotation.tailrec
@@ -179,6 +180,11 @@ class Controller extends Observable {
       disc: DiscardPile,
       round: Int = 1
   ): (Array[Board], Deck, DiscardPile) = {
+    var nd : Deck = deck
+    if(checkmemAct()){
+      nd = getNewDeck
+      setFalse()
+    }
 
     val (boardsAfter, deckAfter, discAfter, stopBetween) =
       if round == 1 then firstRound(numPlayers, plBoards, deck, disc)
@@ -191,7 +197,6 @@ class Controller extends Observable {
       .map(t => (t._1, t._2.size))
       .map(_._1)
       .exists(_ == true)
-
     // println(s"Someone finished: ${isFinished}\n")
     // TEST END
     if isFinished then

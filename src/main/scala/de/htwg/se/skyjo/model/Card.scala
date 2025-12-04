@@ -2,7 +2,8 @@ package de.htwg.se.skyjo.model
 
 def len(x: Any): Int = x.toString().size
 
-case class Card(val value: Int, val turned: Boolean):
+case class Card(val value: Int, val turned: Boolean = false):
+
   override def toString(): String = if turned==true then s"${value}" else "#"
   def falseCopy(): Card = new Card(value, false)
   def trueCopy(): Card = new Card(value, true)
