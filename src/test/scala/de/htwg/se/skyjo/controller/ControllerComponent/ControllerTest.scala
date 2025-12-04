@@ -12,44 +12,51 @@ import de.htwg.se.skyjo.model.{
 import de.htwg.se.skyjo.aView.Tui
 
 import scala.io.StdIn.{readInt, readLine}
-// import annotation.tailrec
 import scala.util.Random
 import java.io.ByteArrayInputStream
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import de.htwg.se.skyjo.model.fillDeck
+import de.htwg.se.skyjo.util.ConcreteMediator
 
 class ControllerTest extends AnyWordSpec with Matchers {
   "A Controller" when:
-    val d = Deck(fillDeck(Seq.empty[Card]), "Deck")
-    val b: Board = fillBoard(4, 3, d)._1
-    val disc = DiscardPile("Disc")
-    val ctrl = Controller()
+    val med = new ConcreteMediator
+    val beginTemp = Board(med)
+    val b: Board = beginTemp._1
+    val d = beginTemp._2
+    val disc = DiscardPile(med, "Disc")
+    val brdArr = Array(b)
+    val ctrl = Controller(med, brdArr, d, disc)
     "it is working, it" should:
       "reduce a Board Column right" in:
         val updatedBoard = Board(
+          med,
           3,
           2,
           Vector(
-            Vector(Card(3), Card(1), Card(2).trueCopy()),
-            Vector(Card(4), Card(6), Card(2).trueCopy())
+            Vector(Card(med, 3), Card(med, 1), Card(med, 2).trueCopy()),
+            Vector(Card(med, 4), Card(med, 6), Card(med, 2).trueCopy())
           )
         )
         ctrl.getReducedBrd(updatedBoard) shouldBe a[Board]
       "reduce a Board Row right" in:
         val updatedBoard = Board(
+          med,
           3,
           2,
           Vector(
-            Vector(Card(3), Card(1), Card(5)),
-            Vector(Card(2).trueCopy(), Card(2).trueCopy(), Card(2).trueCopy())
+            Vector(Card(med, 3), Card(med, 1), Card(med, 5)),
+            Vector(
+              Card(med, 2).trueCopy(),
+              Card(med, 2).trueCopy(),
+              Card(med, 2).trueCopy()
+            )
           )
         )
         ctrl.getReducedBrd(updatedBoard) shouldBe a[Board]
         ctrl.getReducedBrd(updatedBoard) shouldBe a[Board]
 
       "be unable to take a Card from the DiscardPile, when there's no Card" in:
-        val brdArr = Array(b)
         val simulatedInput = "4\n0\n1\n1\n0\n"
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
         Console.withIn(in) {
@@ -58,15 +65,15 @@ class ControllerTest extends AnyWordSpec with Matchers {
           dTakeDisc shouldBe a[Deck]
           discTakeDisc shouldBe a[DiscardPile]
         }
-      val bTemp: Board = fillBoard(2, 1, d)._1
-      val disc2 = DiscardPile("4")
+      val bTemp: Board = fillBoard(med,2, 1, d)._1
+      val disc2 = DiscardPile(med,"4")
       "be unable to take a Card from the DiscardPile" in:
         val simulatedInput = "40\n0\n"
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
 
         Console.withIn(in) {
           val (bTakeDisc, dTakeDisc, discTakeDisc) =
-            ctrl.takeFromDisc(bTemp, d, disc2)
+            ctrl.takeFromDisc(bTemp, d, disc2).getOrElse((bTemp, d, disc2))
           dTakeDisc shouldBe a[Deck]
           discTakeDisc shouldBe a[DiscardPile]
         }
@@ -77,7 +84,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
 
         Console.withIn(in) {
           val (bTakeDisc, dTakeDisc, discTakeDisc) =
-            ctrl.takeFromDisc(bTemp, d, disc2)
+            ctrl.takeFromDisc(bTemp, d, disc2).getOrElse((bTemp, d, disc2))
           dTakeDisc shouldBe a[Deck]
           discTakeDisc shouldBe a[DiscardPile]
         }
@@ -93,7 +100,8 @@ class ControllerTest extends AnyWordSpec with Matchers {
         Console.withIn(in2) {
           ctrl.takeFromDeck(b, d, disc)
         }
-      val b2 = fillBoard(2, 1, d)._1
+
+      val b2 = fillBoard(med, 2, 1, d)._1
       val plBoards: Array[Board] = Array(b2)
       "manage the first round" in:
         val simulatedInput = "1\n1\n0\n"
@@ -118,11 +126,11 @@ class ControllerTest extends AnyWordSpec with Matchers {
           gl._3 shouldBe a[DiscardPile]
         }
       "manage some gameLoop" in:
-        val biggerPlBoards = Array(fillBoard(2, 2, d)._1)
+        val twoTimesTwoPlBoards = Array(fillBoard(med,2,2,d)._1)
         val simulatedInput = "1\n1\n3\n1\n1\n2\n1\n1\n1\n1\n1\n0\n"
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
         Console.withIn(in) {
-          val gl = ctrl.gameLoop(1, biggerPlBoards, d, disc)
+          val gl = ctrl.gameLoop(1, twoTimesTwoPlBoards, d, disc)
           gl._3 shouldBe a[DiscardPile]
         }
 }

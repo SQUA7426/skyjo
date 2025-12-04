@@ -1,6 +1,6 @@
 package de.htwg.se.skyjo.aView
-import de.htwg.se.skyjo.Model
-import de.htwg.se.skyjo.Model.{Board, Deck, DiscardPile}
+import de.htwg.se.skyjo.model
+import de.htwg.se.skyjo.model.{Board, Deck, DiscardPile}
 import de.htwg.se.skyjo.controller.ControllerComponent.Controller
 import scala.io.StdIn.{readInt, readLine}
 import de.htwg.se.skyjo.util.SupportHandler

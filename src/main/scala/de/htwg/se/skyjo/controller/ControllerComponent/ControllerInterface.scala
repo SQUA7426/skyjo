@@ -1,6 +1,6 @@
 package de.htwg.se.skyjo.controller.ControllerComponent
 
-import de.htwg.se.skyjo.Model.Card
+import de.htwg.se.skyjo.model.Card
 import scala.collection.immutable.Vector
 
 trait ControllerInterface {

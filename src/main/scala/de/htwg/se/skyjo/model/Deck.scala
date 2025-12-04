@@ -1,6 +1,6 @@
-package de.htwg.se.skyjo.Model
+package de.htwg.se.skyjo.model
 
-import de.htwg.se.skyjo.Model.Card
+import de.htwg.se.skyjo.model.Card
 import scala.collection.immutable.Vector
 import scala.util.Random
 import scala.collection.immutable.Seq

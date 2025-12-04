@@ -1,12 +1,10 @@
 package de.htwg.se.skyjo.util
 import de.htwg.se.skyjo.controller.ControllerComponent.Controller
-import de.htwg.se.skyjo.Model.{Board,Deck,DiscardPile}
+import de.htwg.se.skyjo.model.{Board,Deck,DiscardPile}
 
 trait Handler:
   val next: Handler
-  def handle(request: String): Option[(Board,Deck,DiscardPile)] =
-    if (next != null) next.handle(request)
-    else println(s"No handler for: $request"); None
+  def handle(request: String): Option[(Board,Deck,DiscardPile)]
 
 class DiscHandler(ctrl: Controller, val b:Board, val d: Deck, val disc: DiscardPile) extends Handler:
   override val next: Handler = DeckHandler(ctrl,b,d,disc)

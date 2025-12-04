@@ -1,6 +1,6 @@
-package de.htwg.se.skyjo.Model
+package de.htwg.se.skyjo.model
 
-import de.htwg.se.skyjo.Model.{Deck}
+import de.htwg.se.skyjo.model.{Deck}
 
 import scala.util.Random
 import scala.util.control._
@@ -154,7 +154,7 @@ def getBoardCard(b: Board, input: Int): Card = {
 }
 
 object Board {
-  def apply(_mediator: Mediator): Board = {
-    fillBoard(_mediator, 4, 3, Deck(_mediator))._1
+  def apply(_mediator: Mediator): (Board,Deck) = {
+    fillBoard(_mediator, 4, 3, Deck(_mediator))
   }
 }

@@ -1,5 +1,5 @@
-package de.htwg.se.skyjo.Model
-import de.htwg.se.skyjo.Model.{Card, Board}
+package de.htwg.se.skyjo.model
+import de.htwg.se.skyjo.model.{Card, Board}
 import de.htwg.se.skyjo.util.{Mediator, Colleague, ConcreteMediator}
 
 class DiscardPile(val _mediator: Mediator, val discPile: String)

@@ -1,6 +1,6 @@
 package de.htwg.se.skyjo
 
-import de.htwg.se.skyjo.Model.{Board, Card, Deck, DiscardPile, fullDeck}
+import de.htwg.se.skyjo.model.{Board, Card, Deck, DiscardPile, fullDeck}
 import de.htwg.se.skyjo.aView.Tui
 import de.htwg.se.skyjo.controller.ControllerComponent.Controller
 import de.htwg.se.skyjo.util.{ConcreteMediator, Mediator}

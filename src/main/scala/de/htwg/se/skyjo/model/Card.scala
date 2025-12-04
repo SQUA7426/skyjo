@@ -1,4 +1,4 @@
-package de.htwg.se.skyjo.Model
+package de.htwg.se.skyjo.model
 
 import de.htwg.se.skyjo.util.{Mediator, Colleague}
 

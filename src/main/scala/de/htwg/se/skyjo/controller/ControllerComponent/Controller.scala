@@ -1,6 +1,6 @@
 package de.htwg.se.skyjo.controller.ControllerComponent
 
-import de.htwg.se.skyjo.Model.{
+import de.htwg.se.skyjo.model.{
   Board,
   Deck,
   DiscardPile,

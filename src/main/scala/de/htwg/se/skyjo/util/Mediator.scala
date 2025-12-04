@@ -1,6 +1,6 @@
 package de.htwg.se.skyjo.util
 
-import de.htwg.se.skyjo.Model.{Card, Board, DiscardPile, Deck}
+import de.htwg.se.skyjo.model.{Card, Board, DiscardPile, Deck}
 import scala.util.Random
 import de.htwg.se.skyjo.util.Colleague
 class Controller;
