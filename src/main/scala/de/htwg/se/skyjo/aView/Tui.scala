@@ -2,6 +2,9 @@ package de.htwg.se.skyjo.aView
 import de.htwg.se.skyjo.model
 import de.htwg.se.skyjo.model.{Board, Deck, DiscardPile}
 import de.htwg.se.skyjo.controller.ControllerComponent.Controller
+import de.htwg.se.skyjo.util.{MoveCaretaker,Memento}
+import scala.collection.mutable.Stack
+
 import scala.io.StdIn.readLine
 
 
@@ -34,12 +37,14 @@ class Tui(cont : Controller) {
     println("\t[2] put on discard and flip board card")
 
     val choose = readLine()
-
     choose match {
       case "0" => cont.takeFromDisc(b, d, disc)
-
       case "1" => {inputRequestDeck(d.turnUpperCard().toString()); cont.takeFromDeck(b, d, disc)}
-
+      case "2" =>
+        if(cont.mementostack.undoStack != null) {
+          val mem : Memento = cont.mementostack.undoStack.pop()
+          cont.mementostack.undo(mem, d, b, disc)
+        } else (b,d,disc)
       case _ =>
         println(s"${choose} is not valid, doing nothing.")
         turn(b, d, disc)

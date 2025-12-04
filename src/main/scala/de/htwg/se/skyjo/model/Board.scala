@@ -57,6 +57,16 @@ case class Board(
     val ySize: Int,
     val brd: Vector[Vector[Card]]
 ) {
+  def swapFromMem(c:Card, pos:Int): Board = {
+    val uptBrd: Vector[Vector[Card]] = brd.collect {
+      case (vec) => vec.zipWithIndex.collect {
+        case (cCard,cardPos) => {
+          if(cardPos==pos) c else cCard
+        }
+      }
+    }
+    new Board(xSize,ySize, uptBrd)
+  }
 
   override def toString(): String =
     brd.flatten.toSeq.zipWithIndex.map { case (aCard, idx) =>
@@ -74,6 +84,8 @@ case class Board(
         }
     }
     new Board(xSize, ySize, turnedIdxBrd)
+
+
 
   def switch(that: Any, input: Int): (Any, Board) =
     val x: String = brd.flatten.apply(input).trueCopy().toString()

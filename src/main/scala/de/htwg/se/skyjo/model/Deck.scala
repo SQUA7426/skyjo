@@ -27,7 +27,7 @@ case class Deck(deck: Vector[Card], upperCard: String) {
     nDeck
   def leftOf(worth: Int): Int = deck.count(_ == Card(worth))
   def getUpperCard(): Card = if upperCard.compareTo("Deck") != 0 then
-    toCard(upperCard.toInt)
-    else throw new IllegalArgumentException(s"Invalid upperCard:${upperCard}")
+    toCard(upperCard.toInt) else toCard(turnUpperCard())
+    //else throw new IllegalArgumentException(s"Invalid upperCard:${upperCard}")
   override def toString(): String = if upperCard.compareTo("Deck")==0 then "Deck" else upperCard
 }

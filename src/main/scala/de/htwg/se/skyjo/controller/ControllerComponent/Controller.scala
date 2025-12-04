@@ -1,16 +1,8 @@
 package de.htwg.se.skyjo.controller.ControllerComponent
 
-import de.htwg.se.skyjo.model.{
-  Board,
-  Deck,
-  DiscardPile,
-  fillBoard,
-  fullDeck,
-  getBoardCard
-}
+import de.htwg.se.skyjo.model.{Board, Card, Deck, DiscardPile, fillBoard, fullDeck, getBoardCard}
 import de.htwg.se.skyjo.aView.Tui
-import de.htwg.se.skyjo.controller.ControllerComponent._
-import de.htwg.se.skyjo.util.{Memento,MoveCaretaker,Observable}
+import de.htwg.se.skyjo.util.{Memento, MoveCaretaker, Observable}
 import de.htwg.se.skyjo.util
 
 import scala.io.StdIn.{readInt, readLine}
@@ -36,7 +28,8 @@ import scala.util.Random
 
 class Controller extends Observable {
   val tui = new Tui(this)
-
+  private var fromDeck : Boolean = false
+  var mementostack : MoveCaretaker = new MoveCaretaker
   def getReducedBrd(updatedBoard: Board): Board = {
     val reducedBoards: Array[(Board, Boolean)] = new Array(
       updatedBoard.xSize + updatedBoard.ySize
@@ -67,6 +60,8 @@ class Controller extends Observable {
         // s"Which BoardCard [0-${b.xSize * b.ySize - 1}] do you want to switch with ${disc.toString()}?"
       )
       val c2 = readInt()
+      mementostack.save(Memento(fromDeck, d.getUpperCard(), c2, getBoardCard(b, c2)))
+
 
       if c2 < b.xSize * b.ySize && c2 >= 0 then
         val (disc2: DiscardPile, b2) = (b.switch(disc, c2): @unchecked)
@@ -81,7 +76,7 @@ class Controller extends Observable {
       d: Deck,
       disc: DiscardPile
   ): (Board, Deck, DiscardPile) = {
-
+    fromDeck = true
     val tempD: Deck = new Deck(d.deck, d.turnUpperCard())
     val c1 = readLine()
 
@@ -89,9 +84,11 @@ class Controller extends Observable {
       case "1" => {
         tui.inputRequest(b, tempD.getUpperCard().toString())
         val c = readInt()
+        mementostack.save(Memento(fromDeck, d.getUpperCard(), c, getBoardCard(b, c)))
         val disc2: DiscardPile = new DiscardPile(getBoardCard(b, c).toString())
         val (d2: Deck, b2) = (b.switch(tempD, c): @unchecked)
         notifyObservers
+
         (b2, d2, disc2)
       }
       case "2" => {
@@ -104,9 +101,12 @@ class Controller extends Observable {
         // println(s"Which BoardCard [0-${b.xSize * b.ySize - 1}] do you want to turn around?")
         val c = readInt()
         val (dd, b2) = b.switch(disc2, c)
+        mementostack.save(Memento(fromDeck, d.getUpperCard(),c,getBoardCard(b,c)))
+
         // println(s"You turned BoardCard: ${disc2}")
         (b2, d2, disc2)
       }
+
       case i if i != "2" && i != "1" => {
         // println("You need to enter either 1 or 2!");
         notifyObservers
@@ -137,7 +137,7 @@ class Controller extends Observable {
       val firstTurned: Board = beforeTurned.turnBoardCard(arr(0))
       plBoards(i) = firstTurned.turnBoardCard(arr(1))
       curDeck = deckAfterFill
-
+      mementostack.save(Memento(true,getBoardCard(plBoards(i),arr(0)),arr(0),getBoardCard(plBoards(i),arr(1))))
     for i <- 0 until numPlayers do
       tui.turnOfPlayer(i)
       // println(s"Player ${i}:")
@@ -181,9 +181,9 @@ class Controller extends Observable {
       round: Int = 1
   ): (Array[Board], Deck, DiscardPile) = {
     var nd : Deck = deck
-    if(checkmemAct()){
-      nd = getNewDeck
-      setFalse()
+    if(mementostack.checkMemAct()){
+      nd = mementostack.getNewDeck()
+      mementostack.setFalse()
     }
 
     val (boardsAfter, deckAfter, discAfter, stopBetween) =
@@ -210,4 +210,5 @@ class Controller extends Observable {
   def finished(b: Board): Boolean =
     notifyObservers
     b.brd.forall(row => row.forall(c => c._2 == true))
+
 }
