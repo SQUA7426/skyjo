@@ -113,13 +113,13 @@ class ControllerTest extends AnyWordSpec with Matchers {
           firstTurnBool shouldBe false
         }
       "manage next rounds" in:
-        val simulatedInput = "1\n1\n0\n"
+        val simulatedInput = "2\n1\n1\n0\n"
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
         Console.withIn(in) {
           ctrl.nextRounds(1, plBoards, d, disc)._4 shouldBe false
         }
       "manage a gameLoop" in:
-        val simulatedInput = "1\n1\n0\n"
+        val simulatedInput = "1\n1\n0\nquit\n"
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
         Console.withIn(in) {
           val gl = ctrl.gameLoop(1, plBoards, d, disc)
