@@ -57,7 +57,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
         ctrl.getReducedBrd(updatedBoard) shouldBe a[Board]
 
       "be unable to take a Card from the DiscardPile, when there's no Card" in:
-        val simulatedInput = "4\n0\n1\n1\n0\n1\n1\n1\n"
+        val simulatedInput = "4\n0\n1\n1\nquit\n"
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
         Console.withIn(in) {
           val (bTakeDisc, dTakeDisc, discTakeDisc, end) =
