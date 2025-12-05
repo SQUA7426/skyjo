@@ -31,9 +31,10 @@ class Deck(
 
   def leftOf(worth: Int): Int = deck.count(_ == Card(_mediator, worth))
 
-  def getUpperCard(): Card = if upperCard.compareTo("Deck") != 0 then
-    toCard(_mediator, upperCard.toInt)
-  else throw new IllegalArgumentException(s"Invalid upperCard:${upperCard}")
+  def getUpperCard(): Card =
+    if upperCard.compareTo("Deck") != 0 then toCard(_mediator, upperCard.toInt) else toCard(_mediator,turnUpperCard())
+    // else throw new IllegalArgumentException(s"Invalid upperCard:${upperCard}")
+
   override def toString(): String =
     if upperCard.compareTo("Deck") == 0 then "Deck" else upperCard
 }

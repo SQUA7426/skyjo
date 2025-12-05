@@ -62,13 +62,24 @@ case class Board(
     val _mediator: Mediator,
     val xSize: Int,
     val ySize: Int,
-    brd: Vector[Vector[Card]]
+    val brd: Vector[Vector[Card]]
 ) extends Colleague {
-  override def send(msg: String): Unit = _mediator.send(this,msg)
+  override def send(msg: String): Unit = _mediator.send(this, msg)
 
   override def receive(msg: String): Boolean = {
     println(s"Board Received Message: ${msg}")
     true
+  }
+
+  def swapFromMem(c: Card, pos: Int): Board = {
+    val uptBrd: Vector[Vector[Card]] = brd.zipWithIndex.collect { case (vec,vecPos) =>
+      vec.zipWithIndex.collect {
+        case (cCard, cardPos) => {
+          if (vecPos * xSize + cardPos == pos) c else cCard
+        }
+      }
+    }
+    new Board(_mediator, xSize, ySize, uptBrd)
   }
 
   override def toString(): String =
@@ -79,9 +90,9 @@ case class Board(
     }.mkString
 
   def turnBoardCard(input: Int): Board =
-    val turnedIdxBrd: Vector[Vector[Card]] = brd.zipWithIndex.map {
+    val turnedIdxBrd: Vector[Vector[Card]] = brd.zipWithIndex.collect {
       case (vectorRow, vectorNum) =>
-        vectorRow.zipWithIndex.map { case (cCard, idx) =>
+        vectorRow.zipWithIndex.collect { case (cCard, idx) =>
           if (vectorNum * xSize + idx == input)
             new Card(_mediator, cCard.value, true)
           else cCard
@@ -91,9 +102,9 @@ case class Board(
 
   def switch(that: Any, input: Int): (Any, Board) =
     val x: String = brd.flatten.apply(input).trueCopy().toString()
-    val sw: Vector[Vector[Card]] = brd.zipWithIndex.map {
+    val sw: Vector[Vector[Card]] = brd.zipWithIndex.collect {
       case (vectorRow, vectorNum) =>
-        vectorRow.zipWithIndex.map { case (cCard, idx) =>
+        vectorRow.zipWithIndex.collect { case (cCard, idx) =>
           if (vectorNum * xSize + idx == input) then
             that match {
               case d: Deck         => toCard(_mediator, d.upperCard)
@@ -145,16 +156,17 @@ case class Board(
     (new Board(_mediator, xSize, ySize, brd), false)
   }
 }
+
+object Board {
+  def apply(_mediator: Mediator): (Board, Deck) = {
+    fillBoard(_mediator, 4, 3, Deck(_mediator))
+  }
+}
+
 def getBoardCard(b: Board, input: Int): Card = {
   if input < 0 || input > (b.ySize * b.ySize - 1) then
     throw new IndexOutOfBoundsException(
       s"Idx: ${input} is not a valid Board entry!"
     )
   b.brd.flatten.apply(input).trueCopy()
-}
-
-object Board {
-  def apply(_mediator: Mediator): (Board,Deck) = {
-    fillBoard(_mediator, 4, 3, Deck(_mediator))
-  }
 }

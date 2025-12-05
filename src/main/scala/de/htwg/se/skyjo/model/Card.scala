@@ -10,11 +10,13 @@ case class Card(
     val turned: Boolean
 ) extends Colleague {
   override def receive(msg: String): Boolean = {
-      msg match
-        case "REQUEST GET UPPERCARD" => {println(s"Card Received Message: ${msg}"); true}
-        case _ => false
+    msg match
+      case "REQUEST GET UPPERCARD" => {
+        println(s"Card Received Message: ${msg}"); true
+      }
+      case _ => false
   }
-  override def send(msg: String): Unit = _mediator.send(this,msg)
+  override def send(msg: String): Unit = _mediator.send(this, msg)
 
   def isTurned(): Boolean = turned
 
@@ -25,7 +27,9 @@ case class Card(
   override def toString(): String = if turned then s"${value}" else "#"
 }
 object Card:
-  def apply(_mediator: Mediator, value: Int): Card = if value>(-3)&&value<(13) then new Card(_mediator,value, true) else throw new IllegalArgumentException(s"Invalid Card number: ${value}") 
+  def apply(_mediator: Mediator, value: Int): Card =
+    if value > (-3) && value < (13) then new Card(_mediator, value, true)
+    else throw new IllegalArgumentException(s"Invalid Card number: ${value}")
 
 def toCard(med: Mediator, x: Any): Card = {
   val val1d =

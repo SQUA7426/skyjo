@@ -2,11 +2,16 @@ package de.htwg.se.skyjo.model
 import de.htwg.se.skyjo.model.{Card, Board}
 import de.htwg.se.skyjo.util.{Mediator, Colleague, ConcreteMediator}
 
-class DiscardPile(val _mediator: Mediator, val discPile: String)
-    extends Colleague {
+class DiscardPile(
+    val _mediator: Mediator,
+    val discPile: String
+) extends Colleague {
+  var isTurned: Boolean = false
+
   override def receive(msg: String): Boolean = {
     msg match
-      case "REQUEST PUT TO DISCARDPILE" => println(s"DiscardPile Received Message: ${msg}"); true
+      case "REQUEST PUT TO DISCARDPILE" =>
+        println(s"DiscardPile Received Message: ${msg}"); true
       case _ => false
   }
 
