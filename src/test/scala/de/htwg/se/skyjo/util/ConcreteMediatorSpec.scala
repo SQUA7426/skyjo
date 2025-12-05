@@ -1,6 +1,7 @@
 package de.htwg.se.skyjo.util
 import de.htwg.se.skyjo.util.{Mediator,ConcreteMediator,Colleague,Handler}
 import de.htwg.se.skyjo.controller.ControllerComponent.Controller
+import de.htwg.se.skyjo.model.{Board,Deck,DiscardPile}
 import de.htwg.se.skyjo.model.*
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -37,7 +38,7 @@ class ConcreteMediatorSpec extends AnyWordSpec with Matchers {
     val h:Handler = new DeckHandler(ctrl,b,deck,disc)
       "A Handler" should:
         "handle things" in:
-          h.handle("2")
+          h.handle("2") shouldBe a[Option[(Board,Deck,DiscardPile)]]
         "be unable to handle unrecognized requests" in:
           h.handle("x") shouldBe None
 }
