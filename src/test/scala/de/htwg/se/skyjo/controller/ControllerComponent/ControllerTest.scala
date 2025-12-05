@@ -79,7 +79,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
         }
 
       "be able to take a Card from the DiscardPile" in:
-        val simulatedInput = "0\n"
+        val simulatedInput = "3\n0\n"
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
 
         Console.withIn(in) {
@@ -89,7 +89,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
           discTakeDisc shouldBe a[DiscardPile]
         }
       "be able to take a Card from the Deck Option 1" in:
-        val simulatedInput = "3\n1\n0\n"
+        val simulatedInput = "1\n0\n"
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
         Console.withIn(in) {
           ctrl.takeFromDeck(b, d, disc)

@@ -31,7 +31,7 @@ class DeckHandler(
   override def handle(request: String): Option[(Board, Deck, DiscardPile)] =
     if request.compareTo("1") == 0 then {
       println(s"DeckHandler handled request: ${request}");
-      Some(ctrl.takeFromDeck(b, d, disc))
+      Option(ctrl.takeFromDeck(b, d, disc))
     } else this.next.handle(request)
 
 class UndoHandler(
