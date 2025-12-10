@@ -51,7 +51,7 @@ class MoveCaretaker(val med: Mediator) {
       println(memento.toString())
       println(b.toString())
       setTrue()
-      (b, deck, memento.lastDisc)
+      (board, deck, memento.lastDisc)
     } else {
       disc.putToDiscardPile(memento.takenCard)
       redoStack.push(memento)

@@ -13,7 +13,7 @@ def main(args: Array[String]): Unit = {
   val deck: Deck = Deck(med)
   val disc: DiscardPile = new DiscardPile(med, "Disc")
   val plBoards: Array[Board] =
-    Array.fill(plCount)(new Board(med, 2, 2, Vector()))
+    Array.fill(plCount)(new Board(med, 4, 3, Vector()))
   val Ctr =
     new Controller(med, disBoards = plBoards, disDeck = deck, discard = disc)
   val t = new Tui(Ctr)

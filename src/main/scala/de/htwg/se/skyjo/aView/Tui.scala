@@ -2,11 +2,13 @@ package de.htwg.se.skyjo.aView
 import de.htwg.se.skyjo.model
 import de.htwg.se.skyjo.model.{Board, Deck, DiscardPile}
 import de.htwg.se.skyjo.controller.ControllerComponent.Controller
-import de.htwg.se.skyjo.util.{MoveCaretaker, Memento, SupportHandler}
-import scala.collection.mutable.Stack
+import de.htwg.se.skyjo.util.{Memento, MoveCaretaker, SupportHandler}
 
+import scala.collection.mutable.Stack
 import scala.io.StdIn.readLine
 import de.htwg.se.skyjo.util.SupportCommand
+
+import scala.util.{Try,Success,Failure}
 
 class Tui(cont: Controller) {
 
@@ -15,7 +17,8 @@ class Tui(cont: Controller) {
 
   def inputRequestDeck(deckCard: String) = (
     println(s"You took ${deckCard}")
-  )
+    )
+
   def cardTurnRq(b: Board) =
     println(
       s"Which BoardCard [0-${b.xSize * b.ySize - 1}] do you want to turn around?"
@@ -25,13 +28,13 @@ class Tui(cont: Controller) {
 
   def finishedConf() = (
     println(s"someone is finished: \n")
-  )
+    )
 
   def turn(
-      b: Board,
-      d: Deck,
-      disc: DiscardPile
-  ): Option[(Board, Deck, DiscardPile)] = {
+            b: Board,
+            d: Deck,
+            disc: DiscardPile
+          ): Option[(Board, Deck, DiscardPile)] = {
     println(b)
     println(s"| ${disc.toString()} |\n")
     println(s"Whatcha want to do?")
@@ -45,6 +48,7 @@ class Tui(cont: Controller) {
     val choose = readLine()
     val h = SupportHandler(cont, b, d, disc)
     val c = SupportCommand(cont, b, d, disc)
+    /*
     try {
       choose match {
         case "0" | "1" | "2" | "undo" | "help" | "redo" | "quit" => {
@@ -60,4 +64,22 @@ class Tui(cont: Controller) {
       }
     }
   }
-}
+  */
+    val action: Try[Option[(Board, Deck, DiscardPile)]] = Try {
+      choose match {
+        case "0" | "1" | "2" | "undo" | "help" | "redo" | "quit" =>
+          if (choose == "1") inputRequestDeck(d.turnUpperCard().toString())
+          val return_H = h.handle(choose)
+          if (return_H == None) c.execute(choose) else return_H
+        case _ =>
+          throw new IllegalArgumentException(s"$choose is not valid, doing nothing.")
+      }
+    }
+
+    action match {
+      case Success(result) => result
+      case Failure(e) =>
+        println(e.getMessage)
+        turn(b, d, disc)
+    }
+  }}

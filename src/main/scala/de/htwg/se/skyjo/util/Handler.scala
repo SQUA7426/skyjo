@@ -42,7 +42,8 @@ class UndoHandler(
 ) extends Handler:
   override val next: Handler = LastHandler()
 
-  override def handle(request: String): Option[(Board, Deck, DiscardPile)] =
+  override def handle(request: String): Option[(Board, Deck, DiscardPile)] = {
+    println(request.compareTo("2") == 0)
     if request.compareTo("2") == 0 then {
       println(s"UndoHandler handled request: ${request}")
       if (ctrl.mementostack.undoStack != null) {
@@ -51,6 +52,7 @@ class UndoHandler(
       }
       Option(b, d, disc)
     } else this.next.handle(request)
+  }
 
 class LastHandler extends Handler:
   override val next: Handler = this
