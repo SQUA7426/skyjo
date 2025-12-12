@@ -21,9 +21,8 @@ import de.htwg.se.skyjo.util.ConcreteMediator
 class ControllerTest extends AnyWordSpec with Matchers {
   "A Controller" when:
     val med = new ConcreteMediator
-    val beginTemp = Board(med)
-    val b: Board = beginTemp._1
-    val d = beginTemp._2
+    val d = Deck(med)
+    val b: Board = new Board(med,2,2,fillBoard(med,2,2,d)._1.brd)
     val disc = DiscardPile(med, "Disc")
     val brdArr = Array(b)
     val ctrl = Controller(med, brdArr, d, disc)
@@ -57,7 +56,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
         ctrl.getReducedBrd(updatedBoard) shouldBe a[Board]
 
       "be unable to take a Card from the DiscardPile, when there's no Card" in:
-        val simulatedInput = "4\n0\n1\n1\nquit\n"
+        val simulatedInput = "4\n0\n1\n1\n1\n1\n1\n"
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
         Console.withIn(in) {
           val (bTakeDisc, dTakeDisc, discTakeDisc, end) =

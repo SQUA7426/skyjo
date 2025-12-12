@@ -42,9 +42,9 @@ class UndoCommand(
       println(s"UndoCommand executed command: ${command}")
       if (ctrl.mementostack.undoStack != null) {
         val mem: Memento = ctrl.mementostack.undoStack.pop()
-        return Option(ctrl.mementostack.undo(mem, d, b, disc))
+        Option(ctrl.mementostack.undo(mem, d, b, disc)).getOrElse(this.next.execute(cmd))
       }
-      Option(b, d, disc)
+      next.execute(cmd)
     } else this.next.execute(command)
 
 class RedoCommand(

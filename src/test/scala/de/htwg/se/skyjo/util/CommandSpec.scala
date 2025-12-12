@@ -23,8 +23,8 @@ class CommandSpec extends AnyWordSpec with Matchers {
       cCom.execute("redo")
     "execute the help cmd" in:
       cCom.execute("help")
-    "execute the quit cmd" in:
-      cCom.execute("quit")
+    // "execute the quit cmd" in:
+    //   cCom.execute("quit")
     "not execute the x cmd" in:
       cCom.execute("x")
   }

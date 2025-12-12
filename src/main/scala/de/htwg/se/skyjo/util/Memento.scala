@@ -29,12 +29,9 @@ class MoveCaretaker(val med: Mediator) {
   var memAct: Boolean = false
 
   def save(m: Memento): Unit = {
-    println("clearing undoStack...")
-    undoStack.clear()
-    println("saving...")
+    println("save")
     undoStack.push(m)
-    undoStack.foreach(println)
-    println()
+    println(undoStack)
     redoStack.clear()
   }
 
@@ -43,37 +40,37 @@ class MoveCaretaker(val med: Mediator) {
       deck: Deck,
       board: Board,
       disc: DiscardPile
-  ): (Board, Deck, DiscardPile) = {
-    val b = board.swapFromMem(memento.replacedCard, memento.boardIndex)
+  ): Option[(Board, Deck, DiscardPile)] = {
+    val newBoard = board.switch(memento.takenCard, memento.boardIndex)._2
     if (memento.fromDeck) {
-      val tempV: Vector[Card] = memento.takenCard +: deck.deck;
+      val tempV: Vector[Card] = memento.takenCard +: deck.deck
       updtDeck = new Deck(med, tempV, memento.takenCard.toString())
-      println(memento.toString())
-      println(b.toString())
+      redoStack.push(memento)
       setTrue()
-      (b, deck, memento.lastDisc)
+      Some((newBoard, updtDeck, disc))
     } else {
       disc.putToDiscardPile(memento.takenCard)
       redoStack.push(memento)
-      memento.lastDisc = DiscardPile(med, disc.putToDiscardPile(memento.takenCard).toString())
-      println(memento.toString())
       setTrue()
-      memento.lastDisc.isTurned = disc.isTurned
-      (board, deck, memento.lastDisc)
+      Some((newBoard, deck, disc))
     }
   }
-
-  def redo(memento: Memento, deck: Deck, board: Board, disc: DiscardPile) = {
+  def redo(
+      memento: Memento,
+      deck: Deck,
+      board: Board,
+      disc: DiscardPile
+  ): Option[(Board, Deck, DiscardPile)] = {
+    val newBoard: Board = board.switch(memento.takenCard, memento.boardIndex)._2
     if (memento.fromDeck) {
       updtDeck = new Deck(med, deck.deck.tail, memento.takenCard.toString())
-      board.switch(memento.takenCard, memento.boardIndex)
       setTrue()
+      Some((newBoard, updtDeck, disc))
     } else {
       disc.putToDiscardPile(memento.replacedCard)
-      board.switch(memento.takenCard, memento.boardIndex)
       setTrue()
+      Some((newBoard, deck, disc))
     }
-    (board, deck, disc)
   }
   def setTrue(): Unit = memAct = true
   def setFalse(): Unit = memAct = false
