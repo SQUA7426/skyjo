@@ -47,7 +47,7 @@ class MoveCaretaker(val med: Mediator) {
       updtDeck = new Deck(med, tempV, memento.takenCard.toString())
       redoStack.push(memento)
       setTrue()
-      Some((newBoard, updtDeck, disc))
+      Some(board, deck, memento.lastDisc)
     } else {
       disc.putToDiscardPile(memento.takenCard)
       redoStack.push(memento)

@@ -133,7 +133,12 @@ class Controller(
         println(dd.toString())
         println(b2.toString())
 
-        Some(b2, d2, dd)
+        disDeck = d2
+        discard = disc2
+        fromDeck = true
+        mementostack.save(Memento(fromDeck, d.getUpperCard(), c, getBoardCard(b, c), disc2))
+
+        Some(b2, d2, disc2)
       }
 
       case i if i != "2" && i != "1" => {
@@ -239,11 +244,7 @@ class Controller(
       round: Int = 1
   ): (Array[Board], Deck, DiscardPile) = {
 
-    var newd: Deck = deck
-    // if (mementostack.checkMemAct()) {
-    //   newd = mementostack.getNewDeck()
-    //   mementostack.setFalse()
-    // }
+    var newd : Deck = deck
 
     val (boardsAfter, deckAfter, discAfter, stopBetween) =
       if round == 1 then firstRound(numPlayers, plBoards, deck, disc)
