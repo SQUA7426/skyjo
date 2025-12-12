@@ -100,8 +100,9 @@ class Controller(val _mediator: Mediator, var disBoards: Array[Board], var disDe
 
         disDeck = d2
         discard = disc2
-        fromDeck = false
-        mementostack.save(Memento(fromDeck, d.getUpperCard(),c,getBoardCard(b,c),disc2))
+        fromDeck = true
+        mementostack.save(Memento(fromDeck, d.getUpperCard(), c, getBoardCard(b, c), disc2))
+
         (b2, d2, disc2)
       }
 
@@ -135,10 +136,6 @@ class Controller(val _mediator: Mediator, var disBoards: Array[Board], var disDe
       plBoards(i) = firstTurned.turnBoardCard(arr(1))
       curDeck = deckAfterFill
       mementostack.save(Memento(true,getBoardCard(plBoards(i),arr(0)).falseCopy(),arr(0),getBoardCard(plBoards(i),arr(0)).trueCopy(),disc))
-      if (mementostack.undoStack != Nil)
-          println(mementostack.undoStack.pop().takenCard.toString())
-      else
-          println("le whyt")
     for i <- 0 until numPlayers do
       tui.turnOfPlayer(i)
       // println(s"Player ${i}:")
