@@ -41,8 +41,8 @@ class UndoCommand(
     if command.compareTo(cmd) == 0 then {
       println(s"UndoCommand executed command: ${command}")
       if (ctrl.mementostack.undoStack != null) {
-        val mem: Memento = ctrl.mementostack.undoStack(1)
-        return Option(ctrl.mementostack.undo(mem, d, b, disc)).getOrElse(this.next.execute(cmd))
+        val mem: Memento = ctrl.mementostack.undoStack(0)
+        return Some(ctrl.mementostack.undo(mem, d, b, disc)).getOrElse(this.next.execute(cmd))
       }
       next.execute(cmd)
     } else this.next.execute(command)
@@ -59,7 +59,8 @@ class RedoCommand(
   override def execute(command: String): Option[(Board, Deck, DiscardPile)] =
     if command.compareTo(cmd) == 0 then {
       println(s"RedoCommand executed command: ${command}")
-      Option(b, d, disc)
+      val mem: Memento = ctrl.mementostack.redoStack(0)
+      return Some(ctrl.mementostack.redo(mem,d,b,disc)).getOrElse(next.execute(cmd))
     } else this.next.execute(command)
 
 class QuitCommand(

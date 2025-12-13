@@ -67,27 +67,37 @@ class Controller(
       notifyObservers
       tui.turn(b, d, disc)
     } else {
-      println(tui.inputRequest(b, disc.toString()))
+      println("In takeFromDisc")
+      tui.inputRequest(b, disc.toString())
       val c2 = readLine()
       val container =
         (for { i <- 0 until b.xSize * b.ySize } yield i.toString()).toVector
       if container.contains(c2) == true then
         fromDeck = false
-        val (disc2: DiscardPile, b2: Board) =
-          (b.switch(disc, c2.toInt): @unchecked)
-        // println(b2.toString())
-        // println(disc2.toString())
-        // mementostack.save(
-        //   Memento(
-        //     fromDeck,
-        //     d.getUpperCard(),
-        //     c2.toInt,
-        //     getBoardCard(b, c2.toInt),
-        //     disc2
-        //   )
-        // )
-        discard = disc2
-        Some(b2, d, disc2)
+        b.switch(disc, c2.toInt) match {
+          case (disc2: DiscardPile, b2: Board) => {
+
+            println("saving...")
+            mementostack.save(
+              Memento(
+                fromDeck,
+                d.getUpperCard(),
+                c2.toInt,
+                getBoardCard(b, c2.toInt),
+                disc2,
+                getBoardCard(b,c2.toInt).turned
+              )
+            )
+            discard = disc2
+            // println("In takeFromDisc\n")
+            // println(b2)
+            // println(d)
+            // println(disc2)
+            // println("returning Some\n")
+            return Some(b2, d, disc2)
+          }
+          case _ => None
+        }
       else notifyObservers; takeFromDisc(b, d, disc)
     }
   }
@@ -98,26 +108,36 @@ class Controller(
       disc: DiscardPile
   ): Option[(Board, Deck, DiscardPile)] = {
     fromDeck = true
-    val tempD: Deck = new Deck(_mediator,d.deck, d.turnUpperCard())
+    val tempD: Deck = new Deck(_mediator, d.deck, d.turnUpperCard())
     val c1 = readLine()
 
     c1 match {
       case "1" => {
+        println("In takeFromDeck 1")
         tui.inputRequest(b, tempD.getUpperCard().toString())
         val c = readInt()
-        // println("saving...")
-        // mementostack.save(
-        //   Memento(fromDeck, d.getUpperCard(), c, getBoardCard(b, c), disc)
-        // )
-        val disc2: DiscardPile = new DiscardPile(_mediator, getBoardCard(b, c).toString())
-        val (d2: Deck, b2:Board) = (b.switch(tempD, c): @unchecked)
+        println("saving...")
+        mementostack.save(
+          Memento(
+            fromDeck,
+            tempD.getUpperCard(),
+            c,
+            getBoardCard(b, c),
+            disc,
+            getBoardCard(b,c).turned
+          )
+        )
+        val disc2: DiscardPile =
+          new DiscardPile(_mediator, getBoardCard(b, c).toString())
+        val (d2: Deck, b2: Board) = (b.switch(tempD, c): @unchecked)
         notifyObservers
-        println(d2.toString())
-        println(b2.toString())
+        // println(d2.toString())
+        // println(b2.toString())
 
         Some(b2, d2, disc2)
       }
       case "2" => {
+        println("In takeFromDeck 2")
         val (disc2: DiscardPile, d2: Deck) = {
           notifyObservers
           (disc.putToDiscardPile(tempD): @unchecked)
@@ -125,18 +145,20 @@ class Controller(
         tui.cardTurnRq(b)
 
         val c = readInt()
-        val (dd:DiscardPile, b2:Board) = (b.switch(disc2, c): @unchecked)
+        val (dd: DiscardPile, b2: Board) = (b.switch(disc2, c): @unchecked)
         println("saving...")
-        // mementostack.save(
-        //   Memento(fromDeck, d.getUpperCard(), c, getBoardCard(b, c),disc2)
-        // )
-        println(dd.toString())
-        println(b2.toString())
+        mementostack.save(
+          Memento(fromDeck, d.getUpperCard(), c, getBoardCard(b, c), disc2, getBoardCard(b, c).turned)
+        )
+        // println(dd.toString())
+        // println(b2.toString())
 
         disDeck = d2
         discard = disc2
         fromDeck = true
-        mementostack.save(Memento(fromDeck, d.getUpperCard(), c, getBoardCard(b, c), disc2))
+        mementostack.save(
+          Memento(fromDeck, d.getUpperCard(), c, getBoardCard(b, c), disc2, getBoardCard(b, c).turned)
+        )
 
         Some(b2, d2, disc2)
       }
@@ -169,19 +191,20 @@ class Controller(
       val firstTurned: Board = beforeTurned.turnBoardCard(arr(0))
       plBoards(i) = firstTurned.turnBoardCard(arr(1))
       curDeck = deckAfterFill
-      // mementostack.save(
-      //   Memento(
-      //     true,
-      //     getBoardCard(plBoards(i), arr(0)).falseCopy(),
-      //     arr(0),
-      //     getBoardCard(plBoards(i), arr(0)).trueCopy(),
-      //     disc
-      //   )
-      // )
+      mementostack.save(
+        Memento(
+          true,
+          getBoardCard(plBoards(i), arr(0)).falseCopy(),
+          arr(0),
+          getBoardCard(plBoards(i), arr(0)).trueCopy(),
+          disc,
+          false
+        )
+      )
     for i <- 0 until numPlayers do
       tui.turnOfPlayer(i)
       // println(s"Player ${i}:")
-      tui.turn(plBoards(i), curDeck,curDisc) match {
+      tui.turn(plBoards(i), curDeck, curDisc) match {
         case Some(updatedBoard, deckAfterTurn, discAfterTurn) => {
           plBoards(i) = getReducedBrd(updatedBoard)
           curDeck = deckAfterTurn
@@ -215,7 +238,7 @@ class Controller(
     for i <- 0 until numPlayers do
       tui.turnOfPlayer(i)
       // println(s"Player ${i}:")
-      tui.turn(plBoards(i), curDeck,curDisc) match {
+      tui.turn(plBoards(i), curDeck, curDisc) match {
         case Some(updatedBoard, deckAfterTurn, discAfterTurn) => {
           plBoards(i) = getReducedBrd(updatedBoard)
           curDeck = deckAfterTurn
@@ -244,7 +267,7 @@ class Controller(
       round: Int = 1
   ): (Array[Board], Deck, DiscardPile) = {
 
-    var newd : Deck = deck
+    var newd: Deck = deck
 
     val (boardsAfter, deckAfter, discAfter, stopBetween) =
       if round == 1 then firstRound(numPlayers, plBoards, deck, disc)

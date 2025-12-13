@@ -49,13 +49,16 @@ class Tui(cont: Controller) {
     println("[help] Show help")
 
     val choose = readLine()
-    val h = SupportHandler(cont, b, d, disc)
-    val c = SupportCommand(cont, b, d, disc)
+    // val tempD: Deck = {if choose != "1" then d else new Deck(d._mediator, d.deck, d.getUpperCard().toString())}
+    val tempD = d
+    val h = SupportHandler(cont, b, tempD, disc)
+    val c = SupportCommand(cont, b, tempD, disc)
 
     val action: Try[Option[(Board, Deck, DiscardPile)]] = Try {
       choose match {
         case "0" | "1" | "2" | "undo" | "help" | "redo" | "quit" =>
-          if (choose == "1") inputRequestDeck(d.turnUpperCard().toString())
+          if (choose == "1")
+            inputRequestDeck(d.getUpperCard().toString())
           val return_H = h.handle(choose)
           if (return_H == None) c.execute(choose) else return_H
         case _ =>
