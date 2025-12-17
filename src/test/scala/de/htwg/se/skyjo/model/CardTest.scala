@@ -9,12 +9,18 @@ import de.htwg.se.skyjo.util.ConcreteMediator
 class CardTest extends AnyWordSpec with Matchers {
   "A Card" when {
     val med = new ConcreteMediator()
+
+    //------------------------- INACCEPTABLE CARDS --------------------------//
+
     "has the value -3" should:
       "not be acceptable as Card" in:
         val lowerCardErr = the [IllegalArgumentException] thrownBy(Card(med,-3))
     "has the value 20" should:
       "not be acceptable as Card" in:
         val highCardErr = the [IllegalArgumentException] thrownBy(Card(med,20))
+
+    //--------------------------- ACCEPTABLE CARDS ----------------------------//
+
     val betweenCard = Card(med,5)
     "has the value 11" should:
       val num: Int = 11
@@ -24,17 +30,26 @@ class CardTest extends AnyWordSpec with Matchers {
     "A Card with value 9" should:
       val num9: Int = 9
       val card9: Card = Card(med,num9)
+
+      //--------------------------- CONVERTING ----------------------------//
+
       "as string 9 be converted correctly" in:
         val n9 = "9"
         toCard(med,n9) shouldBe Card(med,9)
       "as int 9 be converted correctly" in:
         toCard(med,num9) shouldBe Card(med,9)
+      "not be acceptable from boolean" in:
+        val highCardErr = the [IllegalArgumentException] thrownBy(toCard(med,true))
+
+      //--------------------------- CARDCOPY ----------------------------------//
+
       "return # if a False Copy of it is created" in:
         card9.falseCopy().toString() should be ("#")
       "return the number if a True Copy of it is created" in:
         card9.trueCopy() shouldBe Card(med,9, true)
-      "not be acceptable from boolean" in:
-        val highCardErr = the [IllegalArgumentException] thrownBy(toCard(med,true))
+
+      //------------------------- OPERATORS ---------------------------//
+
       "it's digit length" in:
         len(card9.value) should (be (1) or be (2))
       "is from type: Card" in:

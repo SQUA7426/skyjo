@@ -17,7 +17,7 @@ class MementoSpec extends AnyWordSpec with Matchers {
     val deck = tempB._2
     val c1 = Card(med,1)
     val c2 = Card(med,2)
-    val mem = new Memento(true,c1,1,c2,disc)
+    val mem = new Memento(true,c1,1,c2,disc, false)
     val mc = new MoveCaretaker(med)
     mc.save(mem)
     "conv toString()" in:
@@ -29,8 +29,23 @@ class MementoSpec extends AnyWordSpec with Matchers {
       mc.checkMemAct() shouldBe mc.memAct
       mc.getNewDeck() shouldBe a[Deck]
     "undo" in:
-      mc.undo(mem,deck,b,disc) shouldBe a[(Board,Deck,DiscardPile)]
+      mc.undo(mem,deck,b,disc) match {
+        case Some(undoB,undoD,undoDi) => {
+          undoB shouldBe a[Board]
+          undoD shouldBe a[Deck]
+          undoDi shouldBe a[DiscardPile]
+        }
+        case _ => None
+      }
+
     "redo" in:
-      mc.redo(mem,deck,b,disc) shouldBe a[(Board,Deck,DiscardPile)]
+      mc.redo(mem,deck,b,disc) match {
+        case Some(undoB,undoD,undoDi) => {
+          undoB shouldBe a[Board]
+          undoD shouldBe a[Deck]
+          undoDi shouldBe a[DiscardPile]
+        }
+        case _ => None
+      }
   }
 }

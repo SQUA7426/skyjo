@@ -21,6 +21,9 @@ class BoardTest extends AnyWordSpec with Matchers {
     val bTemp = Board(med)
     val b = bTemp._1
     val d = bTemp._2
+
+    //--------------------------- INIT & FILL BOARD --------------------------//
+
     "initialized and not filled" should:
       "create a New filled Board even when filled with x=0 and y=0" in:
         fillBoard(med, 0, 0, new Deck(med, Vector(),"Deck"))._1 shouldBe a[Board]
@@ -29,26 +32,28 @@ class BoardTest extends AnyWordSpec with Matchers {
         val turnedDeck = new Deck(med, d.deck, d.turnUpperCard())
         val bTurnedUpperCard: Board = fillBoard(med, 4, 3, turnedDeck)._1
         bTurnedUpperCard shouldBe a[Board]
+
+      //--------------------------- TAKE FROM BOARD ----------------------------//
+
       "get a Card when gotten" in:
         val c: Card = getBoardCard(b, 0)
         c shouldBe a[Card]
       "get an IndexOutOfBoundsException when wrong idx gotten" in:
         val throwError =
           the[IndexOutOfBoundsException] thrownBy (getBoardCard(b, 20))
-      "be as String" in:
-        b.toString() shouldBe b.brd.flatten.toSeq.zipWithIndex.map {
-          case (aCard, idx) =>
-            if ((idx + 1) % 4 == 0)
-              ((" " * (2 - len(aCard.toString()))) + s"${aCard.toString()}\n")
-            else ((" " * (2 - len(aCard.toString()))) + s"${aCard.toString()}|")
-        }.mkString
       "when a BoardCard is turned (e.g. 3rd) return a Board" in:
         b.turnBoardCard(3) shouldBe a[Board]
+
+      //--------------------------- SWITCH /W BOARD ----------------------------//
+
       "return a new Deck when switched with DeckUpperCard" in:
         val d2: Deck = new Deck(med, d.deck, d.turnUpperCard())
         b.switch(d2, 3)._1 shouldBe a[Deck]
       "return a new DiscardPile when switched with the DiscardPile" in:
         val disc: DiscardPile = new DiscardPile(med, "Disc")
+
+      //--------------------------- REDUCE ----------------------------//
+
       "colCheck should return true" in:
         val secBrd: Board = new Board(
           med,
@@ -60,5 +65,15 @@ class BoardTest extends AnyWordSpec with Matchers {
           )
         )
         secBrd.reduce(-1, 1)._2 shouldBe true
+
+      //--------------------------- STRING  ----------------------------//
+
+      "be as String" in:
+        b.toString() shouldBe b.brd.flatten.toSeq.zipWithIndex.map {
+          case (aCard, idx) =>
+            if ((idx + 1) % 4 == 0)
+              ((" " * (2 - len(aCard.toString()))) + s"${aCard.toString()}\n")
+            else ((" " * (2 - len(aCard.toString()))) + s"${aCard.toString()}|")
+        }.mkString
   }
 }

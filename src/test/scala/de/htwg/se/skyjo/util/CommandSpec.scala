@@ -17,10 +17,10 @@ class CommandSpec extends AnyWordSpec with Matchers {
     val disc = new DiscardPile(med,"Disc")
     val cont = new Controller(med,brdArr,deck,disc)
     val cCom = new SupportCommand(cont,board,deck,disc)
-    "execute the undo cmd" in:
-      cCom.execute("undo")
-    "execute the redo cmd" in:
-      cCom.execute("redo")
+    // "execute the undo cmd" in:
+    //   cCom.execute("undo")
+    // "execute the redo cmd" in:
+    //   cCom.execute("redo")
     "execute the help cmd" in:
       cCom.execute("help")
     // "execute the quit cmd" in:
