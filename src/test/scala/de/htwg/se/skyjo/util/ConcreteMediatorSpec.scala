@@ -38,7 +38,7 @@ class ConcreteMediatorSpec extends AnyWordSpec with Matchers {
     val h:Handler = new DeckHandler(ctrl,b,deck,disc)
       "A Handler" should:
         // "handle things" in:
-        //   h.handle("2") shouldBe a[Option[(Board,Deck,DiscardPile)]]
+        //   h.handle("2") shouldBe a[Some[(Board,Deck,DiscardPile)]]
         "be unable to handle unrecognized requests" in:
           h.handle("x") shouldBe None
 }

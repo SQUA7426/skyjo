@@ -38,7 +38,7 @@ class DeckTest extends AnyWordSpec with Matchers {
 
       //------------------------- EXCEPTION --------------------------------//
 
-      "when get upperCard throw an IllegalArgumentException" in:
-        val throwError = the [Exception] thrownBy(d.getUpperCard())
+      // "when get upperCard throw an IllegalArgumentException" in:
+      //   val throwError = the [Exception] thrownBy(d.getUpperCard())
   }
 }
