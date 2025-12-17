@@ -1,7 +1,7 @@
 package de.htwg.se.skyjo.controller.ControllerComponent
 
 import de.htwg.se.skyjo.model.{Board, Card, Deck, DiscardPile, fillBoard, fullDeck, getBoardCard}
-import de.htwg.se.skyjo.aView.Tui
+import de.htwg.se.skyjo.aView.{Tui}
 import de.htwg.se.skyjo.controller.ControllerComponent._
 import de.htwg.se.skyjo.util.{Observable,Mediator,Memento, MoveCaretaker}
 
@@ -210,3 +210,4 @@ class Controller(val _mediator: Mediator, var disBoards: Array[Board], var disDe
     notifyObservers
     b.brd.forall(row => row.forall(c => c.isTurned() == true))
 }
+

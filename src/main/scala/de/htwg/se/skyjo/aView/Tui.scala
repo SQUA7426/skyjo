@@ -29,6 +29,7 @@ class Tui(cont: Controller) {
   def finishedConf() = (
     println(s"someone is finished: \n")
     )
+  def processInput(i:Int): Unit = ()
 
   def turn(
             b: Board,
