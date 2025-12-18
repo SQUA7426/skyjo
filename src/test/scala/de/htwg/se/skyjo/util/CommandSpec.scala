@@ -30,42 +30,45 @@ class CommandSpec extends AnyWordSpec with Matchers {
 
     val cCom = new SupportCommand(cont, cont.disBoards(0), deck, disc)
     // ---------------------INPUT -----------------------------------------//
-    //GEHT
+    // GEHT
     "execute the undo cmd" in {
-      // val twoTimesTwoPlBoards = Array(fillBoard(med, 2, 2, deck)._1)
       val simulatedInput = "1\n1\n3\n1\n1\n2\nundo\n1\n1\n1\n1\n1\n0\n"
       val in = new ByteArrayInputStream(simulatedInput.getBytes())
       Console.withIn(in) {
         val gl = cont.gameLoop(1, twoTimesTwoPlBoards, deck, disc)
       }
     }
-    //GEHT
-    "execute the redo cmd" in {
-    //   val twoTimesTwoPlBoards = Array(fillBoard(med, 2, 2, deck)._1)
-      val simulatedInput = "1\n1\n3\n0\n2\nredo\n1\n1\n1\n1\n1\n0\n"
-      val in = new ByteArrayInputStream(simulatedInput.getBytes())
-      Console.withIn(in) {
-        val gl = cont.gameLoop(1, twoTimesTwoPlBoards, deck, disc,2)
-      }
-    }
     "execute the undo cmd2" in {
-      // val twoTimesTwoPlBoards = Array(fillBoard(med, 2, 2, deck)._1)
       val simulatedInput = "1\n1\n3\n0\n2\nundo\n1\n1\n1\n1\n1\n0\n"
       val in = new ByteArrayInputStream(simulatedInput.getBytes())
       Console.withIn(in) {
-        val gl = cont.gameLoop(1, twoTimesTwoPlBoards, deck, disc,2)
+        val gl = cont.gameLoop(1, twoTimesTwoPlBoards, deck, disc, 2)
       }
     }
-    //GEHT
+    "execute the redo cmd" in {
+      val simulatedInput = "1\n1\n3\n0\n2\nredo\n1\n1\n1\n1\n1\n0\n"
+      val in = new ByteArrayInputStream(simulatedInput.getBytes())
+      Console.withIn(in) {
+        val gl = cont.gameLoop(1, twoTimesTwoPlBoards, deck, disc, 2)
+      }
+    }
     "execute the redo cmd2" in {
-    //   val twoTimesTwoPlBoards = Array(fillBoard(med, 2, 2, deck)._1)
       val simulatedInput = "1\n1\n3\n1\n1\n2\nredo\n1\n1\n1\n1\n1\n0\n"
       val in = new ByteArrayInputStream(simulatedInput.getBytes())
       Console.withIn(in) {
-        val gl = cont.gameLoop(1, twoTimesTwoPlBoards, deck, disc,2)
+        val gl = cont.gameLoop(1, twoTimesTwoPlBoards, deck, disc, 2)
       }
     }
-
+    "check if redostack is empty in cmd" in:
+      val anotherSupCom =
+        new SupportCommand(cont, cont.disBoards(0), deck, disc)
+      if (!anotherSupCom.ctrl.mementostack.redoStack.isEmpty) {
+        val simInput = "1\n1\n1\n1\n1\n0\n"
+        val intoIn = new ByteArrayInputStream(simInput.getBytes())
+        Console.withIn(intoIn) {
+          anotherSupCom.execute("redo")
+        }
+      }
 
     "execute the help cmd" in:
       cCom.execute("help")
