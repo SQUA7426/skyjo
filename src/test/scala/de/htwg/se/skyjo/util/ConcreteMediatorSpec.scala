@@ -38,6 +38,13 @@ class ConcreteMediatorSpec extends AnyWordSpec with Matchers {
     val ctrl = new Controller(med, plBoards, deck, disc)
     val h: Handler = new DeckHandler(ctrl, b, deck, disc)
     "A Handler" should:
+      "handle input 1" in {
+        val simulatedInput = "1\n1\n0\n"
+        val in = new ByteArrayInputStream(simulatedInput.getBytes())
+        Console.withIn(in) {
+          h.handle("1")
+        }
+      }
       "handle input 2" in {
         val twoTimesTwoPlBoards = Array(fillBoard(med, 2, 2, deck)._1)
         val simulatedInput = "1\n1\n3\n1\n1\n2\n1\n1\n2\n1\n1\n1\n1\n1\n0\n"
