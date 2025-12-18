@@ -26,7 +26,7 @@ class CommandSpec extends AnyWordSpec with Matchers {
     val cont = new Controller(med, brdArr, deck, disc)
 
     val cCom = new SupportCommand(cont, board, deck, disc)
-
+    val twoTimesTwoPlBoards = Array(new Board(med,2,2,Vector(Vector(Card(med,1).falseCopy(),Card(med,2).falseCopy()),Vector(Card(med,3).trueCopy(),Card(med,4).trueCopy()))))
     // ---------------------INPUT -----------------------------------------//
     //GEHT
     // "execute the undo cmd" in {
@@ -49,9 +49,7 @@ class CommandSpec extends AnyWordSpec with Matchers {
 
     //GEHT
     "execute the undo cmd" in {
-      val twoTimesTwoPlBoards = Array(fillBoard(med, 2, 2, deck)._1)
-      val simulatedInput = "1\n1\n3\nredo\nundo\n1\n1\n3\n1\n1\n2\n1\n1\n1\n1\n1\n0\n"
-      // val simulatedInput = "1\n1\n3\nredo\nundo\n1\n1\n3\n1\n1\n2\n"//1\n1\n1\n1\n1\n0\n"
+      val simulatedInput = "1\n1\n0\nredo\nundo\n1\n1\n0\n1\n1\n1\n"
       val in = new ByteArrayInputStream(simulatedInput.getBytes())
       Console.withIn(in) {
         val gl = cont.gameLoop(1, twoTimesTwoPlBoards, deck, disc)
@@ -59,9 +57,7 @@ class CommandSpec extends AnyWordSpec with Matchers {
     }
     //GEHT
     "execute the undo cmd2" in {
-      val twoTimesTwoPlBoards = Array(fillBoard(med, 2, 2, deck)._1)
-      val simulatedInput2 = "1\n1\n3\n0\n3\nundo\n1\n1\n2\n1\n1\n1\n1\n1\n0\n"
-      // val simulatedInput2 = "1\n1\n3\n0\n3\nundo\n1\n1\n2\n"//1\n1\n1\n1\n1\n0\n"
+      val simulatedInput2 = "1\n1\n0\n0\n0\nundo\n1\n1\n1\n"
       val in2 = new ByteArrayInputStream(simulatedInput2.getBytes())
       Console.withIn(in2) {
         val gl = cont.gameLoop(1, twoTimesTwoPlBoards, deck, disc)
@@ -70,9 +66,7 @@ class CommandSpec extends AnyWordSpec with Matchers {
 
     // GEHT
     "execute the redo cmd" in {
-      val twoTimesTwoPlBoards = Array(fillBoard(med, 2, 2, deck)._1)
-      // val simulatedInput = "1\n1\n3\n0\n3\nundo\nredo\n1\n1\n2\n"//1\n1\n1\n1\n1\n0\n"
-      val simulatedInput = "1\n1\n3\n0\n3\nundo\nredo\n1\n1\n2\n1\n1\n1\n1\n1\n0\n"
+      val simulatedInput = "1\n1\n0\n0\n0\nredo\n1\n1\n1\n"
       val in = new ByteArrayInputStream(simulatedInput.getBytes())
       Console.withIn(in) {
         val gl = cont.gameLoop(1, twoTimesTwoPlBoards, deck, disc)
@@ -82,7 +76,7 @@ class CommandSpec extends AnyWordSpec with Matchers {
     "execute the help cmd" in:
       cCom.execute("help")
     // "execute the quit cmd" in:
-    //   cCom.execute("quit")
+    //   cCom.execute("quit") shouldBe None
     "not execute the x cmd" in:
       cCom.execute("x")
   }

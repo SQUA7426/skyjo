@@ -41,10 +41,9 @@ class UndoCommand(
       println(s"UndoCommand executed command: ${command}")
       if (ctrl.mementostack.undoStack != null) {
         val mem: Memento = ctrl.mementostack.undoStack(0)
-        return Some(ctrl.mementostack.undo(mem, d, b, disc))
+        Some(ctrl.mementostack.undo(mem, d, b, disc))
           .getOrElse(this.next.execute(cmd))
-      }
-      next.execute(cmd)
+      } else next.execute(cmd)
     } else this.next.execute(command)
 
 class RedoCommand(
@@ -61,10 +60,9 @@ class RedoCommand(
       println(s"RedoCommand executed command: ${command}")
       if (!ctrl.mementostack.redoStack.isEmpty) {
         val mem: Memento = ctrl.mementostack.redoStack(0)
-        return Some(ctrl.mementostack.redo(mem, d, b, disc))
+        Some(ctrl.mementostack.redo(mem, d, b, disc))
           .getOrElse(next.execute(cmd))
-      }
-      next.execute(cmd)
+      } else next.execute(cmd)
     } else this.next.execute(command)
 
 class QuitCommand(
