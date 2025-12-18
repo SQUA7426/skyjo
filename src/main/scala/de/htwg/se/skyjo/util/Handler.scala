@@ -15,9 +15,10 @@ class DiscHandler(ctrl: Controller, b: Board, d: Deck, disc: DiscardPile) extend
 
 class DeckHandler(ctrl: Controller, b: Board, d: Deck, disc: DiscardPile) extends Handler:
   override val next: Handler = UndoHandler(ctrl, b, d, disc)
-  override def handle(request: String): Option[(Board, Deck, DiscardPile)] =
+  override def handle(request: String): Option[(Board, Deck, DiscardPile)] = {
     if request == "1" then ctrl.takeFromDeck(b, d, disc).orElse(next.handle(request))
     else next.handle(request)
+  }
 
 class UndoHandler(
     ctrl: Controller,
@@ -33,9 +34,8 @@ class UndoHandler(
       println(s"UndoHandler handled request: ${request}")
       if (ctrl.mementostack.undoStack != null) {
         val mem: Memento = ctrl.mementostack.undoStack.pop()
-        return Option(ctrl.mementostack.undo(mem, d, b, disc)).getOrElse(Option(b,d,disc))
-      }
-      Option(b, d, disc)
+        Some(ctrl.mementostack.undo(mem, d, b, disc)).getOrElse(Option(b,d,disc))
+      } else Some(b, d, disc)
     } else this.next.handle(request)
   }
 
