@@ -28,7 +28,7 @@ class MementoSpec extends AnyWordSpec with Matchers {
       mc.toString() shouldBe a[String]
       mc.checkMemAct() shouldBe mc.memAct
       mc.getNewDeck() shouldBe a[Deck]
-    "undo" in:
+    "undo1" in:
       mc.undo(mem,deck,b,disc) match {
         case Some(undoB,undoD,undoDi) => {
           undoB shouldBe a[Board]
@@ -38,8 +38,29 @@ class MementoSpec extends AnyWordSpec with Matchers {
         case _ => None
       }
 
-    "redo" in:
+    "redo1" in:
       mc.redo(mem,deck,b,disc) match {
+        case Some(undoB,undoD,undoDi) => {
+          undoB shouldBe a[Board]
+          undoD shouldBe a[Deck]
+          undoDi shouldBe a[DiscardPile]
+        }
+        case _ => None
+      }
+    val mem2 = new Memento(false,c1,1,c2,disc, false)
+    mc.save(mem2)
+    "undo2" in:
+      mc.undo(mem2,deck,b,disc) match {
+        case Some(undoB,undoD,undoDi) => {
+          undoB shouldBe a[Board]
+          undoD shouldBe a[Deck]
+          undoDi shouldBe a[DiscardPile]
+        }
+        case _ => None
+      }
+
+    "redo2" in:
+      mc.redo(mem2,deck,b,disc) match {
         case Some(undoB,undoD,undoDi) => {
           undoB shouldBe a[Board]
           undoD shouldBe a[Deck]
