@@ -57,7 +57,8 @@ class MoveCaretaker(val med: Mediator) {
       println(undoStack)
       Some(newBoard, deck, memento.lastDisc)
     } else {    // DiscardPile
-      val disc2:DiscardPile = disc.putToDiscardPile(memento.takenCard)._1
+      val disc2:DiscardPile = disc.putToDiscardPile(memento.takenCard.toString())._1
+      updtDeck = disc.putToDiscardPile(memento.takenCard.toString())._2
       redoStack.push(memento)
       setTrue()
       println("clearing undoStack...")
@@ -65,7 +66,7 @@ class MoveCaretaker(val med: Mediator) {
       println("saving...")
       undoStack.push(memento)
       println(undoStack)
-      Some(newBoard, deck, disc2)
+      Some(newBoard, updtDeck, disc2)
     }
   }
   def redo(
@@ -81,8 +82,8 @@ class MoveCaretaker(val med: Mediator) {
       redoStack.clear()
       Some((newBoard, updtDeck, disc))
     } else {          // FROM DISCARDPILE
-      val disc2: DiscardPile = disc.putToDiscardPile(memento.replacedCard)._1
-      val updtDeck = disc.putToDiscardPile(memento.replacedCard)._2
+      val disc2: DiscardPile = disc.putToDiscardPile(memento.replacedCard.toString())._1
+      val updtDeck = disc.putToDiscardPile(memento.replacedCard.toString())._2
       setTrue()
       redoStack.clear()
       Some((newBoard, updtDeck, disc2))

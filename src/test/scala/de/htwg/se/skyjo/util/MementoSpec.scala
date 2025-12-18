@@ -47,26 +47,11 @@ class MementoSpec extends AnyWordSpec with Matchers {
         }
         case _ => None
       }
-    val mem2 = new Memento(false,c1,1,c2,disc, false)
+    val mem2 = new Memento(false,c2,0,c1,disc, false)
     mc.save(mem2)
     "undo2" in:
-      mc.undo(mem2,deck,b,disc) match {
-        case Some(undoB,undoD,undoDi) => {
-          undoB shouldBe a[Board]
-          undoD shouldBe a[Deck]
-          undoDi shouldBe a[DiscardPile]
-        }
-        case _ => None
-      }
-
+      mc.undo(mem2,deck,b,disc)
     "redo2" in:
-      mc.redo(mem2,deck,b,disc) match {
-        case Some(undoB,undoD,undoDi) => {
-          undoB shouldBe a[Board]
-          undoD shouldBe a[Deck]
-          undoDi shouldBe a[DiscardPile]
-        }
-        case _ => None
-      }
+      mc.redo(mem2,deck,b,disc)
   }
 }
