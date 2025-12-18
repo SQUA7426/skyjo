@@ -60,7 +60,7 @@ class Tui(cont: Controller) {
           if (choose == "1")
             inputRequestDeck(d.getUpperCard().toString())
           val return_H = h.handle(choose)
-          if (return_H == None) c.execute(choose) else return_H
+          if (return_H == None) then c.execute(choose) else return_H
         case _ =>
           throw new IllegalArgumentException(s"$choose is not valid, doing nothing.")
       }

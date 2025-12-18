@@ -85,7 +85,7 @@ class MoveCaretaker(val med: Mediator) {
       val updtDeck = disc.putToDiscardPile(memento.replacedCard)._2
       setTrue()
       redoStack.clear()
-      Some((newBoard, deck, disc2))
+      Some((newBoard, updtDeck, disc2))
     }
   }
   def setTrue(): Unit = memAct = true

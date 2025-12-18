@@ -28,18 +28,51 @@ class CommandSpec extends AnyWordSpec with Matchers {
     val cCom = new SupportCommand(cont, board, deck, disc)
 
     // ---------------------INPUT -----------------------------------------//
+    //GEHT
+    // "execute the undo cmd" in {
+    //   val twoTimesTwoPlBoards = Array(fillBoard(med, 2, 2, deck)._1)
+    //   val simulatedInput = "1\n1\n3\n1\n1\n2\nundo\n1\n1\n1\n1\n1\n0\n"
+    //   val in = new ByteArrayInputStream(simulatedInput.getBytes())
+    //   Console.withIn(in) {
+    //     val gl = cont.gameLoop(1, twoTimesTwoPlBoards, deck, disc)
+    //   }
+    // }
+    //GEHT
+    // "execute the redo cmd" in {
+    //   val twoTimesTwoPlBoards = Array(fillBoard(med, 2, 2, deck)._1)
+    //   val simulatedInput = "1\n1\n3\n0\n2\nredo\n1\n1\n1\n1\n1\n0\n"
+    //   val in = new ByteArrayInputStream(simulatedInput.getBytes())
+    //   Console.withIn(in) {
+    //     val gl = cont.gameLoop(1, twoTimesTwoPlBoards, deck, disc)
+    //   }
+    // }
 
+    //GEHT
     "execute the undo cmd" in {
       val twoTimesTwoPlBoards = Array(fillBoard(med, 2, 2, deck)._1)
-      val simulatedInput = "1\n1\n3\n1\n1\n2\nundo\n1\n1\n1\n1\n1\n0\n"
+      val simulatedInput = "1\n1\n3\nredo\nundo\n1\n1\n3\n1\n1\n2\n1\n1\n1\n1\n1\n0\n"
+      // val simulatedInput = "1\n1\n3\nredo\nundo\n1\n1\n3\n1\n1\n2\n"//1\n1\n1\n1\n1\n0\n"
       val in = new ByteArrayInputStream(simulatedInput.getBytes())
       Console.withIn(in) {
         val gl = cont.gameLoop(1, twoTimesTwoPlBoards, deck, disc)
       }
     }
+    //GEHT
+    "execute the undo cmd2" in {
+      val twoTimesTwoPlBoards = Array(fillBoard(med, 2, 2, deck)._1)
+      val simulatedInput2 = "1\n1\n3\n0\n3\nundo\n1\n1\n2\n1\n1\n1\n1\n1\n0\n"
+      // val simulatedInput2 = "1\n1\n3\n0\n3\nundo\n1\n1\n2\n"//1\n1\n1\n1\n1\n0\n"
+      val in2 = new ByteArrayInputStream(simulatedInput2.getBytes())
+      Console.withIn(in2) {
+        val gl = cont.gameLoop(1, twoTimesTwoPlBoards, deck, disc)
+      }
+    }
+
+    // GEHT
     "execute the redo cmd" in {
       val twoTimesTwoPlBoards = Array(fillBoard(med, 2, 2, deck)._1)
-      val simulatedInput = "1\n1\n3\n0\n2\nundo\nredo\n1\n1\n1\n1\n1\n0\n"
+      // val simulatedInput = "1\n1\n3\n0\n3\nundo\nredo\n1\n1\n2\n"//1\n1\n1\n1\n1\n0\n"
+      val simulatedInput = "1\n1\n3\n0\n3\nundo\nredo\n1\n1\n2\n1\n1\n1\n1\n1\n0\n"
       val in = new ByteArrayInputStream(simulatedInput.getBytes())
       Console.withIn(in) {
         val gl = cont.gameLoop(1, twoTimesTwoPlBoards, deck, disc)
