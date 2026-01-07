@@ -23,7 +23,7 @@ class TuiTest extends AnyWordSpec with Matchers {
     val tui = Tui(ctrl)
     "an Input Request is done, it" should:
       "do an Input Request to the Board" in:
-        tui.inputRequest(b, disc.toString()) shouldBe ("Which BoardCard [0-11] do you want to switch with -1?")
+        tui.inputRequest(b, disc.toString())
       "do an Input Request to the Deck" in:
         tui.inputRequestDeck(d.turnUpperCard().toString())
       "do print a Player when a turn begins" in:

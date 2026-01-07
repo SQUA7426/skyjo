@@ -7,7 +7,7 @@ def len(x: Any): Int = x.toString().size
 case class Card(
     val _mediator: Mediator,
     val value: Int,
-    val turned: Boolean
+    var turned: Boolean
 ) extends Colleague {
   override def receive(msg: String): Boolean = {
     msg match
@@ -23,6 +23,8 @@ case class Card(
   def falseCopy(): Card = new Card(_mediator, value, false)
 
   def trueCopy(): Card = new Card(_mediator, value, true)
+
+  def turn(): Unit = { turned = !turned }
 
   override def toString(): String = if turned then s"${value}" else "#"
 }

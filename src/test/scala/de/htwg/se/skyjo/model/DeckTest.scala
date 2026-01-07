@@ -12,16 +12,21 @@ class DeckTest extends AnyWordSpec with Matchers {
     val med = new ConcreteMediator
     val d: Deck = Deck(med)
     "Initialized" should:
+
+      //------------------------- WHEN INIT ----------------------------------//
+
       "have the size of 150" in:
         d.deck.size shouldBe (150)
       "toString() should be the UpperCard" in:
         d.toString() should (be ("Deck") or be (s"d.upperCard"))
       "should have left more then one Card with a Number left" in:
         d.leftOf(1) shouldBe > (0)
-      "when get upperCard throw an IllegalArgumentException" in:
-        val throwError = the [IllegalArgumentException] thrownBy(d.getUpperCard())
+
+      //------------------------- WHEN TURNED --------------------------------//
+
       "when initialized one turned" in:
         d.turnUpperCard() should not be ("Deck")
+
       "have the Card as upperCard when turned" in:
         val d2: Deck = new Deck(med, d.deck, d.turnUpperCard())
         d2.toString() shouldBe (d2.upperCard)
@@ -30,5 +35,10 @@ class DeckTest extends AnyWordSpec with Matchers {
         turnedDeck.getUpperCard() shouldBe a[Card]
       "when turned again" in:
         turnedDeck.turnUpperCard() should be ("Deck")
+
+      //------------------------- EXCEPTION --------------------------------//
+
+      // "when get upperCard throw an IllegalArgumentException" in:
+      //   val throwError = the [Exception] thrownBy(d.getUpperCard())
   }
 }

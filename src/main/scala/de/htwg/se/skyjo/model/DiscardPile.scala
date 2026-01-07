@@ -27,6 +27,12 @@ class DiscardPile(
           new Deck(_mediator, d.remove(1), "Deck")
         )
       }
+      case s:String => {
+        (
+          new DiscardPile(_mediator, s),
+          new Deck(_mediator, Deck(_mediator).remove(1), s)
+        )
+      }
     }
   }
 }

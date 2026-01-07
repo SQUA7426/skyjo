@@ -26,6 +26,22 @@ coverageMinimumStmtPerFile := 100
 coverageMinimumBranchPerFile := 100
 coverageExcludedPackages := ".*Main.*"
 
+// --------------------- SCALAFX CONF ---------------------------------------//
+
+val javaFxVersion = "21"
+
+libraryDependencies ++= {
+  lazy val osName = System.getProperty("os.name") match {
+    case n if n.startsWith("Linux")   => "linux"
+    case n if n.startsWith("Mac")     => "mac"
+    case n if n.startsWith("Windows") => "win"
+    case _                            => throw new Exception("Unknown platform!")
+  }
+
+  Seq("base", "controls", "fxml", "graphics", "media", "swing", "web")
+    .map(m => "org.openjfx" % s"javafx-$m" % javaFxVersion classifier osName)
+}
+
 lazy val root = (project in file("."))
   .settings(
     name := "skyjo"

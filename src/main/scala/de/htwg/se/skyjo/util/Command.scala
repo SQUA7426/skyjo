@@ -1,11 +1,11 @@
 package de.htwg.se.skyjo.util
-import de.htwg.se.skyjo.model.{Board,Deck,DiscardPile}
+import de.htwg.se.skyjo.model.{Board, Deck, DiscardPile}
 import de.htwg.se.skyjo.controller.ControllerComponent.Controller
 
 trait Command:
   val cmd: String
   val next: Command
-  def execute(command: String):Option[(Board,Deck,DiscardPile)]
+  def execute(command: String): Option[(Board, Deck, DiscardPile)]
 
 class HelpCommand(
     ctrl: Controller,
@@ -14,7 +14,7 @@ class HelpCommand(
     val disc: DiscardPile
 ) extends Command:
   override val cmd: String = "help"
-  override val next: Command = UndoCommand(ctrl,b,d,disc)
+  override val next: Command = UndoCommand(ctrl, b, d, disc)
 
   override def execute(command: String): Option[(Board, Deck, DiscardPile)] =
     if command.compareTo(cmd) == 0 then {
@@ -27,7 +27,6 @@ class HelpCommand(
       None
     } else this.next.execute(command)
 
-
 class UndoCommand(
     ctrl: Controller,
     val b: Board,
@@ -35,16 +34,16 @@ class UndoCommand(
     val disc: DiscardPile
 ) extends Command:
   override val cmd: String = "undo"
-  override val next: Command = RedoCommand(ctrl,b,d,disc)
+  override val next: Command = RedoCommand(ctrl, b, d, disc)
 
   override def execute(command: String): Option[(Board, Deck, DiscardPile)] =
     if command.compareTo(cmd) == 0 then {
       println(s"UndoCommand executed command: ${command}")
       if (ctrl.mementostack.undoStack != null) {
-        val mem: Memento = ctrl.mementostack.undoStack(1)
-        return Option(ctrl.mementostack.undo(mem, d, b, disc))
-      }
-      Option(b, d, disc)
+        val mem: Memento = ctrl.mementostack.undoStack(0)
+        Some(ctrl.mementostack.undo(mem, d, b, disc))
+          .getOrElse(this.next.execute(cmd))
+      } else next.execute(cmd)
     } else this.next.execute(command)
 
 class RedoCommand(
@@ -54,12 +53,16 @@ class RedoCommand(
     val disc: DiscardPile
 ) extends Command:
   override val cmd: String = "redo"
-  override val next: Command = QuitCommand(ctrl,b,d,disc)
+  override val next: Command = QuitCommand(ctrl, b, d, disc)
 
   override def execute(command: String): Option[(Board, Deck, DiscardPile)] =
     if command.compareTo(cmd) == 0 then {
       println(s"RedoCommand executed command: ${command}")
-      Option(b, d, disc)
+      if (!ctrl.mementostack.redoStack.isEmpty) {
+        val mem: Memento = ctrl.mementostack.redoStack(0)
+        Some(ctrl.mementostack.redo(mem, d, b, disc))
+          .getOrElse(next.execute(cmd))
+      } else next.execute(cmd)
     } else this.next.execute(command)
 
 class QuitCommand(

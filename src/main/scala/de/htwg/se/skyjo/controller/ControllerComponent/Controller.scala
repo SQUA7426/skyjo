@@ -1,9 +1,17 @@
 package de.htwg.se.skyjo.controller.ControllerComponent
 
-import de.htwg.se.skyjo.model.{Board, Card, Deck, DiscardPile, fillBoard, fullDeck, getBoardCard}
-import de.htwg.se.skyjo.aView.{Tui}
+import de.htwg.se.skyjo.model.{
+  Board,
+  Card,
+  Deck,
+  DiscardPile,
+  fillBoard,
+  fullDeck,
+  getBoardCard
+}
+import de.htwg.se.skyjo.aView.Tui
 import de.htwg.se.skyjo.controller.ControllerComponent._
-import de.htwg.se.skyjo.util.{Observable,Mediator,Memento, MoveCaretaker}
+import de.htwg.se.skyjo.util.{Observable, Mediator, Memento, MoveCaretaker}
 
 import scala.io.StdIn.{readInt, readLine}
 import scala.util.Random
@@ -21,11 +29,16 @@ import scala.util.Random
 //   case LightGreen extends Color("\u001b[92m")
 // }
 
-class Controller(val _mediator: Mediator, var disBoards: Array[Board], var disDeck: Deck, var discard: DiscardPile) extends Observable {
+class Controller(
+    val _mediator: Mediator,
+    var disBoards: Array[Board],
+    var disDeck: Deck,
+    var discard: DiscardPile
+) extends Observable {
   val tui = new Tui(this)
 
-  private var fromDeck : Boolean = false
-  var mementostack : MoveCaretaker = new MoveCaretaker(_mediator)
+  private var fromDeck: Boolean = false
+  var mementostack: MoveCaretaker = new MoveCaretaker(_mediator)
 
   def getReducedBrd(updatedBoard: Board): Board = {
     val reducedBoards: Array[(Board, Boolean)] = new Array(
@@ -50,17 +63,41 @@ class Controller(val _mediator: Mediator, var disBoards: Array[Board], var disDe
       d: Deck,
       disc: DiscardPile
   ): Option[(Board, Deck, DiscardPile)] = {
-    if (disc.toString() == "Disc") { notifyObservers; tui.turn(b, d, disc)}
-    else {
-      println(tui.inputRequest(b, disc.toString()))
+    if (disc.toString() == "Disc") {
+      notifyObservers
+      tui.turn(b, d, disc)
+    } else {
+      println("In takeFromDisc")
+      tui.inputRequest(b, disc.toString())
       val c2 = readLine()
-      val container = (for{i <- 0 until b.xSize*b.ySize} yield i.toString()).toVector
-      if container.contains(c2)==true then
-          fromDeck = false
-          val (disc2: DiscardPile, b2) = (b.switch(disc, c2.toInt): @unchecked)
-          mementostack.save(Memento(fromDeck, d.getUpperCard(), c2.toInt, getBoardCard(b, c2.toInt),disc2))
-          discard = disc2
-          return Option(b2, d, disc2)
+      val container =
+        (for { i <- 0 until b.xSize * b.ySize } yield i.toString()).toVector
+      if container.contains(c2) == true then
+        fromDeck = false
+        b.switch(disc, c2.toInt) match {
+          case (disc2: DiscardPile, b2: Board) => {
+
+            println("saving...")
+            mementostack.save(
+              Memento(
+                fromDeck,
+                d.getUpperCard(),
+                c2.toInt,
+                getBoardCard(b, c2.toInt),
+                disc2,
+                getBoardCard(b,c2.toInt).turned
+              )
+            )
+            discard = disc2
+            // println("In takeFromDisc\n")
+            // println(b2)
+            // println(d)
+            // println(disc2)
+            // println("returning Some\n")
+            return Some(b2, d, disc2)
+          }
+          case _ => None
+        }
       else notifyObservers; takeFromDisc(b, d, disc)
     }
   }
@@ -69,50 +106,69 @@ class Controller(val _mediator: Mediator, var disBoards: Array[Board], var disDe
       b: Board,
       d: Deck,
       disc: DiscardPile
-  ): (Board, Deck, DiscardPile) = {
-
-    val tempD: Deck = new Deck(_mediator,d.deck, d.turnUpperCard())
+  ): Option[(Board, Deck, DiscardPile)] = {
     fromDeck = true
+    val tempD: Deck = new Deck(_mediator, d.deck, d.turnUpperCard())
     val c1 = readLine()
 
     c1 match {
       case "1" => {
-        fromDeck = true
+        println("In takeFromDeck 1")
         tui.inputRequest(b, tempD.getUpperCard().toString())
         val c = readInt()
-        val disc2: DiscardPile = new DiscardPile(_mediator,getBoardCard(b, c).toString())
-        mementostack.save(Memento(fromDeck, d.getUpperCard(), c, getBoardCard(b, c),disc2))
-        val (d2: Deck, b2) = (b.switch(tempD, c): @unchecked)
+        println("saving...")
+        mementostack.save(
+          Memento(
+            fromDeck,
+            tempD.getUpperCard(),
+            c,
+            getBoardCard(b, c),
+            disc,
+            getBoardCard(b,c).turned
+          )
+        )
+        val disc2: DiscardPile =
+          new DiscardPile(_mediator, getBoardCard(b, c).toString())
+        val (d2: Deck, b2: Board) = (b.switch(tempD, c): @unchecked)
         notifyObservers
+        // println(d2.toString())
+        // println(b2.toString())
 
-        (b2, d2, disc2)
+        Some(b2, d2, disc2)
       }
       case "2" => {
+        println("In takeFromDeck 2")
         val (disc2: DiscardPile, d2: Deck) = {
           notifyObservers
-
           (disc.putToDiscardPile(tempD): @unchecked)
         }
         tui.cardTurnRq(b)
 
         val c = readInt()
-        val (dd, b2) = b.switch(disc2, c)
+        val (dd: DiscardPile, b2: Board) = (b.switch(disc2, c): @unchecked)
+        println("saving...")
+        mementostack.save(
+          Memento(fromDeck, d.getUpperCard(), c, getBoardCard(b, c), disc2, getBoardCard(b, c).turned)
+        )
+        // println(dd.toString())
+        // println(b2.toString())
 
         disDeck = d2
         discard = disc2
         fromDeck = true
-        mementostack.save(Memento(fromDeck, d.getUpperCard(), c, getBoardCard(b, c), disc2))
+        mementostack.save(
+          Memento(fromDeck, d.getUpperCard(), c, getBoardCard(b, c), disc2, getBoardCard(b, c).turned)
+        )
 
-        (b2, d2, disc2)
+        Some(b2, d2, disc2)
       }
 
       case i if i != "2" && i != "1" => {
         notifyObservers
         takeFromDeck(b, d, disc)
       }
-
+      case _ => None
     }
-
   }
 
   def firstRound(
@@ -122,12 +178,12 @@ class Controller(val _mediator: Mediator, var disBoards: Array[Board], var disDe
       disc: DiscardPile
   ): (Array[Board], Deck, DiscardPile, Boolean) = {
 
-    var curDeck:Deck = deck
+    var curDeck: Deck = deck
     var curDisc = disc
 
     for i <- 0 until numPlayers do
       val (cardsOnBoard, deckAfterFill) =
-        fillBoard(_mediator,plBoards(i).xSize, plBoards(i).ySize, curDeck)
+        fillBoard(_mediator, plBoards(i).xSize, plBoards(i).ySize, curDeck)
       val beforeTurned = cardsOnBoard
       val initSize = plBoards(i).xSize * plBoards(i).ySize
       val arr: Array[Int] =
@@ -135,16 +191,35 @@ class Controller(val _mediator: Mediator, var disBoards: Array[Board], var disDe
       val firstTurned: Board = beforeTurned.turnBoardCard(arr(0))
       plBoards(i) = firstTurned.turnBoardCard(arr(1))
       curDeck = deckAfterFill
-      mementostack.save(Memento(true,getBoardCard(plBoards(i),arr(0)).falseCopy(),arr(0),getBoardCard(plBoards(i),arr(0)).trueCopy(),disc))
+      mementostack.save(
+        Memento(
+          true,
+          getBoardCard(plBoards(i), arr(0)).falseCopy(),
+          arr(0),
+          getBoardCard(plBoards(i), arr(0)).trueCopy(),
+          disc,
+          false
+        )
+      )
     for i <- 0 until numPlayers do
       tui.turnOfPlayer(i)
       // println(s"Player ${i}:")
-      val (updatedBoard: Board, deckAfterTurn: Deck, discAfterTurn: DiscardPile) =
-        tui.turn(plBoards(i), curDeck, curDisc).getOrElse((plBoards(i), curDeck, curDisc))
-      plBoards(i) = getReducedBrd(updatedBoard)
-      curDeck = deckAfterTurn
-      curDisc = discAfterTurn
-      notifyObservers
+      tui.turn(plBoards(i), curDeck, curDisc) match {
+        case Some(updatedBoard, deckAfterTurn, discAfterTurn) => {
+          plBoards(i) = getReducedBrd(updatedBoard)
+          curDeck = deckAfterTurn
+          curDisc = discAfterTurn
+          notifyObservers
+        }
+        case None => {
+          throw new IllegalStateException("Turn returned None in first round")
+        }
+      }
+
+      // plBoards(i) = getReducedBrd(updatedBoard)
+      // curDeck = deckAfterTurn
+      // curDisc = discAfterTurn
+      // notifyObservers
 
     disBoards = plBoards
     (plBoards, curDeck, curDisc, false)
@@ -157,18 +232,27 @@ class Controller(val _mediator: Mediator, var disBoards: Array[Board], var disDe
       disc: DiscardPile
   ): (Array[Board], Deck, DiscardPile, Boolean) = {
 
-    var curDeck:Deck = deck
-    var curDisc:DiscardPile = disc
+    var curDeck: Deck = deck
+    var curDisc: DiscardPile = disc
 
     for i <- 0 until numPlayers do
       tui.turnOfPlayer(i)
       // println(s"Player ${i}:")
-      val (updatedBoard: Board, deckAfterTurn: Deck, discAfterTurn: DiscardPile) =
-        tui.turn(plBoards(i), curDeck, curDisc).getOrElse((plBoards(i), curDeck, curDisc))
-      plBoards(i) = getReducedBrd(updatedBoard)
-      curDeck = deckAfterTurn
-      curDisc = discAfterTurn
-      notifyObservers
+      tui.turn(plBoards(i), curDeck, curDisc) match {
+        case Some(updatedBoard, deckAfterTurn, discAfterTurn) => {
+          plBoards(i) = getReducedBrd(updatedBoard)
+          curDeck = deckAfterTurn
+          curDisc = discAfterTurn
+          notifyObservers
+        }
+        case None => {
+          throw new IllegalStateException("Turn returned None in first round")
+        }
+      }
+      // plBoards(i) = getReducedBrd(updatedBoard)
+      // curDeck = deckAfterTurn
+      // curDisc = discAfterTurn
+      // notifyObservers
 
     disBoards = plBoards
     (plBoards, curDeck, curDisc, false)
@@ -183,7 +267,7 @@ class Controller(val _mediator: Mediator, var disBoards: Array[Board], var disDe
       round: Int = 1
   ): (Array[Board], Deck, DiscardPile) = {
 
-    var newd : Deck = deck
+    var newd: Deck = deck
 
     val (boardsAfter, deckAfter, discAfter, stopBetween) =
       if round == 1 then firstRound(numPlayers, plBoards, deck, disc)

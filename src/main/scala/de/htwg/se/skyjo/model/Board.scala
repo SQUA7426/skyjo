@@ -164,7 +164,7 @@ object Board {
 }
 
 def getBoardCard(b: Board, input: Int): Card = {
-  if input < 0 || input > (b.ySize * b.ySize - 1) then
+  if input < 0 || input > (b.ySize * b.xSize -1) then
     throw new IndexOutOfBoundsException(
       s"Idx: ${input} is not a valid Board entry!"
     )
