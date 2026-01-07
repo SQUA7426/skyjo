@@ -6,7 +6,7 @@ import scala.collection.mutable.Stack
 import de.htwg.se.skyjo.util.Mediator
 
 case class Memento(
-    fromDeck: Boolean, // true = Deck, false = DiscardPile
+    fromDeck: Boolean,
     takenCard: Card,
     boardIndex: Int,
     replacedCard: Card,
@@ -14,10 +14,12 @@ case class Memento(
     replacedCardTurned: Boolean
 ) {
   override def toString(): String = {
-    val s = (s"replacedCard: ${replacedCard.toString()}; turned: ${replacedCard.isTurned()}\n")
-    val s1 = s + (s"Card is Taken From Deck: ${fromDeck}\n")
+    val s = (s"Card is Taken From Deck: ${fromDeck}\n")
+    val s1 =
+      s + (s"Taken Deck Card: ${takenCard}; turned: ${takenCard.isTurned()}\n")
     val s2 = s1 + (s"last Board Idx: ${boardIndex}\n")
-    val s3 = s2 + (s"Taken Card: ${takenCard}; turned: ${takenCard.isTurned()}\n")
+    val s3 =
+      s2 + (s"replacedCard: ${replacedCard.toString()}; turned: ${replacedCard.isTurned()}\n")
     val s4 = s3 + (s"lastDisc: ${lastDisc}")
     s4
   }
@@ -35,7 +37,6 @@ class MoveCaretaker(val med: Mediator) {
     println("saving...")
     undoStack.push(m)
     println(undoStack)
-    // redoStack.clear()
   }
 
   def undo(
@@ -44,28 +45,25 @@ class MoveCaretaker(val med: Mediator) {
       board: Board,
       disc: DiscardPile
   ): Option[(Board, Deck, DiscardPile)] = {
-    val newBoard:Board = board.swapFromMem(memento.replacedCard, memento.boardIndex)
+    val newBoard: Board =
+      board.swapFromMem(memento.replacedCard, memento.boardIndex)
     if (memento.fromDeck) {
       val tempV: Vector[Card] = memento.takenCard +: deck.deck
       updtDeck = new Deck(med, tempV, memento.takenCard.toString())
       redoStack.push(memento)
       setTrue()
-      println("clearing undoStack...")
       undoStack.clear()
-      println("saving...")
       undoStack.push(memento)
-      println(undoStack)
+
       Some(newBoard, deck, memento.lastDisc)
-    } else {    // DiscardPile
-      val disc2:DiscardPile = disc.putToDiscardPile(memento.takenCard.toString())._1
+    } else { // DiscardPile
+      val disc2: DiscardPile =
+        disc.putToDiscardPile(memento.takenCard.toString())._1
       updtDeck = disc.putToDiscardPile(memento.takenCard.toString())._2
       redoStack.push(memento)
       setTrue()
-      println("clearing undoStack...")
       undoStack.clear()
-      println("saving...")
       undoStack.push(memento)
-      println(undoStack)
       Some(newBoard, updtDeck, disc2)
     }
   }
@@ -75,15 +73,40 @@ class MoveCaretaker(val med: Mediator) {
       board: Board,
       disc: DiscardPile
   ): Option[(Board, Deck, DiscardPile)] = {
-    val newBoard: Board = board.swapFromMem(memento.takenCard, memento.boardIndex)
+    val newBoard: Board = board.swapFromMem(
+      if memento.fromDeck then memento.takenCard else memento.replacedCard,
+      memento.boardIndex
+    )
     if (memento.fromDeck) {
-      updtDeck = new Deck(med, deck.deck.tail, memento.takenCard.toString())
+      updtDeck = deck
+      val (uptTaken, uptReplaced) = (memento.replacedCard, memento.takenCard)
+      val tmpDisc = new DiscardPile(med, memento.replacedCard.toString())
+      val tmpMemento = Memento(
+        true,
+        uptTaken,
+        memento.boardIndex,
+        uptReplaced,
+        memento.lastDisc,
+        memento.lastDisc.isTurned
+      )
+      undoStack.push(tmpMemento)
       setTrue()
       redoStack.clear()
-      Some((newBoard, updtDeck, disc))
-    } else {          // FROM DISCARDPILE
-      val disc2: DiscardPile = disc.putToDiscardPile(memento.replacedCard.toString())._1
-      val updtDeck = disc.putToDiscardPile(memento.replacedCard.toString())._2
+      Some((newBoard, updtDeck, tmpDisc))
+    } else { // FROM DISCARDPILE
+      val disc2: DiscardPile =
+        disc.putToDiscardPile(memento.replacedCard.toString())._1
+      updtDeck = deck
+      val (uptTaken, uptReplaced) = (memento.replacedCard, memento.takenCard)
+      val tmpMemento = Memento(
+        false,
+        uptTaken,
+        memento.boardIndex,
+        uptReplaced,
+        memento.lastDisc,
+        memento.lastDisc.isTurned
+      )
+      undoStack.push(tmpMemento)
       setTrue()
       redoStack.clear()
       Some((newBoard, updtDeck, disc2))
