@@ -70,7 +70,7 @@ var currentState: State = State.BEGIN
 case class BoardView() {
 
   val _med: Mediator = new ConcreteMediator()
-  private val padding = 30
+  val padding = 30
   var aDeck: Deck = Deck(_med)
   var termBoard: Board = fillBoard(_med, 4, 3, aDeck)._1
   var aDisc: DiscardPile = new DiscardPile(_med, "Disc")
@@ -92,8 +92,8 @@ case class BoardView() {
       switchDeckB: () => Unit,
       endTurn: () => Unit
   ) {
-    private val arcH = 30
-    private val arcW = arcH
+    val arcH = 30
+    val arcW = arcH
 
     val label: Text = createLabel
     var selected = false
@@ -403,7 +403,7 @@ case class BoardView() {
 }
 
 object Gui extends JFXApp3 {
-  private val boardLayer = new Pane()
+  val boardLayer = new Pane()
   val b = new BoardView()
 
   override def start(): Unit = {
