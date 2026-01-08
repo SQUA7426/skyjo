@@ -1,10 +1,12 @@
 package de.htwg.se.skyjo.aView
 
 import de.htwg.se.skyjo.aView.Tui
-import de.htwg.se.skyjo.model.{Board, Deck, DiscardPile, Card,fillBoard}
-import de.htwg.se.skyjo.controller.ControllerComponent.Controller
-import de.htwg.se.skyjo.model.fillBoard
-import de.htwg.se.skyjo.util.ConcreteMediator
+import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.*
+import de.htwg.se.skyjo.model.DeckImplementation.*
+import de.htwg.se.skyjo.model.BoardImplementation.*
+import de.htwg.se.skyjo.model.DiscardPileImplementation.*
+import de.htwg.se.skyjo.util.*
+import de.htwg.se.skyjo.model.GameState
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -12,22 +14,26 @@ import org.scalactic.StringNormalizations._
 import java.io.ByteArrayInputStream
 
 class TuiTest extends AnyWordSpec with Matchers {
-  "A Tui " when:
-    val med = new ConcreteMediator
-    val bTemp = Board(med)
-    val b = bTemp._1
-    val brdArr = Array(b)
-    val d = bTemp._2
-    val disc = DiscardPile(med,"-1")
-    val ctrl = new Controller(med,brdArr,d,disc)
-    val tui = Tui(ctrl)
+  "A Tui " when {
+    val plCount = 1
+    val med = new ConcreteMediator()
+
+    val tempState = new GameState(med, Vector.empty, null, null, 0, None)
+    val ctr = new Controller(tempState)
+
+    val deck = new Deck(ctr.fullDeck(), ctr)
+    val disc = new DiscardPile(ctr)
+
+    val plBoards = Vector.fill(plCount)(new Board(med, 4, 3, Vector.empty))
+
+    ctr.state = new GameState(med, plBoards, deck, disc, 0, None)
+
+    val tui = new Tui(ctr)
     "an Input Request is done, it" should:
-      "do an Input Request to the Board" in:
-        tui.inputRequest(b, disc.toString())
-      "do an Input Request to the Deck" in:
-        tui.inputRequestDeck(d.turnUpperCard().toString())
-      "do print a Player when a turn begins" in:
-        tui.turnOfPlayer(3)
-      "announce if someone finished" in:
-        tui.finishedConf()
+      "process an Input" in:
+        tui.processInput("1")
+        tui.processInput("x")
+      "update" in:
+        tui.update shouldBe true
+  }
 }

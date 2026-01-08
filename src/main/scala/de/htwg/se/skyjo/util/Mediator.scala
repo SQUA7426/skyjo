@@ -1,10 +1,7 @@
 package de.htwg.se.skyjo.util
 
-import de.htwg.se.skyjo.model.{Card, Board, DiscardPile, Deck}
 import scala.util.Random
 import de.htwg.se.skyjo.util.Colleague
-class Controller;
-class Tui;
 
 trait Mediator {
   def send(colleague: Colleague, msg: String): Unit
@@ -20,8 +17,9 @@ class ConcreteMediator extends Mediator {
     thresholdingColleague.filterNot(o => o == c)
 
   override def send(colleague: Colleague, msg: String): Unit = {
-    for colleagues <- thresholdingColleague do
-      if colleagues != colleague && colleagues.receive(msg) then return
+    thresholdingColleague.find{c =>
+        c != colleague && c.receive(msg)
+        }
   }
 
   def requestRmUpperCard(colleague: Colleague): Unit =

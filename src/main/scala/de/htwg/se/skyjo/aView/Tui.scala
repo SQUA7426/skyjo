@@ -1,8 +1,9 @@
 package de.htwg.se.skyjo.aView
-import de.htwg.se.skyjo.model
-import de.htwg.se.skyjo.model.{Board, Deck, DiscardPile}
-import de.htwg.se.skyjo.controller.ControllerComponent.Controller
+import de.htwg.se.skyjo.model.DeckImplementation.*
+import de.htwg.se.skyjo.model.DiscardPileImplementation.*
+import de.htwg.se.skyjo.model.BoardImplementation.*
 import de.htwg.se.skyjo.util.{Memento, MoveCaretaker, SupportHandler}
+import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
 
 import scala.collection.mutable.Stack
 import scala.io.StdIn.readLine
@@ -12,69 +13,44 @@ import scala.util.{Failure, Success}
 
 import scala.util.{Try, Success, Failure}
 import scala.util.Random
+import de.htwg.se.skyjo.util.Observer
 
-class Tui(cont: Controller) {
+class Tui(ctrl: ControllerInterface) extends Observer {
+  ctrl.add(this)
 
-  def inputRequest(b: Board, disc: String) =
-    println(
-      s"Which BoardCard [0-${b.xSize * b.ySize - 1}] do you want to switch with ${disc}?"
-    )
+  def processInput(input: String) = {
+    val state = ctrl.getGameState
+    val result = SupportHandler(ctrl)
+      .handle(input, state)
+      .orElse(SupportCommand(ctrl).execute(input, state))
 
-  def inputRequestDeck(deckCard: String) = (
-    println(s"You took ${deckCard}")
-  )
+    result match {
+      case Some(newState) =>
+        ctrl.uptGameState(
+          newState
+        )
+      case None =>
+        println("input unknown")
+    }
+  }
 
-  def cardTurnRq(b: Board) =
-    println(
-      s"Which BoardCard [0-${b.xSize * b.ySize - 1}] do you want to turn around?"
-    )
+  override def update: Boolean = {
+    // println("[DEBUG] TUI Update triggered!")
+    val state = ctrl.getGameState
+    val b = state.boards(state.playerIdx)
 
-  def turnOfPlayer(i: Int) = (println(s"Player ${i}:"))
-
-  def finishedConf() = (
-    println(s"someone is finished: \n")
-  )
-  def processInput(i: Int): Unit = ()
-
-  def turn(
-      b: Board,
-      d: Deck,
-      disc: DiscardPile
-  ): Option[(Board, Deck, DiscardPile)] = {
+    println(s"\n--- Player ${state.playerIdx}'s Turn ---")
     println(b)
-    println(s"| ${disc.toString()} |\n")
-    println(s"What do you want to do?")
-    println("[0] Take discard and switch with a board card")
-    println("[1] Take deck card and choose:")
-    println("\t[1] switch with board card")
-    println("\t[2] put on discard and flip board card")
-    println("[help] Show help")
+    println(s"Discard Pile: | ${state.disc} |")
 
-    val choose: String = readLine()
-    // val tempD: Deck = {if choose != "1" then d else new Deck(d._mediator, d.deck, d.getUpperCard().toString())}
-    val tempD = d
-    val h = SupportHandler(cont, b, tempD, disc)
-    val c = SupportCommand(cont, b, tempD, disc)
-
-    val action: Try[Option[(Board, Deck, DiscardPile)]] = Try {
-      choose match {
-        case "0" | "1" | "2" | "undo" | "help" | "redo" | "quit" =>
-          if (choose == "1")
-            inputRequestDeck(d.getUpperCard().toString())
-          val return_H = h.handle(choose)
-          if (return_H == None) then c.execute(choose) else return_H
-        case _ =>
-          throw new IllegalArgumentException(
-            s"${choose} is not valid, doing nothing."
-          )
-      }
+    state.drawnCard match {
+      case Some(card) =>
+        println(s">> Holding: $card.\n[Index] to put onto Board or [s] to swap with discard & flip BoardCard.")
+      case None if state.isFlippingPhase =>
+        println("Card discarded! Now enter index [0-11] to flip a board card.")
+      case None =>
+        println("[0] Take discard | [1] Take deck")
     }
-
-    action match {
-      case Success(result) => result
-      case Failure(e) =>
-        println(e.getMessage)
-        turn(b, d, disc)
-    }
+    true
   }
 }
