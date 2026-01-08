@@ -26,7 +26,7 @@ class ConcreteMediatorSpec extends AnyWordSpec with Matchers {
 
     val plBoards = Vector.fill(plCount)(new Board(med, 4, 3, Vector.empty))
 
-    ctr.state = new GameState(med, plBoards, deck, disc, 0, None)
+    ctr.state = new GameState(med, plBoards, deck, disc, 0, Some(Card(9, ctr)))
     ctr.setup()
     val simpleCard: Card = new Card(3, true, ctr)
     "add Colleagues" in:
@@ -61,6 +61,10 @@ class ConcreteMediatorSpec extends AnyWordSpec with Matchers {
       "handle input redo" in {
         h.handle("redo", ctr.state)
       }
+      "handle input s for putting DeckCard onto Discard" in {
+        h.handle("s", ctr.state)
+      }
+
       "be unable to handle unrecognized requests" in:
         h.handle("x", ctr.state) shouldBe None
 }
