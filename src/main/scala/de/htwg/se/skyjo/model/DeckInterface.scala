@@ -11,6 +11,6 @@ trait DeckInterface:
 
   def remove(amount: Int): Vector[CardInterface]
 
-  def leftOf(worth: Int): Int
+  // def leftOf(worth: Int): Int
 
   def draw(): (CardInterface, DeckInterface)
