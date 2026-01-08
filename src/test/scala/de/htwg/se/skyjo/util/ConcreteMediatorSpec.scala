@@ -55,6 +55,12 @@ class ConcreteMediatorSpec extends AnyWordSpec with Matchers {
       "handle input 1" in {
         h.handle("1", ctr.state)
       }
+      "handle input undo" in {
+        h.handle("undo", ctr.state)
+      }
+      "handle input redo" in {
+        h.handle("redo", ctr.state)
+      }
       "be unable to handle unrecognized requests" in:
         h.handle("x", ctr.state) shouldBe None
 }

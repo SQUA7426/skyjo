@@ -2,6 +2,7 @@ package de.htwg.se.skyjo.controller.ControllerComponent
 
 import de.htwg.se.skyjo.aView.Tui
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.*
+import de.htwg.se.skyjo.model.CardImplementation.*
 import de.htwg.se.skyjo.model.DeckImplementation.*
 import de.htwg.se.skyjo.model.BoardImplementation.*
 import de.htwg.se.skyjo.model.DiscardPileImplementation.*
@@ -73,12 +74,15 @@ class ControllerTest extends AnyWordSpec with Matchers {
     }
 
     "A GAMESTATE" should:
-      val state = ctr.getGameState
+      val state:GameState = ctr.getGameState
+      val card9 = Card(9,ctr)
+      val anotherState = state.copy(
+        drawnCard = Some(card9)
+        )
       "have a drawnCard" in:
-        state.drawnCard match {
-          case Some(ci) => ci shouldBe a[CardInterface]
-          case None => {}
-        }
+        state.drawnCard shouldBe None
       "be parsed toString()" in:
         state.toString() shouldBe a[String]
+      "be parsed toString()" in:
+        anotherState.toString() shouldBe a[String]
 }
