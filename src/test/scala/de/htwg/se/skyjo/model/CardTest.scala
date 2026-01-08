@@ -5,6 +5,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalactic.StringNormalizations._
 import de.htwg.se.skyjo.aView.Tui
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.*
+import de.htwg.se.skyjo.model.CardImplementation.*
 import de.htwg.se.skyjo.model.DeckImplementation.*
 import de.htwg.se.skyjo.model.BoardImplementation.*
 import de.htwg.se.skyjo.model.DiscardPileImplementation.*
@@ -49,7 +50,7 @@ class CardTest extends AnyWordSpec with Matchers {
         card11.toString() shouldBe (f"${num}")
     "A Card with value 9" should:
       val num9: Int = 9
-      val card9 = ctr.toCard(num9)
+      val card9 = Card(num9,ctr)
 
       //--------------------------- CONVERTING ----------------------------//
 
@@ -59,7 +60,7 @@ class CardTest extends AnyWordSpec with Matchers {
       "as int 9 be converted correctly" in:
         ctr.toCard(num9) shouldBe card9
       "not be acceptable from boolean" in:
-        val highCardErr = the [IllegalArgumentException] thrownBy(ctr.toCard(99))
+        val highCardErr = the [IllegalArgumentException] thrownBy(Card(99,ctr))
 
       //--------------------------- CARDCOPY ----------------------------------//
 

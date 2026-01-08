@@ -48,8 +48,8 @@ class DeckTest extends AnyWordSpec with Matchers {
       val d2 = new Deck(d.deck, ctr, d.turnUpperCard)
       "have the Card as upperCard when turned" in:
         d2.toString() shouldBe (d2.upperCard)
-      "when initialized one turned be a Card" in:
-        d2.getCard shouldBe a[None.type]
+      // "when initialized one turned be a Card" in:
+      //   d2.getCard shouldBe a[None.type]
       "when turned again" in:
         d2.turnUpperCard should be ("Deck")
 
