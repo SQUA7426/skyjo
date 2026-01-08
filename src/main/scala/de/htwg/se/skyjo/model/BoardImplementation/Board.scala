@@ -18,8 +18,7 @@ case class Board(
     val xSize: Int,
     val ySize: Int,
     val brd: Vector[Vector[CardInterface]] = Vector.empty
-) extends Colleague,
-      BoardInterface {
+) extends Colleague with BoardInterface {
   override def send(msg: String): Unit = _mediator.send(this, msg)
 
   override def receive(msg: String): Boolean = {

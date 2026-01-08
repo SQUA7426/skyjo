@@ -18,6 +18,16 @@ import de.htwg.se.skyjo.util.Observer
 class Tui(ctrl: ControllerInterface) extends Observer {
   ctrl.add(this)
 
+  def startGame: Unit =
+    var input: String = ""
+    while (input != "quit") {
+      print(">> ")
+      input = scala.io.StdIn.readLine()
+      if (input != "quit") {
+        processInput(input)
+      }
+    }
+
   def processInput(input: String) = {
     val state = ctrl.getGameState
     val result = SupportHandler(ctrl)

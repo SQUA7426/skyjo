@@ -1,14 +1,11 @@
 package de.htwg.se.skyjo.util
 
-import de.htwg.se.skyjo.util.{Command, SupportCommand, ConcreteMediator}
-import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.Controller
-import de.htwg.se.skyjo.model.BoardInterface
-import de.htwg.se.skyjo.model.BoardImplementation.Board
-import de.htwg.se.skyjo.model.BoardImplementation.fillBoard
-import de.htwg.se.skyjo.model.DeckImplementation.Deck
-import de.htwg.se.skyjo.model.DiscardPileImplementation.DiscardPile
-import de.htwg.se.skyjo.model.CardImplementation.Card
-import de.htwg.se.skyjo.model.CardImplementation.{toCard, len, isCard}
+import de.htwg.se.skyjo.aView.Tui
+import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.*
+import de.htwg.se.skyjo.model.DeckImplementation.*
+import de.htwg.se.skyjo.model.BoardImplementation.*
+import de.htwg.se.skyjo.model.DiscardPileImplementation.*
+import de.htwg.se.skyjo.util.*
 import de.htwg.se.skyjo.model.GameState
 import org.scalatest.matchers.should.Matchers
 
@@ -18,71 +15,35 @@ import java.io.ByteArrayInputStream
 
 class CommandSpec extends AnyWordSpec with Matchers {
   "A Command" should {
+    val plCount = 1
     val med = new ConcreteMediator()
-    val board = new Board(
-      med,
-      2,
-      1,
-      Vector(Vector(Card(med, 1).falseCopy, Card(med, 2)))
-    )
-    val brdArr = Array(board)
-    val deck = Deck(med)
 
-    val disc = new DiscardPile(med, "Disc")
+    val tempState = new GameState(med, Vector.empty, null, null, 0, None)
+    val ctr = new Controller(tempState)
 
-    val twoTimesTwoPlBoards = Vector(fillBoard(med, 2, 2, deck)._1)
+    val deck = new Deck(ctr.fullDeck(), ctr)
+    val disc = new DiscardPile(ctr)
 
-    val state = GameState(twoTimesTwoPlBoards, deck, disc,0)
+    val plBoards = Vector.fill(plCount)(new Board(med, 4, 3, Vector.empty))
 
-    val cont = new Controller(state)
+    ctr.state = new GameState(med, plBoards, deck, disc, 0, None)
+    ctr.setup()
 
-    val cCom = new SupportCommand(cont)
+    val cCom = new SupportCommand(ctr)
     // ---------------------INPUT -----------------------------------------//
-    // GEHT
     "execute the undo cmd" in {
-      // val simulatedInput = "1\n1\n3\n1\n1\n2\nundo\n1\n1\n1\n1\n1\n0\n"
-      // val in = new ByteArrayInputStream(simulatedInput.getBytes())
-      // Console.withIn(in) {
-      val gl = cCom.execute("undo", state)
-      // }
+      val gl = cCom.execute("undo", ctr.state)
     }
-    // "execute the undo cmd2" in {
-    //   val simulatedInput = "1\n1\n3\n0\n2\nundo\n1\n1\n1\n1\n1\n0\n"
-    //   val in = new ByteArrayInputStream(simulatedInput.getBytes())
-    //   Console.withIn(in) {
-    //     val gl = cont.gameLoop(1, twoTimesTwoPlBoards, deck, disc, 2)
-    //   }
-    // }
     "execute the redo cmd" in {
-      // val simulatedInput = "1\n1\n3\n0\n2\nredo\n1\n1\n1\n1\n1\n0\n"
-      // val in = new ByteArrayInputStream(simulatedInput.getBytes())
-      // Console.withIn(in) {
-        val gl = cCom.execute("redo", state)
+        val gl = cCom.execute("redo", ctr.state)
       // }
     }
-    // "execute the redo cmd2" in {
-    //   val simulatedInput = "1\n1\n3\n1\n1\n2\nredo\n1\n1\n1\n1\n1\n0\n"
-    //   val in = new ByteArrayInputStream(simulatedInput.getBytes())
-    //   Console.withIn(in) {
-    //     val gl = cont.gameLoop(1, twoTimesTwoPlBoards, deck, disc, 2)
-    //   }
-    // }
-    // "check if redostack is empty in cmd" in:
-    //   val anotherSupCom =
-    //     new SupportCommand(cont, cont.disBoards(0), deck, disc)
-    //   if (!anotherSupCom.ctrl.mementostack.redoStack.isEmpty) {
-    //     val simInput = "1\n1\n1\n1\n1\n0\n"
-    //     val intoIn = new ByteArrayInputStream(simInput.getBytes())
-    //     Console.withIn(intoIn) {
-    //       anotherSupCom.execute("redo")
-    //     }
-    //   }
 
     "execute the help cmd" in:
-      cCom.execute("help", state)
+      cCom.execute("help", ctr.state)
     // "execute the quit cmd" in:
     //   cCom.execute("quit") shouldBe None
     "not execute the x cmd" in:
-      cCom.execute("x", state)
+      cCom.execute("x", ctr.state)
   }
 }

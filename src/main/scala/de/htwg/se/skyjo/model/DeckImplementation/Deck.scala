@@ -12,8 +12,7 @@ class Deck(
     val deck: Vector[CardInterface],
     val ctrl: ControllerInterface,
     val upperCard: String = "Deck"
-) extends Colleague,
-      DeckInterface {
+) extends Colleague with DeckInterface {
   val _mediator = ctrl.getMediator
   override def receive(msg: String): Boolean = {
     msg match

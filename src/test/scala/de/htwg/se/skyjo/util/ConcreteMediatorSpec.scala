@@ -1,14 +1,12 @@
 package de.htwg.se.skyjo.util
-import de.htwg.se.skyjo.util.{Mediator, ConcreteMediator, Colleague, Handler}
-import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.Controller
-import de.htwg.se.skyjo.model.BoardInterface
-import de.htwg.se.skyjo.model.BoardImplementation.Board
-import de.htwg.se.skyjo.model.BoardImplementation.fillBoard
-import de.htwg.se.skyjo.model.DeckImplementation.Deck
-import de.htwg.se.skyjo.model.DeckInterface
-import de.htwg.se.skyjo.model.DiscardPileImplementation.DiscardPile
-import de.htwg.se.skyjo.model.CardImplementation.Card
-import de.htwg.se.skyjo.model.CardImplementation.{toCard, len, isCard}
+
+import de.htwg.se.skyjo.aView.Tui
+import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.*
+import de.htwg.se.skyjo.model.CardImplementation.*
+import de.htwg.se.skyjo.model.DeckImplementation.*
+import de.htwg.se.skyjo.model.BoardImplementation.*
+import de.htwg.se.skyjo.model.DiscardPileImplementation.*
+import de.htwg.se.skyjo.util.*
 import de.htwg.se.skyjo.model.GameState
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -17,14 +15,20 @@ import java.io.ByteArrayInputStream
 
 class ConcreteMediatorSpec extends AnyWordSpec with Matchers {
   "A ConcreteMediator" should:
+    val plCount = 1
     val med = new ConcreteMediator()
-    val tmpDeck: DeckInterface = Deck(med)
-    val tBoard = new Board(med, 3, 4, fillBoard(med, 3, 4, tmpDeck)._1.getBoard)
-    val b: Board = tBoard
-    val deck: Deck = Deck(med)
-    val disc: DiscardPile = new DiscardPile(med, "Disc")
-    val plBoards: Vector[Board] = Vector(b)
-    val simpleCard = new Card(med, 3, true)
+
+    val tempState = new GameState(med, Vector.empty, null, null, 0, None)
+    val ctr: Controller = new Controller(tempState)
+
+    val deck = new Deck(ctr.fullDeck(), ctr)
+    val disc = new DiscardPile(ctr)
+
+    val plBoards = Vector.fill(plCount)(new Board(med, 4, 3, Vector.empty))
+
+    ctr.state = new GameState(med, plBoards, deck, disc, 0, None)
+    ctr.setup()
+    val simpleCard: Card = new Card(3, true, ctr)
     "add Colleagues" in:
       med.add(deck)
       med.add(disc)
@@ -43,26 +47,14 @@ class ConcreteMediatorSpec extends AnyWordSpec with Matchers {
     "remove a Colleague" in:
       med.remove(plBoards(0))
 
-    val state = GameState(plBoards, deck, disc, 0)
-
-    val ctrl = new Controller(state)
-    val h: SupportHandler = new SupportHandler(ctrl)
+    val h: SupportHandler = new SupportHandler(ctr)
     "A Handler" should:
       "handle input 0" in {
-        // val simulatedInput = "1\n1\n0\n"
-        // val in = new ByteArrayInputStream(simulatedInput.getBytes())
-        // Console.withIn(in) {
-        h.handle("0", state)
-        // }
+        h.handle("0", ctr.state)
       }
       "handle input 1" in {
-        // val twoTimesTwoPlBoards = Array(fillBoard(med, 2, 2, deck)._1)
-        // val simulatedInput = "1\n1\n3\n1\n1\n2\n1\n1\n2\n1\n1\n1\n1\n1\n0\n"
-        // val in = new ByteArrayInputStream(simulatedInput.getBytes())
-        // Console.withIn(in) {
-        h.handle("1", state)
-        // }
+        h.handle("1", ctr.state)
       }
       "be unable to handle unrecognized requests" in:
-        h.handle("x", state) shouldBe None
+        h.handle("x", ctr.state) shouldBe None
 }

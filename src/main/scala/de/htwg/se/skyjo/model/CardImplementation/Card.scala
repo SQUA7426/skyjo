@@ -8,7 +8,7 @@ case class Card(
     val value: Int,
     var turned: Boolean,
     val ctrl: ControllerInterface
-) extends Colleague, CardInterface {
+) extends Colleague with CardInterface {
   val _mediator = ctrl.getMediator
   override def receive(msg: String): Boolean = {
     msg match

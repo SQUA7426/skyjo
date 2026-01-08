@@ -29,14 +29,8 @@ def main(args: Array[String]): Unit = {
   // println("GAMESTATE")
   // println(ctr.getGameState.toString())
 
-  var input: String = ""
-  while (input != "quit") {
-    print(">> ")
-    input = scala.io.StdIn.readLine()
-    if (input != "quit") {
-      t.processInput(input)
-    }
-  }
+  t.startGame
+
   println("After finished")
   val simpleCard = new Card(3, true, ctr)
   med.add(deck)

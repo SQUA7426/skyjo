@@ -35,5 +35,11 @@ class TuiTest extends AnyWordSpec with Matchers {
         tui.processInput("x")
       "update" in:
         tui.update shouldBe true
+      "can quit the game" in:
+        val simulatedInput = "quit"
+        val in = new ByteArrayInputStream(simulatedInput.getBytes())
+        Console.withIn(in) {
+          tui.startGame
+        }
   }
 }

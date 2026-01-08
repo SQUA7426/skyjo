@@ -11,8 +11,7 @@ import de.htwg.se.skyjo.controller.ControllerComponent.*
 class DiscardPile(
     val ctrl: ControllerInterface,
     val discPile: String = "Disc"
-) extends Colleague,
-      DiscardPileInterface {
+) extends Colleague with DiscardPileInterface {
   var isTurned: Boolean = false
   // var before: DiscardPileInterface = this
   val _mediator = ctrl.getMediator

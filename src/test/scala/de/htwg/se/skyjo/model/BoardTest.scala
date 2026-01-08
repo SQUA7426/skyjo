@@ -13,6 +13,9 @@ import org.scalactic.StringNormalizations._
 import java.io.ByteArrayOutputStream
 import scala.collection.immutable.Seq
 
+import java.io.ByteArrayInputStream
+import scala.Console
+
 class BoardTest extends AnyWordSpec with Matchers {
   "A Board" should {
     val plCount = 1
@@ -30,7 +33,7 @@ class BoardTest extends AnyWordSpec with Matchers {
     ctr.setup()
 
     val board = ctr.getGameState.boards(ctr.getGameState.playerIdx)
-    // val tui = new Tui(ctr)
+    val tui = new Tui(ctr)
     "parse toString()" in:
       board.toString() shouldBe a[String]
   }
