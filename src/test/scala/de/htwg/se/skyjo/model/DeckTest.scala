@@ -49,7 +49,7 @@ class DeckTest extends AnyWordSpec with Matchers {
       "have the Card as upperCard when turned" in:
         d2.toString() shouldBe (d2.upperCard)
       "when initialized one turned be a Card" in:
-        d2.getCard shouldBe a[None]
+        d2.getCard shouldBe a[None.type]
       "when turned again" in:
         d2.turnUpperCard should be ("Deck")
 

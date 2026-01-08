@@ -37,7 +37,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
         ctr.getMediator shouldBe a[Mediator]
         ctr.getGameState shouldBe a[GameState]
         ctr.getDeck shouldBe a[Vector[CardInterface]]
-        ctr.getDiscCard() shouldBe a[None]
+        ctr.getDiscCard() shouldBe a[None.type]
       "be able to fill a Board" in:
         val (afterBoard, afterDeck) = ctr.fillBoard(4, 3, ctr.state.deck)
         afterBoard shouldBe a[BoardInterface]
