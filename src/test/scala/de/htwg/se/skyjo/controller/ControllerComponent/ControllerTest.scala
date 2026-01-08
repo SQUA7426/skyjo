@@ -43,8 +43,9 @@ class ControllerTest extends AnyWordSpec with Matchers {
         val (afterBoard, afterDeck) = ctr.fillBoard(4, 3, ctr.state.deck)
         afterBoard shouldBe a[BoardInterface]
         afterDeck shouldBe a[DeckInterface]
-      "execute undo and redo" in:
+      "execute save, undo and redo" in:
         val oldState = ctr.state
+        ctr.save(oldState)
         ctr.undo()
         ctr.redo()
       "execute a move and update GAMESTATE" in:

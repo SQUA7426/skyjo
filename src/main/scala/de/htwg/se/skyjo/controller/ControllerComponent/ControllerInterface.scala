@@ -13,6 +13,7 @@ trait ControllerInterface extends Observable {
   // GAME MECHANICS //
   def uptGameState(newState: GameState): Unit
   def setup(): Unit
+  def save(saveState: GameState):Unit
   def undo(): Unit
   def redo(): Unit
   def turnBoardCard(index: Int): Unit

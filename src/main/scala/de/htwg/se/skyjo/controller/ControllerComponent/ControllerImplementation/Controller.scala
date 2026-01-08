@@ -48,6 +48,8 @@ class Controller(var state: GameState) extends Observable with ControllerInterfa
     notifyObservers
   }
 
+  def save(saveState: GameState):Unit = caretaker.save(saveState)
+
   def undo(): Unit = {
     caretaker.undo(state) match {
       case Some(oldState) =>
