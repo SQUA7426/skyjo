@@ -71,4 +71,14 @@ class ControllerTest extends AnyWordSpec with Matchers {
         val fullDeck = ctr.fullDeck()
         fullDeck.length shouldBe 150
     }
+
+    "A GAMESTATE" should:
+      val state = ctr.getGameState
+      "have a drawnCard" in:
+        state.drawnCard match {
+          case Some(ci) => ci shouldBe a[CardInterface]
+          case None => {}
+        }
+      "be parsed toString()" in:
+        state.toString() shouldBe a[String]
 }
