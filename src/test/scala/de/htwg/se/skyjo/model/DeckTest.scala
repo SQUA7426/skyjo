@@ -32,6 +32,8 @@ class DeckTest extends AnyWordSpec with Matchers {
     "Initialized" should:
 
       //------------------------- WHEN INIT ----------------------------------//
+      "be able to be init by alt. way" in:
+        Deck(ctr) shouldBe a[DeckInterface]
 
       "have the size of 150" in:
         d.deck.size shouldBe (150)
@@ -39,6 +41,8 @@ class DeckTest extends AnyWordSpec with Matchers {
         d.toString() should (be ("Deck") or be (s"d.upperCard"))
       // "should have left more then one Card with a Number left" in:
       //   d.leftOf(1) shouldBe > (0)
+      "return a CardInterface when getCard" in:
+        d.getCard shouldBe a[CardInterface]
 
       //------------------------- WHEN TURNED --------------------------------//
 
@@ -48,8 +52,8 @@ class DeckTest extends AnyWordSpec with Matchers {
       val d2 = new Deck(d.deck, ctr, d.turnUpperCard)
       "have the Card as upperCard when turned" in:
         d2.toString() shouldBe (d2.upperCard)
-      // "when initialized one turned be a Card" in:
-      //   d2.getCard shouldBe a[None.type]
+      "return a 'Deck' when turned and draw()" in:
+        d2.draw()._1 shouldBe a[CardInterface]
       "when turned again" in:
         d2.turnUpperCard should be ("Deck")
 

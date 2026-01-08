@@ -47,8 +47,6 @@ case class Board(
     new Board(_mediator, xSize, ySize, turnedIdxBrd)
   }
 
-  def getMediator = _mediator
-
   def getSize: (Int, Int) = (xSize, ySize)
 
   def getBoard = brd
@@ -74,7 +72,7 @@ case class Board(
     (oldCard, new Board(_mediator, xSize, ySize, updatedBrd))
   }
 
-  def reduce(row: Int, col: Int): (Board, Boolean) = {
+  def reduce(row: Int, col: Int): (BoardInterface, Boolean) = {
     if (col != -1) {
       val checkCol: Vector[Boolean] = (0 until xSize).toVector.map { colIdx =>
         brd.map(_(colIdx)).distinct.size == 1 && brd.size != 1

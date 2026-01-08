@@ -283,4 +283,8 @@ class Controller(var state: GameState) extends Observable with ControllerInterfa
   // def turn: Unit
   def turnUpperCard: String = state.deck.turnUpperCard
 
+  def getBoard: Vector[Vector[CardInterface]] = getGameState.boards(getGameState.playerIdx).getBoard
+
+  def reduce(row: Int, col: Int): (BoardInterface, Boolean) =
+    getGameState.boards(getGameState.playerIdx).reduce(row,col)
 }

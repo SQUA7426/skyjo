@@ -4,7 +4,6 @@ import de.htwg.se.skyjo.model.CardInterface
 import de.htwg.se.skyjo.util.*
 
 trait BoardInterface:
-  def getMediator: Mediator
 
   def getBoard: Vector[Vector[CardInterface]]
 

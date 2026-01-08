@@ -25,6 +25,10 @@ trait ControllerInterface extends Observable {
   def SwapHandler(index: Int): Unit
 
   // OUTSIDE FUNCS //
+  def getBoard: Vector[Vector[CardInterface]]
+
+  def reduce(row: Int, col: Int): (BoardInterface, Boolean)
+
   def fillBoard(
       xSize: Int,
       ySize: Int,

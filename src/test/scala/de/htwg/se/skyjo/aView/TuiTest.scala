@@ -33,7 +33,9 @@ class TuiTest extends AnyWordSpec with Matchers {
       "process an Input" in:
         tui.processInput("1")
         tui.processInput("x")
-      "update" in:
+      "update shouldBe true" in:
+        tui.update shouldBe true
+        ctr.state = ctr.state.copy(isFlippingPhase = true)
         tui.update shouldBe true
       "can quit the game" in:
         val simulatedInput = "quit"

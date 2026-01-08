@@ -34,7 +34,18 @@ class BoardTest extends AnyWordSpec with Matchers {
 
     val board = ctr.getGameState.boards(ctr.getGameState.playerIdx)
     val tui = new Tui(ctr)
+
+    "before filled" in:
+      plBoards(0).brd shouldBe (Vector.empty)
+
+    "be alternatively initialized" in:
+      Board(ctr)._1 shouldBe a[BoardInterface]
+
     "parse toString()" in:
       board.toString() shouldBe a[String]
+
+    // ------------------ EXCEPTION ------------------------------- //
+    "throw an EXCEPTION when accessing wrong boardIdx" in:
+      val errBrd = the [IndexOutOfBoundsException] thrownBy(board.getBoardCard(30))
   }
 }
