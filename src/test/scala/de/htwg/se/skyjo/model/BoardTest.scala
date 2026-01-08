@@ -5,7 +5,10 @@ import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.
 import de.htwg.se.skyjo.model.DeckImplementation.*
 import de.htwg.se.skyjo.model.BoardImplementation.*
 import de.htwg.se.skyjo.model.DiscardPileImplementation.*
+<<<<<<< HEAD
 import de.htwg.se.skyjo.model.CardImplementation.*
+=======
+>>>>>>> components
 import de.htwg.se.skyjo.util.*
 import de.htwg.se.skyjo.model.GameState
 import org.scalatest.matchers.should.Matchers
@@ -35,6 +38,7 @@ class BoardTest extends AnyWordSpec with Matchers {
 
     val board = ctr.getGameState.boards(ctr.getGameState.playerIdx)
     val tui = new Tui(ctr)
+<<<<<<< HEAD
 
     "before filled" in:
       plBoards(0).brd shouldBe (Vector.empty)
@@ -65,5 +69,9 @@ class BoardTest extends AnyWordSpec with Matchers {
     // ------------------ EXCEPTION ------------------------------- //
     "throw an EXCEPTION when accessing wrong boardIdx" in:
       val errBrd = the [IndexOutOfBoundsException] thrownBy(board.getBoardCard(30))
+=======
+    "parse toString()" in:
+      board.toString() shouldBe a[String]
+>>>>>>> components
   }
 }

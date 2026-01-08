@@ -27,19 +27,29 @@ class TuiTest extends AnyWordSpec with Matchers {
     val plBoards = Vector.fill(plCount)(new Board(med, 4, 3, Vector.empty))
 
     ctr.state = new GameState(med, plBoards, deck, disc, 0, None)
+<<<<<<< HEAD
     ctr.setup()
+=======
+>>>>>>> components
 
     val tui = new Tui(ctr)
     "an Input Request is done, it" should:
       "process an Input" in:
         tui.processInput("1")
         tui.processInput("x")
+<<<<<<< HEAD
       "update shouldBe true" in:
         tui.update shouldBe true
         ctr.state = ctr.state.copy(isFlippingPhase = true)
         tui.update shouldBe true
       "can quit the game" in:
         val simulatedInput = "1\nquit"
+=======
+      "update" in:
+        tui.update shouldBe true
+      "can quit the game" in:
+        val simulatedInput = "quit"
+>>>>>>> components
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
         Console.withIn(in) {
           tui.startGame

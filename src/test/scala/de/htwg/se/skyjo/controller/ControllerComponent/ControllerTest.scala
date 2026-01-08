@@ -2,7 +2,10 @@ package de.htwg.se.skyjo.controller.ControllerComponent
 
 import de.htwg.se.skyjo.aView.Tui
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.*
+<<<<<<< HEAD
 import de.htwg.se.skyjo.model.CardImplementation.*
+=======
+>>>>>>> components
 import de.htwg.se.skyjo.model.DeckImplementation.*
 import de.htwg.se.skyjo.model.BoardImplementation.*
 import de.htwg.se.skyjo.model.DiscardPileImplementation.*
@@ -30,6 +33,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
 
     ctr.state = new GameState(med, plBoards, deck, disc, 0, None)
 
+<<<<<<< HEAD
     // setup()
     ctr.setup()
 
@@ -41,6 +45,12 @@ class ControllerTest extends AnyWordSpec with Matchers {
       drawnCard = Some(card8)
       )
     "it is working, it" should {
+=======
+    val tui = new Tui(ctr)
+    "it is working, it" should {
+      "do a setup() and update Tui" in:
+        ctr.setup()
+>>>>>>> components
       "get Mediator, GameState, Deck and Discard-Card" in:
         ctr.getMediator shouldBe a[Mediator]
         ctr.getGameState shouldBe a[GameState]
@@ -50,12 +60,21 @@ class ControllerTest extends AnyWordSpec with Matchers {
         val (afterBoard, afterDeck) = ctr.fillBoard(4, 3, ctr.state.deck)
         afterBoard shouldBe a[BoardInterface]
         afterDeck shouldBe a[DeckInterface]
+<<<<<<< HEAD
       val oldState = ctr.state
       "execute save, undo and redo" in:
         ctr.save(oldState)
         ctr.undo()
         ctr.redo()
       "execute a move and update GAMESTATE" in:
+=======
+      "execute undo and redo" in:
+        val oldState = ctr.state
+        ctr.undo()
+        ctr.redo()
+      "execute a move and update GAMESTATE" in:
+        val oldState = ctr.state
+>>>>>>> components
         ctr.executeMove(oldState)
         ctr.uptGameState(oldState)
       "draw from Deck and DiscardPile" in:
@@ -78,6 +97,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
       "execute a fullDeck()" in:
         val fullDeck = ctr.fullDeck()
         fullDeck.length shouldBe 150
+<<<<<<< HEAD
 
       ctr.state = anotherState
       "be able to putCardOnBoard" in
@@ -104,4 +124,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
         state.toString() shouldBe a[String]
       "be parsed anotherState toString()" in:
         anotherState.toString() shouldBe a[String]
+=======
+    }
+>>>>>>> components
 }

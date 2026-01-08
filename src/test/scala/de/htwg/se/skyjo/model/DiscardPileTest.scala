@@ -33,9 +33,12 @@ class DiscardPileTest extends AnyWordSpec with Matchers {
       "when switched with upperCard of Deck should return ._2 == Deck" in:
         val d2 = discard.putToDiscardPile(deck)._2
         d2 shouldBe a[DeckInterface]
+<<<<<<< HEAD
       "be able to put an String onto DiscardPile" in:
         val d3 = discard.putToDiscardPile("5")._2
         d3 shouldBe a[DeckInterface]
       "be unable to put an unrecognized Type onto DiscardPile" in:
         val d4 = the [MatchError] thrownBy(discard.putToDiscardPile(ctr.getGameState))
+=======
+>>>>>>> components
 }
