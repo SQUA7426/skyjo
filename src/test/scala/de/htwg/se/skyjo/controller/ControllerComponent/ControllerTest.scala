@@ -30,6 +30,9 @@ class ControllerTest extends AnyWordSpec with Matchers {
 
     ctr.state = new GameState(med, plBoards, deck, disc, 0, None)
 
+    // setup()
+    ctr.setup()
+
     val tui = new Tui(ctr)
 
     val state:GameState = ctr.getGameState
@@ -38,8 +41,6 @@ class ControllerTest extends AnyWordSpec with Matchers {
       drawnCard = Some(card8)
       )
     "it is working, it" should {
-      "do a setup() and update Tui" in:
-        ctr.setup()
       "get Mediator, GameState, Deck and Discard-Card" in:
         ctr.getMediator shouldBe a[Mediator]
         ctr.getGameState shouldBe a[GameState]
