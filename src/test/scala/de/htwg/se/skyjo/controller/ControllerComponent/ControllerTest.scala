@@ -92,5 +92,4 @@ class ControllerTest extends AnyWordSpec with Matchers {
         state.toString() shouldBe a[String]
       "be parsed anotherState toString()" in:
         anotherState.toString() shouldBe a[String]
-      ""
 }
