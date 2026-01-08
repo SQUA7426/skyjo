@@ -81,8 +81,8 @@ class ControllerTest extends AnyWordSpec with Matchers {
         )
       "have a drawnCard" in:
         state.drawnCard shouldBe None
-      "be parsed toString()" in:
+      "be parsed state toString()" in:
         state.toString() shouldBe a[String]
-      "be parsed toString()" in:
+      "be parsed anotherState toString()" in:
         anotherState.toString() shouldBe a[String]
 }
