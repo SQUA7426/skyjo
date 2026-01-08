@@ -31,6 +31,12 @@ class ControllerTest extends AnyWordSpec with Matchers {
     ctr.state = new GameState(med, plBoards, deck, disc, 0, None)
 
     val tui = new Tui(ctr)
+
+    val state:GameState = ctr.getGameState
+    val card8 = Card(9,ctr)
+    val anotherState = state.copy(
+      drawnCard = Some(card8)
+      )
     "it is working, it" should {
       "do a setup() and update Tui" in:
         ctr.setup()
@@ -43,13 +49,12 @@ class ControllerTest extends AnyWordSpec with Matchers {
         val (afterBoard, afterDeck) = ctr.fillBoard(4, 3, ctr.state.deck)
         afterBoard shouldBe a[BoardInterface]
         afterDeck shouldBe a[DeckInterface]
+      val oldState = ctr.state
       "execute save, undo and redo" in:
-        val oldState = ctr.state
         ctr.save(oldState)
         ctr.undo()
         ctr.redo()
       "execute a move and update GAMESTATE" in:
-        val oldState = ctr.state
         ctr.executeMove(oldState)
         ctr.uptGameState(oldState)
       "draw from Deck and DiscardPile" in:
@@ -72,18 +77,20 @@ class ControllerTest extends AnyWordSpec with Matchers {
       "execute a fullDeck()" in:
         val fullDeck = ctr.fullDeck()
         fullDeck.length shouldBe 150
+
+      ctr.state = anotherState
+      "be able to putCardOnBoard" in
+        ctr.putCardOnBoard(0)
+      "be able to turnBoardCard" in:
+        ctr.turnBoardCard(4)
     }
 
     "A GAMESTATE" should:
-      val state:GameState = ctr.getGameState
-      val card9 = Card(9,ctr)
-      val anotherState = state.copy(
-        drawnCard = Some(card9)
-        )
       "have a drawnCard" in:
         state.drawnCard shouldBe None
       "be parsed state toString()" in:
         state.toString() shouldBe a[String]
       "be parsed anotherState toString()" in:
         anotherState.toString() shouldBe a[String]
+      ""
 }
