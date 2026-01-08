@@ -34,10 +34,10 @@ class CardTest extends AnyWordSpec with Matchers {
 
     "has the value -3" should:
       "not be acceptable as Card" in:
-        val lowerCardErr = the [IllegalArgumentException] thrownBy(ctr.toCard(-3))
+        val lowerCardErr = the [IllegalArgumentException] thrownBy(ctr.toCard(-3, ctr))
     "has the value 20" should:
       "not be acceptable as Card" in:
-        val highCardErr = the [IllegalArgumentException] thrownBy(ctr.toCard(20))
+        val highCardErr = the [IllegalArgumentException] thrownBy(ctr.toCard(20, ctr))
 
     //--------------------------- ACCEPTABLE CARDS ----------------------------//
 

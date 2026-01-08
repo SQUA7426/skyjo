@@ -41,8 +41,8 @@ class Deck(
     val nDeck = deck.dropRight(amount)
     nDeck
 
-  override def leftOf(worth: Int): Int =
-    deck.count(_ == ctrl.toCard(_mediator, worth))
+  // override def leftOf(worth: Int): Int =
+  //   deck.count(_ == ctrl.toCard(_mediator, worth))
 
   override def draw(): (CardInterface, DeckInterface) = {
     if (upperCard != "Deck") {
