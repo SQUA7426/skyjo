@@ -5,6 +5,7 @@ import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.
 import de.htwg.se.skyjo.model.DeckImplementation.*
 import de.htwg.se.skyjo.model.BoardImplementation.*
 import de.htwg.se.skyjo.model.DiscardPileImplementation.*
+import de.htwg.se.skyjo.model.CardImplementation.*
 import de.htwg.se.skyjo.util.*
 import de.htwg.se.skyjo.model.GameState
 import org.scalatest.matchers.should.Matchers
@@ -43,6 +44,20 @@ class BoardTest extends AnyWordSpec with Matchers {
 
     "parse toString()" in:
       board.toString() shouldBe a[String]
+    "getBoard" in:
+      ctr.getBoard shouldBe a[Vector[Vector[CardInterface]]]
+
+    // ------------------- REDUCE --------------------------------- //
+    "reduce nothing normally" in:
+      ctr.reduce(0,0)._2 shouldBe a[Boolean]
+
+    val twoTimesTwoBoard = new Board(med, 2, 2, Vector(Vector(Card(1,ctr), Card(1, ctr)), Vector(Card(1,ctr), Card(1, ctr).falseCopy)))
+
+    "reduce a row" in:
+      twoTimesTwoBoard.reduce(1, -1)._2 shouldBe a[Boolean]
+
+    "reduce a col" in:
+      twoTimesTwoBoard.reduce(-1, 1)._2 shouldBe a[Boolean]
 
     // ------------------ EXCEPTION ------------------------------- //
     "throw an EXCEPTION when accessing wrong boardIdx" in:
