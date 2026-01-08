@@ -59,6 +59,9 @@ class BoardTest extends AnyWordSpec with Matchers {
     "reduce a col" in:
       twoTimesTwoBoard.reduce(-1, 1)._2 shouldBe a[Boolean]
 
+    "reduce a row and col" in:
+      twoTimesTwoBoard.reduce(1, 1)._2 shouldBe a[Boolean]
+
     // ------------------ EXCEPTION ------------------------------- //
     "throw an EXCEPTION when accessing wrong boardIdx" in:
       val errBrd = the [IndexOutOfBoundsException] thrownBy(board.getBoardCard(30))

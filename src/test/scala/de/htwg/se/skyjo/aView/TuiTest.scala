@@ -38,7 +38,7 @@ class TuiTest extends AnyWordSpec with Matchers {
         ctr.state = ctr.state.copy(isFlippingPhase = true)
         tui.update shouldBe true
       "can quit the game" in:
-        val simulatedInput = "quit"
+        val simulatedInput = "1\nquit"
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
         Console.withIn(in) {
           tui.startGame

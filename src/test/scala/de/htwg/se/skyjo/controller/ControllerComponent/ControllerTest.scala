@@ -83,7 +83,18 @@ class ControllerTest extends AnyWordSpec with Matchers {
       "be able to putCardOnBoard" in
         ctr.putCardOnBoard(0)
       "be able to turnBoardCard" in:
+        ctr.turnBoardCard(0)
+        ctr.turnBoardCard(1)
+        ctr.turnBoardCard(2)
+        ctr.turnBoardCard(3)
         ctr.turnBoardCard(4)
+        ctr.turnBoardCard(5)
+        ctr.turnBoardCard(6)
+        ctr.turnBoardCard(7)
+        ctr.turnBoardCard(8)
+        ctr.turnBoardCard(9)
+        ctr.turnBoardCard(10)
+        ctr.turnBoardCard(11)
     }
 
     "A GAMESTATE" should:
