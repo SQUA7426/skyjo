@@ -32,11 +32,8 @@ class DeckTest extends AnyWordSpec with Matchers {
     "Initialized" should:
 
       //------------------------- WHEN INIT ----------------------------------//
-<<<<<<< HEAD
       "be able to be init by alt. way" in:
         Deck(ctr) shouldBe a[DeckInterface]
-=======
->>>>>>> components
 
       "have the size of 150" in:
         d.deck.size shouldBe (150)
@@ -53,11 +50,6 @@ class DeckTest extends AnyWordSpec with Matchers {
       val d2 = new Deck(d.deck, ctr, d.turnUpperCard)
       "have the Card as upperCard when turned" in:
         d2.toString() shouldBe (d2.upperCard)
-<<<<<<< HEAD
-=======
-      "when initialized one turned be a Card" in:
-        d2.getCard shouldBe a[None.type]
->>>>>>> components
       "when turned again" in:
         d2.turnUpperCard should be ("Deck")
 
@@ -65,12 +57,9 @@ class DeckTest extends AnyWordSpec with Matchers {
 
       // "when get upperCard throw an IllegalArgumentException" in:
       //   val throwError = the [Exception] thrownBy(d.getUpperCard())
-<<<<<<< HEAD
       "draw()" in:
         val err = the [IllegalArgumentException] thrownBy(d2.draw())
       "getCard" in:
         val errC = the [IllegalArgumentException] thrownBy(d2.getCard)
-=======
->>>>>>> components
   }
 }

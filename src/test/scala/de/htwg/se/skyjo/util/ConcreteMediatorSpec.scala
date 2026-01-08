@@ -26,11 +26,7 @@ class ConcreteMediatorSpec extends AnyWordSpec with Matchers {
 
     val plBoards = Vector.fill(plCount)(new Board(med, 4, 3, Vector.empty))
 
-<<<<<<< HEAD
     ctr.state = new GameState(med, plBoards, deck, disc, 0, Some(Card(9, ctr)))
-=======
-    ctr.state = new GameState(med, plBoards, deck, disc, 0, None)
->>>>>>> components
     ctr.setup()
     val simpleCard: Card = new Card(3, true, ctr)
     "add Colleagues" in:
@@ -59,7 +55,6 @@ class ConcreteMediatorSpec extends AnyWordSpec with Matchers {
       "handle input 1" in {
         h.handle("1", ctr.state)
       }
-<<<<<<< HEAD
       "handle input undo" in {
         h.handle("undo", ctr.state)
       }
@@ -70,8 +65,6 @@ class ConcreteMediatorSpec extends AnyWordSpec with Matchers {
         h.handle("s", ctr.state)
       }
 
-=======
->>>>>>> components
       "be unable to handle unrecognized requests" in:
         h.handle("x", ctr.state) shouldBe None
 }
