@@ -1,4 +1,4 @@
-package de.htwg.se.skyjo.model
+package de.htwg.se.skyjo.util
 
 import de.htwg.se.skyjo.aView.Tui
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.*
@@ -8,16 +8,13 @@ import de.htwg.se.skyjo.model.DiscardPileImplementation.*
 import de.htwg.se.skyjo.util.*
 import de.htwg.se.skyjo.model.GameState
 import org.scalatest.matchers.should.Matchers
+
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalactic.StringNormalizations._
-import java.io.ByteArrayOutputStream
-import scala.collection.immutable.Seq
-
+import org.scalatest.enablers.Containing
 import java.io.ByteArrayInputStream
-import scala.Console
 
-class BoardTest extends AnyWordSpec with Matchers {
-  "A Board" should {
+class CommandSpec extends AnyWordSpec with Matchers {
+  "A Command" should {
     val plCount = 1
     val med = new ConcreteMediator()
 
@@ -32,9 +29,21 @@ class BoardTest extends AnyWordSpec with Matchers {
     ctr.state = new GameState(med, plBoards, deck, disc, 0, None)
     ctr.setup()
 
-    val board = ctr.getGameState.boards(ctr.getGameState.playerIdx)
-    val tui = new Tui(ctr)
-    "parse toString()" in:
-      board.toString() shouldBe a[String]
+    val cCom = new SupportCommand(ctr)
+    // ---------------------INPUT -----------------------------------------//
+    "execute the undo cmd" in {
+      val gl = cCom.execute("undo", ctr.state)
+    }
+    "execute the redo cmd" in {
+        val gl = cCom.execute("redo", ctr.state)
+      // }
+    }
+
+    "execute the help cmd" in:
+      cCom.execute("help", ctr.state)
+    // "execute the quit cmd" in:
+    //   cCom.execute("quit") shouldBe None
+    "not execute the x cmd" in:
+      cCom.execute("x", ctr.state)
   }
 }

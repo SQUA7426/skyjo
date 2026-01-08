@@ -1,53 +1,66 @@
 package de.htwg.se.skyjo.aView
-import de.htwg.se.skyjo.model
-import de.htwg.se.skyjo.model.{Board, Deck, DiscardPile}
-import de.htwg.se.skyjo.controller.ControllerComponent.Controller
-import de.htwg.se.skyjo.util.{MoveCaretaker,Memento}
+import de.htwg.se.skyjo.model.DeckImplementation.*
+import de.htwg.se.skyjo.model.DiscardPileImplementation.*
+import de.htwg.se.skyjo.model.BoardImplementation.*
+import de.htwg.se.skyjo.util.{Memento, MoveCaretaker, SupportHandler}
+import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
+
 import scala.collection.mutable.Stack
-
 import scala.io.StdIn.readLine
+import de.htwg.se.skyjo.util.SupportCommand
+import scala.util.Try
+import scala.util.{Failure, Success}
 
+import scala.util.{Try, Success, Failure}
+import scala.util.Random
+import de.htwg.se.skyjo.util.Observer
 
+class Tui(ctrl: ControllerInterface) extends Observer {
+  ctrl.add(this)
 
-class Tui(cont : Controller) {
-
-  def inputRequest(b:Board, disc : String)=(
-    s"Which BoardCard [0-${b.xSize * b.ySize - 1}] do you want to switch with ${disc}?")
-
-  def inputRequestDeck(deckCard : String)=(
-    println(s"You took ${deckCard}")
-  )
-  def cardTurnRq(b:Board)=(
-    s"Which BoardCard [0-${b.xSize * b.ySize - 1}] do you want to turn around?")
-
-  def turnOfPlayer(i:Int)=(
-    println(s"Player ${i}:"))
-
-  def finishedConf()=(
-    println(s"someone is finished: \n")
-    )
-
-  def turn(b: Board, d: Deck, disc: DiscardPile): (Board, Deck, DiscardPile) =
-    println(b)
-    println(s"| ${disc.toString()} |\n")
-    println(s"Whatcha want to do?")
-    println("[0] Take discard and switch with a board card")
-    println("[1] Take deck card and choose:")
-    println("\t[1] switch with board card")
-    println("\t[2] put on discard and flip board card")
-
-    val choose = readLine()
-    choose match {
-      case "0" => cont.takeFromDisc(b, d, disc)
-      case "1" => {inputRequestDeck(d.turnUpperCard().toString()); cont.takeFromDeck(b, d, disc)}
-      case "2" =>
-        if(cont.mementostack.undoStack != null) {
-          val mem : Memento = cont.mementostack.undoStack.pop()
-          cont.mementostack.undo(mem, d, b, disc)
-        } else (b,d,disc)
-      case _ =>
-        println(s"${choose} is not valid, doing nothing.")
-        turn(b, d, disc)
+  def startGame: Unit =
+    var input: String = ""
+    while (input != "quit") {
+      print(">> ")
+      input = scala.io.StdIn.readLine()
+      if (input != "quit") {
+        processInput(input)
+      }
     }
 
+  def processInput(input: String) = {
+    val state = ctrl.getGameState
+    val result = SupportHandler(ctrl)
+      .handle(input, state)
+      .orElse(SupportCommand(ctrl).execute(input, state))
+
+    result match {
+      case Some(newState) =>
+        ctrl.uptGameState(
+          newState
+        )
+      case None =>
+        println("input unknown")
+    }
+  }
+
+  override def update: Boolean = {
+    // println("[DEBUG] TUI Update triggered!")
+    val state = ctrl.getGameState
+    val b = state.boards(state.playerIdx)
+
+    println(s"\n--- Player ${state.playerIdx}'s Turn ---")
+    println(b)
+    println(s"Discard Pile: | ${state.disc} |")
+
+    state.drawnCard match {
+      case Some(card) =>
+        println(s">> Holding: $card.\n[Index] to put onto Board or [s] to swap with discard & flip BoardCard.")
+      case None if state.isFlippingPhase =>
+        println("Card discarded! Now enter index [0-11] to flip a board card.")
+      case None =>
+        println("[0] Take discard | [1] Take deck")
+    }
+    true
+  }
 }

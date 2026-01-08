@@ -1,111 +1,74 @@
 package de.htwg.se.skyjo.controller.ControllerComponent
 
-import de.htwg.se.skyjo.model.{
-  Board,
-  Card,
-  Deck,
-  DiscardPile,
-  fillBoard,
-  fullDeck,
-  getBoardCard
-}
 import de.htwg.se.skyjo.aView.Tui
+import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.*
+import de.htwg.se.skyjo.model.DeckImplementation.*
+import de.htwg.se.skyjo.model.BoardImplementation.*
+import de.htwg.se.skyjo.model.DiscardPileImplementation.*
+import de.htwg.se.skyjo.util.*
+import de.htwg.se.skyjo.model.{GameState, DeckInterface, CardInterface, BoardInterface, DiscardPileInterface}
 
 import scala.io.StdIn.{readInt, readLine}
-// import annotation.tailrec
 import scala.util.Random
 import java.io.ByteArrayInputStream
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import de.htwg.se.skyjo.model.fillDeck
 
 class ControllerTest extends AnyWordSpec with Matchers {
   "A Controller" when:
-    val d = Deck(fillDeck(Seq.empty[Card]), "Deck")
-    val b = fillBoard(4, 3, d)._1
-    val disc = DiscardPile("Disc")
-    val ctrl = Controller()
-    "it is working, it" should:
-      "reduce a Board Column right" in:
-        val updatedBoard = Board(
-          3,
-          2,
-          Vector(
-            Vector(Card(3), Card(1), Card(2).trueCopy()),
-            Vector(Card(4), Card(6), Card(2).trueCopy())
-          )
-        )
-        ctrl.getReducedBrd(updatedBoard) shouldBe a[Board]
-      "reduce a Board Row right" in:
-        val updatedBoard = Board(
-          3,
-          2,
-          Vector(
-            Vector(Card(3), Card(1), Card(5)),
-            Vector(Card(2).trueCopy(), Card(2).trueCopy(), Card(2).trueCopy())
-          )
-        )
-        ctrl.getReducedBrd(updatedBoard) shouldBe a[Board]
-      "be unable to take a Card from the DiscardPile, when there's no Card" in:
-        val simulatedInput = "1\n1\n0\n"
-        val in = new ByteArrayInputStream(simulatedInput.getBytes())
-        Console.withIn(in) {
-          val (bTakeDisc, dTakeDisc, discTakeDisc) =
-            ctrl.takeFromDisc(b, d, disc)
-        }
-      "be able to take a Card from the DiscardPile" in:
-        val disc2 = DiscardPile("3")
-        val simulatedInput = "0\n"
-        val in = new ByteArrayInputStream(simulatedInput.getBytes())
-        Console.withIn(in) {
-          val (bTakeDisc, dTakeDisc, discTakeDisc) =
-            ctrl.takeFromDisc(b, d, disc2)
-          bTakeDisc shouldBe a[Board]
-          dTakeDisc shouldBe a[Deck]
-          discTakeDisc shouldBe a[DiscardPile]
-        }
-      "be able to take a Card from the Deck Option 1" in:
-        val simulatedInput = "3\n1\n0\n"
-        val in = new ByteArrayInputStream(simulatedInput.getBytes())
-        Console.withIn(in) {
-          ctrl.takeFromDeck(b,d,disc)
-        }
-      "be able to take a Card from the Deck Option 2" in:
-        val anotherSimulatedInput = "2\n0\n"
-        val in2 = new ByteArrayInputStream(anotherSimulatedInput.getBytes())
-        Console.withIn(in2) {
-          ctrl.takeFromDeck(b,d,disc)
-        }
-      val b2 = fillBoard(2, 1, d)._1
-      val plBoards: Array[Board] = Array(b2)
-      "manage the first round" in:
-        val simulatedInput = "1\n1\n0\n"
-        val in = new ByteArrayInputStream(simulatedInput.getBytes())
+    val plCount = 1
+    val med = new ConcreteMediator()
 
-        Console.withIn(in) {
-          val (brdAfterFirst, deckAfterFirst, discAfterFist, firstTurnBool) =
-            ctrl.firstRound(1, plBoards, d, disc)
-          firstTurnBool shouldBe false
-        }
-      "manage next rounds" in:
-        val simulatedInput = "1\n1\n0\n"
-        val in = new ByteArrayInputStream(simulatedInput.getBytes())
-        Console.withIn(in) {
-          ctrl.nextRounds(1,plBoards,d,disc)._4 shouldBe false
-        }
-      "manage a gameLoop" in:
-        val simulatedInput = "1\n1\n0\n"
-        val in = new ByteArrayInputStream(simulatedInput.getBytes())
-        Console.withIn(in) {
-          val gl = ctrl.gameLoop(1,plBoards,d,disc)
-          gl._3 shouldBe a[DiscardPile]
-        }
-      "manage some gameLoop" in:
-        val biggerPlBoards = Array(fillBoard(2,2,d)._1)
-        val simulatedInput = "1\n1\n3\n1\n1\n2\n1\n1\n1\n1\n1\n0\n"
-        val in = new ByteArrayInputStream(simulatedInput.getBytes())
-        Console.withIn(in) {
-          val gl = ctrl.gameLoop(1,biggerPlBoards,d,disc)
-          gl._3 shouldBe a[DiscardPile]
-        }
+    val tempState = new GameState(med, Vector.empty, null, null, 0, None)
+    val ctr = new Controller(tempState)
+
+    val deck = new Deck(ctr.fullDeck(), ctr)
+    val disc = new DiscardPile(ctr)
+
+    val plBoards = Vector.fill(plCount)(new Board(med, 4, 3, Vector.empty))
+
+    ctr.state = new GameState(med, plBoards, deck, disc, 0, None)
+
+    val tui = new Tui(ctr)
+    "it is working, it" should {
+      "do a setup() and update Tui" in:
+        ctr.setup()
+      "get Mediator, GameState, Deck and Discard-Card" in:
+        ctr.getMediator shouldBe a[Mediator]
+        ctr.getGameState shouldBe a[GameState]
+        ctr.getDeck shouldBe a[Vector[CardInterface]]
+        ctr.getDiscCard() shouldBe a[None.type]
+      "be able to fill a Board" in:
+        val (afterBoard, afterDeck) = ctr.fillBoard(4, 3, ctr.state.deck)
+        afterBoard shouldBe a[BoardInterface]
+        afterDeck shouldBe a[DeckInterface]
+      "execute undo and redo" in:
+        val oldState = ctr.state
+        ctr.undo()
+        ctr.redo()
+      "execute a move and update GAMESTATE" in:
+        val oldState = ctr.state
+        ctr.executeMove(oldState)
+        ctr.uptGameState(oldState)
+      "draw from Deck and DiscardPile" in:
+        ctr.drawFromDeck()
+        ctr.drawFromDisc()
+        ctr.draw()
+      "replaceCard on Board" in:
+        ctr.replaceCard(0)
+      "execute a swap between Deck and DiscardPile" in:
+        ctr.discardDrawnCard()
+      "execute a SwapHandler()" in:
+        ctr.SwapHandler(0)
+      "remove a Card From Disc" in:
+        ctr.remove()
+      "remove a Card From Deck" in:
+        ctr.remove(1)
+      "be able to turn Deck UpperCard" in:
+        ctr.turnUpperCard shouldBe a[String]
+
+      "execute a fullDeck()" in:
+        val fullDeck = ctr.fullDeck()
+        fullDeck.length shouldBe 150
+    }
 }

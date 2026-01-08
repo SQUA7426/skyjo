@@ -1,4 +1,4 @@
-package de.htwg.se.skyjo.model
+package de.htwg.se.skyjo.util
 
 import de.htwg.se.skyjo.aView.Tui
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.*
@@ -9,15 +9,10 @@ import de.htwg.se.skyjo.util.*
 import de.htwg.se.skyjo.model.GameState
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalactic.StringNormalizations._
-import java.io.ByteArrayOutputStream
-import scala.collection.immutable.Seq
+import org.scalatest.enablers.Containing
 
-import java.io.ByteArrayInputStream
-import scala.Console
-
-class BoardTest extends AnyWordSpec with Matchers {
-  "A Board" should {
+class MementoSpec extends AnyWordSpec with Matchers {
+  "A MoveCaretaker" should {
     val plCount = 1
     val med = new ConcreteMediator()
 
@@ -32,9 +27,10 @@ class BoardTest extends AnyWordSpec with Matchers {
     ctr.state = new GameState(med, plBoards, deck, disc, 0, None)
     ctr.setup()
 
-    val board = ctr.getGameState.boards(ctr.getGameState.playerIdx)
-    val tui = new Tui(ctr)
-    "parse toString()" in:
-      board.toString() shouldBe a[String]
+    val mc = new MoveCaretaker()
+    "save, undo and redo" in:
+      mc.save(ctr.state)
+      mc.undo(ctr.state)
+      mc.redo(ctr.state)
   }
 }
