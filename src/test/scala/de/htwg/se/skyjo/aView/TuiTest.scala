@@ -27,6 +27,7 @@ class TuiTest extends AnyWordSpec with Matchers {
     val plBoards = Vector.fill(plCount)(new Board(med, 4, 3, Vector.empty))
 
     ctr.state = new GameState(med, plBoards, deck, disc, 0, None)
+    ctr.setup()
 
     val tui = new Tui(ctr)
     "an Input Request is done, it" should:
