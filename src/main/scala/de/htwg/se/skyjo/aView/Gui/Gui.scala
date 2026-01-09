@@ -190,7 +190,7 @@ case class BoardView() {
       // println(termBoard.brd.flatten)
       // println(s"aDisc:\n${aDisc.discPile}")
       // println(s"aDeck:\n${aDeck.toString()}")
-      if termBoard.brd.forall(row => row.forall(c => c.isTurned() == true)) then popup
+      if termBoard.brd.forall(row => row.forall(c => c.isTurned() == true)) then popup(termBoard)
     }
 
     def uptCardView: Unit = {
@@ -556,12 +556,13 @@ object Gui extends JFXApp3 {
   }
 }
 
-def popup = {
+def popup(b:Board) = {
       val finished = new Alert(AlertType.Information) {
         // initOwner(stage)
         title = "finished window"
       }
       finished.headerText = "FINISHED"
+      finished.contentText = s"SUM:  ${b.brd.flatten.toList.map(c => c.value).fold(0)((x,y) => x + y).toString()}"
       val re = finished.showAndWait()
       re match {
         case Some(ButtonType.OK) => {
