@@ -469,8 +469,8 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
            aDisc = toDisc._1
            aDeck = toDisc._2
 
-           aDiscard.cCard = ctr.toCard(aDisc.toString())
-           vDeck.cCard = ctr.toCard(aDeck.turnUpperCard)
+           aDiscard.cCard = ctr.toCard(aDisc)
+           vDeck.cCard = ctr.toCard(aDeck.getCard.toString())
 
            // ctr.state = ctr.getGameState.copy(
            //   currentState = ctr.currState.reset()
