@@ -204,9 +204,9 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
           uptCardView
         }
       }
-      // println(termBoard.brd.flatten)
-      // println(s"aDisc:\n${aDisc.discPile}")
-      // println(s"aDeck:\n${aDeck.toString()}")
+      println(ctr.getBoard.flatten)
+      println(s"aDisc:\n${aDisc.toString()}")
+      println(s"aDeck:\n${aDeck.toString()}")
 
       def popup = {
         val finished = new Alert(AlertType.Information) {
@@ -248,7 +248,7 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
   }
 
   // BOARDVIEW
-  var manyCards: Seq[CardView] = BOARD_INIT()
+  var manyCards: Seq[CardView] = BOARD_INIT(false)
 
   def BOARD_INIT(begin: Boolean = true): Seq[CardView] = {
     println(ctr.getBoard.flatten.map(c => c.trueCopy))
@@ -272,9 +272,10 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
           switchDeckDisc = () => {},
           switchDiscB = () => {
             val preDisc = ctr.toCard(aDisc.toString())
-            val (tmpDisc: DiscardPileInterface, tmpBoard: BoardInterface) =
+            val (tmpCard: CardInterface, tmpBoard: BoardInterface) =
               (termBoard
                 .switch(preDisc, (ySize * row) + col + row): @unchecked)
+            val tmpDisc  = new DiscardPile(ctr, tmpCard.toString())
             aDisc = tmpDisc
             aDiscard.cCard =
               ctr.getBoard.flatten.apply((ySize * row) + col + row)
@@ -328,11 +329,11 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
             )
             val turnedDeck =
               new Deck(ctr.getDeck, ctr, ctr.draw()._1.toString())
-            val (tmpDeck: Deck, tmpBoard: Board) = (termBoard.switch(
+            val (tmpCard: CardInterface, tmpBoard: Board) = (termBoard.switch(
               ctr.toCard(turnedDeck.toString()),
               (ySize * row) + col + row
             ): @unchecked)
-
+            val tmpDeck: Deck = new Deck(ctr.getDeck, ctr, tmpCard.toString())
             aDiscard.cCard = ctr.toCard(aDisc.toString())
             val preBoard = termBoard
             termBoard = tmpBoard
@@ -372,7 +373,7 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
                 ctr.getPldx,
                 Some(ctr.toCard(turnedDeck)),
                 ctr.getPhase,
-                ctr.currState
+                ctr.currState.reset()
               )
             )
             ctr.save(ctr.getGameState)

@@ -262,8 +262,10 @@ class Controller(var state: GameState) extends Observable with ControllerInterfa
       case a: Int => Card(a.toInt, true, this)
       case b: String if val1d.contains(b) =>
         Card(Integer.parseInt(b), true, this)
+      case d: Deck => Card(Integer.parseInt(d.toString()), true, this)
+      case disc: DiscardPile => Card(Integer.parseInt(disc.toString()), this)
       case other =>
-        throw new IllegalArgumentException(s"Invalid input:$other")
+        throw new IllegalArgumentException(s"Invalid input:$other with type: ${other.getClass}")
     }
   }
 
