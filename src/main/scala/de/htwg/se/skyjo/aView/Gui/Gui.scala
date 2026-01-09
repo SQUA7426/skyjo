@@ -49,17 +49,20 @@ import scalafx.scene.Node
 
 import de.htwg.se.skyjo.aView.Gui.{BoardView, fontname}
 
-case class Gui(ctr: ControllerInterface) extends Observer with JFXApp3 {
-  ctr.add(this)
-  val boardLayer = new Pane()
-  val b = new BoardView()
+object Gui extends Observer with JFXApp3 {
+  var ctr: ControllerInterface = _
+  var boardLayer: Pane = _
+  var b: BoardView = _
 
   override def start(): Unit = {
+    require(ctr != null, "Controller must be set before launching GUI!")
+    boardLayer = new Pane()
+    b = new BoardView(ctr)
     print(b.termBoard.toString())
     stage = new JFXApp3.PrimaryStage {
-      title.value = "ScalaFX Skyjo"
-      width = 800
-      height = 1200
+      // title.value = "ScalaFX Skyjo"
+      // width = 800
+      // height = 1200
       scene = new Scene {
 
         root = new Pane {
@@ -68,8 +71,10 @@ case class Gui(ctr: ControllerInterface) extends Observer with JFXApp3 {
           children = Seq(boardLayer, (guiButtons(stage)))
         }
       }
-      update
     }
+    stage.show()
+    ctr.add(this)
+    update
   }
 
   def guiButtons(stage: Stage): HBox = {
@@ -112,15 +117,13 @@ case class Gui(ctr: ControllerInterface) extends Observer with JFXApp3 {
     bt_undo.tooltip = "Undoing Turn"
     bt_undo.setPrefHeight(ht)
     bt_undo.setPrefWidth(wt)
-    bt_undo.onMouseClicked = _ => {
-    }
+    bt_undo.onMouseClicked = _ => {}
 
     val bt_redo = new Button("redo")
     bt_redo.tooltip = "Redoing last Turn"
     bt_redo.setPrefHeight(ht)
     bt_redo.setPrefWidth(wt)
-    bt_redo.onMouseClicked = _ => {
-    }
+    bt_redo.onMouseClicked = _ => {}
 
     val bt_quit = new Button("quit")
     bt_quit.tooltip = "quitting GAME"
@@ -151,4 +154,3 @@ case class Gui(ctr: ControllerInterface) extends Observer with JFXApp3 {
 
   override def update: Boolean = true
 }
-

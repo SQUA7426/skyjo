@@ -15,6 +15,8 @@ import de.htwg.se.skyjo.util.*
 
 import scala.io.StdIn.{readInt, readLine}
 import scala.util.Random
+import de.htwg.se.skyjo.model.State
+import de.htwg.se.skyjo.model.DiscardPileInterface
 
 class Controller(var state: GameState) extends Observable with ControllerInterface {
   private val caretaker = new MoveCaretaker()
@@ -103,6 +105,27 @@ class Controller(var state: GameState) extends Observable with ControllerInterfa
     notifyObservers
   }
   def getGameState: GameState = state
+
+  def getBrds = state.boards
+  def getADeck = state.deck
+  def getDisc = state.disc
+  def getPldx: Int = state.playerIdx
+  def getdrawn: Option[CardInterface] = {
+    state.drawnCard match {
+    case Some(ci) => Some(ci)
+    case None => None
+    }
+  }
+  def getPhase: Boolean = state.isFlippingPhase
+  def currState: State = state.currentState
+
+  def copy(med: Mediator = getMediator, brds: Vector[BoardInterface] = getBrds, d: DeckInterface = getADeck, disc: DiscardPileInterface = getDisc, idx: Int = getPldx, drawnCard: Option[CardInterface] = getdrawn, flippedPhase: Boolean = getPhase, state: State = currState): GameState = {
+    GameState(med, brds,d,disc,idx,drawnCard,flippedPhase, state)
+  }
+
+  def assertGameState(newState: GameState): Unit = {
+    state = newState
+  }
 
   def uptGameState(newState: GameState): Unit = {
     state = newState

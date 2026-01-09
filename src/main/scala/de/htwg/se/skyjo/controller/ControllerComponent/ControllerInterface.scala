@@ -8,6 +8,7 @@ import de.htwg.se.skyjo.model.{
 }
 import de.htwg.se.skyjo.util.*
 import de.htwg.se.skyjo.model.GameState
+import de.htwg.se.skyjo.model.State
 
 trait ControllerInterface extends Observable {
   // GAME MECHANICS //
@@ -18,8 +19,21 @@ trait ControllerInterface extends Observable {
   def redo(): Unit
   def turnBoardCard(index: Int): Unit
   def putCardOnBoard(pos: Int): Unit
+  
   def getMediator: Mediator
   def getGameState: GameState
+  def getBrds: Vector[BoardInterface]
+  def getADeck: DeckInterface
+  def getDisc: DiscardPileInterface
+  def getPldx: Int
+  def getdrawn: Option[CardInterface]
+  def getPhase: Boolean
+  def currState: State
+
+  def copy(med: Mediator, brds: Vector[BoardInterface], d: DeckInterface, disc: DiscardPileInterface, idx: Int, drawnCard: Option[CardInterface], flippedPhase: Boolean, state: State): GameState
+
+  def assertGameState(newState: GameState): Unit
+
   def drawFromDeck(): Unit
   def drawFromDisc(): Unit
   def replaceCard(pos: Int): Unit

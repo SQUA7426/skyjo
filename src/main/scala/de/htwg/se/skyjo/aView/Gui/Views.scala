@@ -50,10 +50,13 @@ import scalafx.scene.Node
 import de.htwg.se.skyjo.model.DiscardPileInterface
 import de.htwg.se.skyjo.model.BoardInterface
 import de.htwg.se.skyjo.model.DeckInterface
+import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
 
 val fontname = "Parisienne"
 
-case class BoardView() {
+case class BoardView(ctr: ControllerInterface) extends Observer {
+  ctr.add(this)
+  override def update: Boolean = true
 
   // val _med: Mediator = new ConcreteMediator()
   val padding = 30
@@ -61,21 +64,11 @@ case class BoardView() {
   // var termBoard: Board = fillBoard(_med, 4, 3, aDeck)._1
   // var aDisc: DiscardPile = new DiscardPile(_med, "Disc")
   // var memStack: MoveCaretaker = new MoveCaretaker(_med)
-  val plCount = 1
-  val med = new ConcreteMediator()
+  var med = ctr.getMediator
+  var aDisc = ctr.getDisc
+  var aDeck = ctr.getADeck
 
-  val tempState = new GameState(med, Vector.empty, null, null, 0, None)
-  val ctr = new Controller(tempState)
-
-  var aDeck: DeckInterface = new Deck(ctr.fullDeck(), ctr)
-  var aDisc: DiscardPileInterface = new DiscardPile(ctr)
-
-  val plBoards = Vector.fill(plCount)(new Board(med, 4, 3, Vector.empty))
-
-  ctr.state = new GameState(med, plBoards, aDeck, aDisc, 0, None)
-  ctr.setup()
-
-  var termBoard = ctr.getGameState.boards(ctr.getGameState.playerIdx)
+  var termBoard = ctr.getBrds(ctr.getPldx)
 
   // val tui = new Tui(ctr)
 
@@ -134,36 +127,45 @@ case class BoardView() {
     }
 
     cardShape.onMouseClicked = (_: MouseEvent) => {
-      ctr.getGameState.currentState match {
+      ctr.currState match {
         case State.BEGIN => {
           selected = !selected
 
           if selected && (isDisc || isDeck) then
-            ctr.state = ctr.getGameState.copy(
-              currentState = ctr.getGameState.currentState.nextState()
+            ctr.assertGameState(
+              ctr.copy(
+                ctr.getMediator,
+                ctr.getBrds,
+                ctr.getADeck,
+                ctr.getDisc,
+                ctr.getPldx,
+                ctr.getdrawn,
+                ctr.getPhase,
+                ctr.currState.nextState()
+              )
             )
 
-          if isDisc then ctr.getGameState.currentState.pre = "DISC"
+          if isDisc then ctr.currState.pre = "DISC"
           else if isDeck then
-            ctr.getGameState.currentState.pre = "DECK"
+            ctr.currState.pre = "DECK"
             aDeck = new Deck(ctr.getDeck, ctr, aDeck.turnUpperCard)
             turned = true
           else
             selected = !selected
-            ctr.getGameState.currentState.pre = "BOARD"
+            ctr.currState.pre = "BOARD"
           // println(s"changed to State: ${currentState.toString}")
           uptCardView
         }
         case State.MID => {
           selected = !selected
 
-          if ctr.getGameState.currentState.pre.compareTo("DISC") == 0 then
+          if ctr.currState.pre.compareTo("DISC") == 0 then
             if aDiscard.turned then
               turned = true
               // println("switching Disc / Board")
               switchDiscB()
             else println("Cannot get from Empty DiscardPile")
-          else if ctr.getGameState.currentState.pre.compareTo("DECK") == 0 then
+          else if ctr.currState.pre.compareTo("DECK") == 0 then
             turned = true
             if isDisc then
               // println("switching Deck / Disc")
@@ -182,11 +184,20 @@ case class BoardView() {
           vDeck.uptCardView
 
           uptCardView
-          if ctr.getGameState.currentState == State.MID then
-            ctr.state = ctr.getGameState.copy(
-              currentState = ctr.getGameState.currentState.reset()
+          if ctr.currState == State.MID then
+            ctr.assertGameState(
+              ctr.copy(
+                ctr.getMediator,
+                ctr.getBrds,
+                ctr.getADeck,
+                ctr.getDisc,
+                ctr.getPldx,
+                ctr.getdrawn,
+                ctr.getPhase,
+                ctr.currState.nextState()
+              )
             )
-            // println(s"changed to State: ${ctr.getGameState.currentState.toString}")
+            // println(s"changed to State: ${ctr.currState.toString}")
         }
         case State.END => {
           endTurn()
@@ -285,13 +296,27 @@ case class BoardView() {
             //     ).turned
             //   )
             // )
-            val preStage = ctr.getGameState.copy(
-              boards = ctr.getGameState.boards
-                .updated(ctr.getGameState.playerIdx, preBoard),
-              disc = DiscardPile(ctr, preDisc.toString()),
-              drawnCard = Some(preDisc)
+
+            // val preStage = ctr.getGameState.copy(
+            //   boards = ctr.getGameState.boards
+            //     .updated(ctr.getGameState.playerIdx, preBoard),
+            //   disc = DiscardPile(ctr, preDisc.toString()),
+            //   drawnCard = Some(preDisc)
+            // )
+
+            ctr.assertGameState(
+              ctr.copy(
+                ctr.getMediator,
+                ctr.getBrds.updated(ctr.getPldx, preBoard),
+                ctr.getADeck,
+                DiscardPile(ctr, preDisc.toString()),
+                ctr.getPldx,
+                ctr.getdrawn,
+                ctr.getPhase,
+                ctr.currState
+              )
             )
-            ctr.save(preStage)
+            ctr.save(ctr.getGameState)
           },
           switchDeckB = () => {
             val preDisc = aDisc
@@ -329,20 +354,46 @@ case class BoardView() {
             //     ).turned
             //   )
             // )
-            val preStage = ctr.getGameState.copy(
-              boards = ctr.getGameState.boards
-                .updated(ctr.getGameState.playerIdx, preBoard),
-              deck = turnedDeck,
-              disc = DiscardPile(ctr, preDisc.toString()),
-              drawnCard = Some(ctr.toCard(turnedDeck))
+
+            // val preStage = ctr.getGameState.copy(
+            //   boards = ctr.getGameState.boards
+            //     .updated(ctr.getGameState.playerIdx, preBoard),
+            //   deck = turnedDeck,
+            //   disc = DiscardPile(ctr, preDisc.toString()),
+            //   drawnCard = Some(ctr.toCard(turnedDeck))
+            // )
+
+            ctr.assertGameState(
+              ctr.copy(
+                ctr.getMediator,
+                ctr.getBrds.updated(ctr.getPldx, preBoard),
+                ctr.getADeck,
+                DiscardPile(ctr, preDisc.toString()),
+                ctr.getPldx,
+                Some(ctr.toCard(turnedDeck)),
+                ctr.getPhase,
+                ctr.currState
+              )
             )
-            ctr.save(preStage)
+            ctr.save(ctr.getGameState)
           },
           endTurn = () => {
             termBoard = termBoard.turnBoardCard((ySize * row) + col + row)
             manyCards.apply((ySize * row) + col + row).turned = true
-            ctr.state = ctr.getGameState.copy(
-              currentState = ctr.getGameState.currentState.reset()
+            // ctr.state = ctr.getGameState.copy(
+            //   currentState = ctr.currState.reset()
+            // )
+            ctr.assertGameState(
+              ctr.copy(
+                ctr.getMediator,
+                ctr.getBrds,
+                ctr.getADeck,
+                ctr.getDisc,
+                ctr.getPldx,
+                ctr.getdrawn,
+                ctr.getPhase,
+                ctr.currState.reset()
+              )
             )
           }
         )
@@ -375,10 +426,28 @@ case class BoardView() {
            aDiscard.cCard = ctr.toCard(aDisc.toString())
            vDeck.cCard = ctr.toCard(aDeck.turnUpperCard)
 
-           ctr.state = ctr.getGameState.copy(
-             currentState = ctr.getGameState.currentState.reset()
+//            val tmpState: GameState =
+//             new GameState(ctr.getGameState.copy(
+//              currentState = ctr.currState.reset()
+//            )
+// )
+//
+//            ctr.state = ctr.getGameState.copy(
+//              currentState = ctr.currState.reset()
+//            )
+           ctr.assertGameState(
+             ctr.copy(
+               ctr.getMediator,
+               ctr.getBrds,
+               ctr.getADeck,
+               ctr.getDisc,
+               ctr.getPldx,
+               ctr.getdrawn,
+               ctr.getPhase,
+               ctr.currState.reset()
+             )
            )
-           ctr.getGameState.currentState.pre = "BOARD"
+           ctr.currState.pre = "BOARD"
          },
          switchDiscB = () => {},
          switchDeckB = () => {},
@@ -402,10 +471,11 @@ case class BoardView() {
            aDiscard.cCard = ctr.toCard(aDisc.toString())
            vDeck.cCard = ctr.toCard(aDeck.turnUpperCard)
 
-           ctr.state = ctr.getGameState.copy(
-             currentState = ctr.getGameState.currentState.reset()
-           )
-           ctr.getGameState.currentState.pre = "BOARD"
+           // ctr.state = ctr.getGameState.copy(
+           //   currentState = ctr.currState.reset()
+           // )
+           ctr.assertGameState(ctr.copy(ctr.getMediator, ctr.getBrds, ctr.getADeck, ctr.getDisc,ctr.getPldx, ctr.getdrawn, ctr.getPhase, ctr.currState.reset()))
+           ctr.currState.pre = "BOARD"
          },
          switchDiscB = () => {},
          switchDeckB = () => {},
