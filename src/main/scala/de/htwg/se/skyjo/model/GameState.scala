@@ -3,6 +3,17 @@ package de.htwg.se.skyjo.model
 import de.htwg.se.skyjo.model.{BoardInterface,CardInterface, DeckInterface, DiscardPileInterface}
 import de.htwg.se.skyjo.util.*
 
+enum State(str: String = "BEGIN", var pre: String = "BOARD") {
+  def nextState(): State = {
+    if str == "BEGIN" then State.MID
+    else State.END
+  }
+  case BEGIN extends State()
+  case MID extends State("MID")
+  case END extends State("END")
+  def reset(): State = BEGIN
+}
+
 case class GameState (
   med: Mediator,
   boards: Vector[BoardInterface],
@@ -10,7 +21,8 @@ case class GameState (
   disc: DiscardPileInterface,
   playerIdx: Int,
   drawnCard: Option[CardInterface] = None,
-  isFlippingPhase: Boolean = false
+  isFlippingPhase: Boolean = false,
+  currentState: State = State.BEGIN
 ) {
   override def toString(): String = {
     val brds = boards.foreach(bi => bi.toString())
