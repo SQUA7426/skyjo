@@ -131,7 +131,7 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
         case State.BEGIN => {
           selected = !selected
 
-          if selected && (isDisc || isDeck) then
+          if selected && (isDisc || isDeck) then {
             ctr.assertGameState(
               ctr.copy(
                 ctr.getMediator,
@@ -144,6 +144,7 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
                 ctr.currState.nextState()
               )
             )
+          }
 
           if isDisc then ctr.currState.pre = "DISC"
           else if isDeck then
@@ -225,6 +226,7 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
       }
 
       if ctr.getBoard.forall(row => row.forall(_.isTurned)) then popup
+      Gui.update
     }
 
     def uptCardView: Unit = {
@@ -464,7 +466,7 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
          isDisc = true,
          switchDeckDisc = () => {
            val turnedDeck =
-             new Deck(ctr.getDeck, ctr, ctr.draw().toString())
+             new Deck(ctr.getDeck, ctr, ctr.draw()._1.toString())
            val toDisc = aDisc.putToDiscardPile(turnedDeck)
            aDisc = toDisc._1
            aDeck = toDisc._2

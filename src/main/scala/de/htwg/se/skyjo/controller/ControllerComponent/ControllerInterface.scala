@@ -69,7 +69,6 @@ trait ControllerInterface extends Observable {
 
   // DECK INT //
   // def getCard: CardInterface
-
   def discardDrawnCard(): Unit
 
   def getDeck: Vector[CardInterface]
@@ -86,4 +85,6 @@ trait ControllerInterface extends Observable {
   def getDiscCard(): Option[CardInterface]
 
   def putToDiscardPile(from: Any): (DiscardPileInterface, DeckInterface)
+
+  def shrinkDeck(): Unit 
 }

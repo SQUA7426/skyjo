@@ -5,6 +5,7 @@ import de.htwg.se.skyjo.util.*
 
 enum State(str: String = "BEGIN", var pre: String = "BOARD") {
   def nextState(): State = {
+    
     if str == "BEGIN" then State.MID
     else State.END
   }
@@ -17,7 +18,7 @@ enum State(str: String = "BEGIN", var pre: String = "BOARD") {
 case class GameState (
   med: Mediator,
   boards: Vector[BoardInterface],
-  deck: DeckInterface,
+  var deck: DeckInterface,
   disc: DiscardPileInterface,
   playerIdx: Int,
   drawnCard: Option[CardInterface] = None,

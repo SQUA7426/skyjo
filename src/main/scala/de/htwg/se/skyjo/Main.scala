@@ -30,7 +30,7 @@ object Main:
       // val t = new Tui(ctr)
 
       println("input => g for GUI")
-      val choose = scala.io.StdIn.readLine()
+      val choose = "g"
       if choose == "g" then
         Gui.ctr = ctr
         Gui.main(args)

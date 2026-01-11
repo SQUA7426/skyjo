@@ -256,14 +256,14 @@ class Controller(var state: GameState) extends Observable with ControllerInterfa
   def getMediator: Mediator = this.getGameState.med
 
   def toCard(x: Any): CardInterface = {
-    val val1d =
-      (for { j <- -2 to 12 } yield j.toString()).toVector
+    val val1d = (for {j <- -2 to 12} yield j.toString()).toVector
     x match {
       case a: Int => Card(a.toInt, true, this)
       case b: String if val1d.contains(b) =>
         Card(Integer.parseInt(b), true, this)
-      case d: Deck => Card(Integer.parseInt(d.toString()), true, this)
-      case disc: DiscardPile => Card(Integer.parseInt(disc.toString()), this)
+      case d: Deck => d.getDeck.headOption.getOrElse(Card(0, true, this))
+      case disc: DiscardPile => disc.getDiscCard().getOrElse(Card(0, true, this))
+      case b: String if b == "Deck" || b == "Disc" => Card(0, true, this)
       case other =>
         throw new IllegalArgumentException(s"Invalid input:$other with type: ${other.getClass}")
     }
@@ -314,4 +314,10 @@ class Controller(var state: GameState) extends Observable with ControllerInterfa
 
   def reduce(row: Int, col: Int): (BoardInterface, Boolean) =
     getGameState.boards(getGameState.playerIdx).reduce(row,col)
+
+  def shrinkDeck(): Unit = {
+
+    state.deck.getDeck.drop(1)
+
+  }
 }

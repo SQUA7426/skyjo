@@ -9,7 +9,7 @@ import de.htwg.se.skyjo.controller.ControllerComponent.*
 import de.htwg.se.skyjo.model.DeckInterface
 
 class Deck(
-    val deck: Vector[CardInterface],
+    var   deck: Vector[CardInterface],
     val ctrl: ControllerInterface,
     val upperCard: String = "Deck"
 ) extends Colleague with DeckInterface {
@@ -29,11 +29,14 @@ class Deck(
     if upperCard == "Deck" then turnUpperCard else upperCard
   )
 
-  override def turnUpperCard: String =
+  override def turnUpperCard: String = {
     upperCard.compareTo("Deck") match {
       case 0 => deck.last.toString()
       case _ => "Deck"
     }
+  }
+
+  
 
   override def getDeck: Vector[CardInterface] = deck
 

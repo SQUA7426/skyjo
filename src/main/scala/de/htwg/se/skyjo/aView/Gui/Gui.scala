@@ -76,7 +76,6 @@ object Gui extends Observer with JFXApp3 {
     ctr.add(this)
     update
   }
-
   def guiButtons(stage: Stage): HBox = {
     val ht = 20
     val wt = 60
@@ -152,5 +151,13 @@ object Gui extends Observer with JFXApp3 {
     buttonBox
   }
 
-  override def update: Boolean = true
+  override def update: Boolean = {
+    // 1. Oberste Karte vom Deck entfernen
+    val (drawnCard, newDeck) = ctr.draw()
+
+
+    boardLayer.children = new BoardView(ctr).viewBoard()
+    ctr.shrinkDeck()
+    true
+  }
 }
