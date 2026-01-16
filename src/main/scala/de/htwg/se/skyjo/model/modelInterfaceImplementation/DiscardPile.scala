@@ -1,20 +1,22 @@
-package de.htwg.se.skyjo.model.DiscardPileImplementation
-import de.htwg.se.skyjo.model.CardInterface
-import de.htwg.se.skyjo.model.BoardInterface
-import de.htwg.se.skyjo.util.*
-import de.htwg.se.skyjo.model.DiscardPileInterface
-import de.htwg.se.skyjo.model.DeckInterface
+package de.htwg.se.skyjo.model.modelInterfaceImplementation
 
-import de.htwg.se.skyjo.model.DeckImplementation.Deck
+import de.htwg.se.skyjo.model.{DiscardPileInterface, BoardInterface, CardInterface, DeckInterface}
+import de.htwg.se.skyjo.model.modelInterfaceImplementation.{DiscardPile, Deck}
+
 import de.htwg.se.skyjo.controller.ControllerComponent.*
+import de.htwg.se.skyjo.util.*
 
-class DiscardPile(
+import jakarta.inject.Inject
+
+case class DiscardPile @Inject() (
     val ctrl: ControllerInterface,
     val discPile: String = "Disc"
 ) extends Colleague with DiscardPileInterface {
-  var isTurned: Boolean = false
-  // var before: DiscardPileInterface = this
+
+  var turned: Boolean = false
   val _mediator = ctrl.getMediator
+
+  def isTurned: Boolean = turned
 
   override def receive(msg: String): Boolean = {
     msg match

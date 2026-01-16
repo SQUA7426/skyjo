@@ -1,18 +1,21 @@
-package de.htwg.se.skyjo.model.DeckImplementation
+package de.htwg.se.skyjo.model.modelInterfaceImplementation
 
-import de.htwg.se.skyjo.model.CardInterface
+import de.htwg.se.skyjo.model.{DeckInterface, CardInterface}
 import scala.collection.immutable.Vector
 import scala.util.Random
+import scala.util.Try
 import scala.collection.immutable.Seq
 import de.htwg.se.skyjo.util.*
 import de.htwg.se.skyjo.controller.ControllerComponent.*
-import de.htwg.se.skyjo.model.DeckInterface
 
-class Deck(
+import jakarta.inject.Inject
+
+case class Deck @Inject() (
     val deck: Vector[CardInterface],
     val ctrl: ControllerInterface,
     val upperCard: String = "Deck"
-) extends Colleague with DeckInterface {
+) extends Colleague
+    with DeckInterface {
   val _mediator = ctrl.getMediator
   override def receive(msg: String): Boolean = {
     msg match
@@ -24,10 +27,15 @@ class Deck(
   }
   override def send(msg: String): Unit = _mediator.send(this, msg)
 
-  override def getCard: CardInterface = ctrl.toCard(
-    this._mediator,
-    if upperCard == "Deck" then turnUpperCard else upperCard
-  )
+  override def getCard: Try[CardInterface] =
+    Try {
+      val value: String =
+        if upperCard == "Deck" then turnUpperCard else upperCard
+      Card(
+        Integer.parseInt(value),
+        ctrl
+      )
+    }
 
   override def turnUpperCard: String =
     upperCard.compareTo("Deck") match {
@@ -35,7 +43,9 @@ class Deck(
       case _ => "Deck"
     }
 
-  override def getDeck: Vector[CardInterface] = deck
+  override def getDeckCards: Vector[CardInterface] = deck
+
+  override def getDeck: DeckInterface = this
 
   override def remove(amount: Int): Vector[CardInterface] =
     val nDeck = deck.dropRight(amount)
@@ -46,7 +56,7 @@ class Deck(
 
   override def draw(): (CardInterface, DeckInterface) = {
     if (upperCard != "Deck") {
-      val card = ctrl.toCard(_mediator, upperCard)
+      val card = ctrl.toCard(upperCard)
       (card, new Deck(this.remove(1), ctrl, "Deck"))
     } else {
       val card = deck.last.trueCopy

@@ -1,19 +1,16 @@
-package de.htwg.se.skyjo.model.BoardImplementation
+package de.htwg.se.skyjo.model.modelInterfaceImplementation
 
-import de.htwg.se.skyjo.model.DeckInterface
-import de.htwg.se.skyjo.model.DeckImplementation.*
-import de.htwg.se.skyjo.model.DiscardPileInterface
-import de.htwg.se.skyjo.model.DiscardPileImplementation.*
-import de.htwg.se.skyjo.model.CardInterface
-import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.Controller
+import de.htwg.se.skyjo.model.{BoardInterface, CardInterface, DeckInterface}
+import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
 
 import scala.util.Random
 import scala.util.control._
 import scala.collection.immutable.Seq
 import de.htwg.se.skyjo.util.*
-import de.htwg.se.skyjo.model.BoardInterface
 
-case class Board(
+import jakarta.inject.Inject
+
+case class Board @Inject() (
     val _mediator: Mediator,
     val xSize: Int,
     val ySize: Int,
@@ -57,6 +54,17 @@ case class Board(
         s"Idx: ${pos} is not a valid Board entry!"
       )
     brd.flatten.apply(pos).trueCopy
+  }
+
+  def swapFromMem(c: CardInterface, pos: Int): BoardInterface = {
+    val uptBrd: Vector[Vector[CardInterface]] = brd.zipWithIndex.collect { case (vec,vecPos) =>
+      vec.zipWithIndex.collect {
+        case (cCard, cardPos) => {
+          if (vecPos * xSize + cardPos == pos) c else cCard
+        }
+      }
+    }
+    new Board(_mediator, xSize, ySize, uptBrd)
   }
 
   def switch(
@@ -109,7 +117,7 @@ case class Board(
 }
 
 object Board {
-  def apply(ctrl: Controller): (BoardInterface, DeckInterface) = {
+  def apply(ctrl: ControllerInterface): (BoardInterface, DeckInterface) = {
     ctrl.fillBoard(4, 3, Deck(ctrl))
   }
 }

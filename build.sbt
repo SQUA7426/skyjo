@@ -11,7 +11,8 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.2.10" % Test,
   "org.scalameta" %% "munit" % "1.0.0",
   "org.apache.commons" % "commons-lang3" % "3.4",
-  "org.apache.commons" % "commons-io" % "1.3.2"
+  "org.apache.commons" % "commons-io" % "1.3.2",
+  "net.codingwell" %% "scala-guice" % "7.0.0"
 )
 
 coverageEnabled := true

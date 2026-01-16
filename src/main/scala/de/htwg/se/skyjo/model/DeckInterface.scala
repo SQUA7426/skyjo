@@ -1,11 +1,14 @@
 package de.htwg.se.skyjo.model
 
-import de.htwg.se.skyjo.model.CardInterface
+import de.htwg.se.skyjo.model.{CardInterface}
+import scala.util.Try
 
 trait DeckInterface:
-  def getCard: CardInterface
+  def getCard: Try[CardInterface]
 
-  def getDeck: Vector[CardInterface]
+  def getDeckCards: Vector[CardInterface]
+
+  def getDeck: DeckInterface
 
   def turnUpperCard: String
 

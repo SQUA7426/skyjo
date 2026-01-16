@@ -5,10 +5,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalactic.StringNormalizations._
 import de.htwg.se.skyjo.aView.Tui
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.*
-import de.htwg.se.skyjo.model.CardImplementation.*
-import de.htwg.se.skyjo.model.DeckImplementation.*
-import de.htwg.se.skyjo.model.BoardImplementation.*
-import de.htwg.se.skyjo.model.DiscardPileImplementation.*
+import de.htwg.se.skyjo.model.modelInterfaceImplementation.{Card, Deck, DiscardPile, Board}
 import de.htwg.se.skyjo.util.*
 import de.htwg.se.skyjo.model.GameState
 

@@ -2,9 +2,7 @@ package de.htwg.se.skyjo.model
 
 import de.htwg.se.skyjo.aView.Tui
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.*
-import de.htwg.se.skyjo.model.DeckImplementation.*
-import de.htwg.se.skyjo.model.BoardImplementation.*
-import de.htwg.se.skyjo.model.DiscardPileImplementation.*
+import de.htwg.se.skyjo.model.modelInterfaceImplementation.{DiscardPile, Deck, Board, Card}
 import de.htwg.se.skyjo.util.*
 import de.htwg.se.skyjo.model.GameState
 import de.htwg.se.skyjo.util.ConcreteMediator
