@@ -6,18 +6,12 @@ import de.htwg.se.skyjo.util.*
 trait ControllerInterface extends Observable {
   // GAME MECHANICS //
   def setup(): Unit
-  // def save(saveState: GameState):Unit
   def save(mem: Memento): Unit
   def undo(): Unit
   def redo(): Unit
-  // def turnBoardCard(index: Int): Unit
-  // def putCardOnBoard(pos: Int): Unit
   def drawFromDeck(): Unit
   def drawFromDisc(): Unit
-  // def replaceCard(pos: Int): Unit
-  // def SwapHandler(index: Int): Unit
 
-  // def uptGameState(newState: GameState): Unit
   // OUTSIDE FUNCS //
   def getSize: (Int, Int)
   def getBrds: Vector[BoardInterface]
@@ -31,6 +25,7 @@ trait ControllerInterface extends Observable {
   def getPlIdx: Int
   def currMemento: MoveCaretaker
 
+  // BOARD //
   def reduce(row: Int, col: Int): (BoardInterface, Boolean)
 
   def fillBoard(
@@ -41,24 +36,10 @@ trait ControllerInterface extends Observable {
 
   def fullDeck(): Vector[CardInterface]
 
-  // def len(x: Any): Int
-
   def toCard(x: Any): CardInterface
 
   def isCard(c: Any): Boolean
 
-  // CARD INT //
-  // def isTurned: Boolean
-
-  // def trueCopy: CardInterface
-
-  // def falseCopy: CardInterface
-
-  // def turn: Unit
-
-  // DECK INT //
-
-  // def discardDrawnCard(): Unit
   def hasDrawn: Boolean
 
   def getDeckCards: Vector[CardInterface]
@@ -69,20 +50,15 @@ trait ControllerInterface extends Observable {
 
   def draw(): (CardInterface, DeckInterface)
 
-  // DISC //
   def remove(): DiscardPileInterface
 
-
   def putToDiscardPile(from: Any): (DiscardPileInterface, DeckInterface)
-  // OLD
   
   def getDrawn: Option[CardInterface]
-  // def getdrawn: Option[CardInterface]
-  // def getPhase: Boolean
+
   def currState: State
 
   def copy(med: Mediator = getMediator, mems: Vector[MoveCaretaker] = getMementos, brds: Vector[BoardInterface] = getBrds, d: DeckInterface = getDeck, disc: DiscardPileInterface = getDisc, idx: Int = getPlIdx,currentState: State = currState): GameState
-  // def copy(med: Mediator, brds: Vector[BoardInterface], d: DeckInterface, disc: DiscardPileInterface, idx: Int, drawnCard: Option[CardInterface], flippedPhase: Boolean, state: State): GameState
 
   def assertGameState(newState: GameState): Unit
 

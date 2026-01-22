@@ -19,9 +19,7 @@ import scalafx.event.ActionEvent
 import scalafx.scene.layout.Pane
 import scalafx.scene.input.MouseEvent
 import scalafx.scene.control.Alert.*
-// import javafx.scene.control.Alert
 import scalafx.scene.control.ButtonType.*
-// import javafx.scene.control.ButtonType
 
 import scalafx.scene.control.Alert
 import scalafx.scene.control.Alert.AlertType
@@ -51,18 +49,17 @@ import scalafx.geometry.Insets
 import sbt.testing.EventHandler
 import scalafx.scene.Node
 
-// Konstanten global oder im Companion Object
 object UIConstants {
   val cardWidth = 132
   val cardHeight = 198
   val padding = 30
-  val fontname = "Arial" // Oder "Parisienne" falls verfügbar
+  val fontname = "Arial"
 }
 
 object Gui extends JFXApp3 with Observer {
 
   val boardLayer = new Pane()
-  // Wir erlauben null initial, aber fordern Init vor Start
+ 
   var ctr: ControllerInterface = _
   var b: BoardView = _
   var currentStage: Stage = _
@@ -81,7 +78,6 @@ object Gui extends JFXApp3 with Observer {
     b = new BoardView(ctr)
 
     stage = new JFXApp3.PrimaryStage {
-      // 1. Wir speichern 'this' (die Stage) in einer lokalen Variable
       val mainStage = this
 
       title.value = "ScalaFX Skyjo"
@@ -91,32 +87,21 @@ object Gui extends JFXApp3 with Observer {
       scene = new Scene {
         root = new Pane {
           style = "-fx-background-color: darkgreen;"
-
           boardLayer.children = b.viewBoard()
-
-          // 2. Hier nutzen wir 'mainStage' statt 'this'
           children = Seq(boardLayer, guiButtons(mainStage))
         }
       }
     }
-    // currentStage für globale Referenzen setzen (falls nötig)
+   
     currentStage = stage
   }
 
-  // --- Observer Update ---
   override def update: Boolean = {
     Platform.runLater {
-      // 1. Die BoardView Instanz anweisen, neue Daten vom Controller zu holen
-      b.syncWithController()
+      // b.syncWithController()
 
-      // 2. Die Pane 'boardLayer' leeren und mit neuen CardViews befüllen
-      // b.viewBoard() erzeugt jetzt CardViews mit den Werten (wie der 8),
-      // die du gerade im Log gesehen hast.
       boardLayer.children = b.viewBoard()
 
-      // 3. Optional: Buttons neu positionieren oder disablen (z.B. Undo/Redo)
-      // Wenn die Buttons in einem eigenen Container liegen,
-      // muss dieser hier nicht zwingend angefasst werden.
     }
     true
   }
@@ -125,21 +110,24 @@ object Gui extends JFXApp3 with Observer {
     val bt_help = new Button("Help") {
       onAction = _ => {
         val alert = new Alert(AlertType.Information) {
-          initOwner(stage) // Das funktioniert jetzt korrekt mit der Stage
+          initOwner(stage)
           title = "Help"
-          // ... Rest des Codes
           headerText = "Spielablauf"
-          contentText = """Phase BEGIN:
-            | - Klicke Deck um Karte zu ziehen
-            | - Klicke Disc um oberste Karte zu nehmen
-            |
-            |Phase MID:
-            | - Klicke auf eine Board-Karte zum Tauschen
-            | - (Falls Deck gezogen): Klicke auf Disc zum Wegwerfen
-            |
-            |Phase END:
-            | - Klicke eine verdeckte Karte zum Umdrehen
-            |""".stripMargin
+          contentText = (
+            "Rules:\n" ++
+              "STATE: BEGIN\n" ++
+              "0.1 DISC SELECT\n" ++
+              "0.2 DECK SELECT\n" ++
+              "0.3 COMMANDS => EXECUTING COMMAND\n" ++
+              "\n" ++
+              "STATE: MID\n" ++
+              "0.1.1 / 0.2.1 BOARDCARD SELECT\n" ++
+              "0.1.2 SWITCH DISC w/ BOARDCARD\n" ++
+              "0.2.2 SWITCH DECK w/ BOARDCARD\n" ++
+              "\n" ++
+              "STATE: END\n" ++
+              "0.3.2 SELECT BOARDCARD => turn BOARDCARD\n"
+          )
         }
         alert.showAndWait()
       }
@@ -158,8 +146,8 @@ object Gui extends JFXApp3 with Observer {
 
     new HBox {
       spacing = 20
-      layoutX = 100
-      layoutY = 850 // Unten positionieren
+      layoutX = 20
+      layoutY = 60
       children = List(bt_help, bt_undo, bt_redo, bt_quit)
     }
   }

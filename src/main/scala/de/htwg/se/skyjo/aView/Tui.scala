@@ -11,11 +11,11 @@ import de.htwg.se.skyjo.util.utilComponent.{SupportCommand, SupportHandler}
 import scala.util.{Try, Success, Failure}
 import scala.util.Random
 import de.htwg.se.skyjo.util.Observer
-import de.htwg.se.skyjo.model.{BoardInterface, CardInterface}
+import de.htwg.se.skyjo.model.{State, BoardInterface, CardInterface}
 
 class Tui(ctr: ControllerInterface) extends Observer {
   ctr.add(this)
-
+  var iter: Int = 0
   def startGame: Unit =
     var input: String = ""
     while (input != "quit") {
@@ -29,7 +29,10 @@ class Tui(ctr: ControllerInterface) extends Observer {
   // Try Success Failure
   def processInput(input: String) = {
     val result: Try[Unit] =
-      Try(SupportHandler(ctr, ctr.getBrds(ctr.getPlIdx), ctr.getDeck, ctr.getDisc).handle(input))
+      Try(
+        SupportHandler(ctr, ctr.getBrds(ctr.getPlIdx), ctr.getDeck, ctr.getDisc)
+          .handle(input)
+      )
     // .orElse(SupportCommand(ctr).execute(input, state))
     result match {
       case Success(_) => {}
@@ -39,30 +42,44 @@ class Tui(ctr: ControllerInterface) extends Observer {
           .execute(input)
       }
     }
+    // ctr.assertGameState(ctr.copy(currentState = ctr.currState.reset()))
+    println(s"State: ${ctr.currState.getStr}")
   }
 
   override def update: Boolean = {
-    // println("[DEBUG] TUI Update triggered!")
     val state = ctr.getGameState
     val b = state.boards(ctr.getPlIdx)
-
     println(s"\n--- Player ${ctr.getPlIdx}'s Turn ---")
     println(b)
     println(s"Discard Pile: | ${state.disc} |")
 
-    // if ctr.hasDrawn then {
+    if ctr.currState.getStr == "BEGIN" then {
+      ctr.assertGameState(
+        ctr.copy(currentState = ctr.currState.nextState())
+      )
+    } else if ctr.currState == State.MID then {
+      // if ctr.currState.getStr == "MID" then {
       ctr.getDrawn match {
         case Some(card: CardInterface) => {
+          // if ctr.currState == State.MID then
           println(
             s">> Holding: $card.\n[Index] to put onto Board or [s] to swap with discard & flip BoardCard."
           )
+          ctr.assertGameState(
+            ctr.copy(currentState = ctr.currState.reset())
+          )
         }
-        // case None if state.isFlippingPhase =>
-        //   println("Card discarded! Now enter index [0-11] to flip a board card.")
         case None =>
           println("[0] Take discard | [1] Take deck")
+          ctr.assertGameState(
+            ctr.copy(currentState = ctr.currState.nextState())
+          )
       }
-    // }
+    } else {
+      ctr.assertGameState(
+        ctr.copy(currentState = ctr.currState.reset())
+      )
+    }
     true
   }
 // }

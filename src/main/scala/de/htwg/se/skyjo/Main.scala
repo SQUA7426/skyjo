@@ -44,7 +44,8 @@ def main(args: Array[String]): Unit = {
   val t = new Tui(ctr)
   ctr.setup()
   println("input => g for GUI")
-  val choose = "g"
+  // val choose = "g"
+  val choose = ""
   if choose == "g" then
     Gui.init(ctr)
     Gui.main(args)
