@@ -25,6 +25,11 @@ class Tui(ctr: ControllerInterface) extends Observer {
   var iter: Int = 0
 
   def startGame: Unit =
+    turnOfPlayer(ctr.getPlIdx)
+    printfBoard
+    discContent(ctr.getDisc)
+    turnOptions
+
     var input: String = ""
     while (input != "quit") {
       print(">> ")
@@ -56,6 +61,8 @@ class Tui(ctr: ControllerInterface) extends Observer {
 
   def discContent(disc: DiscardPileInterface) =
     println(s"| ${disc.toString()} |\n")
+
+  def printfBoard = println(s"${ctr.getBrds(ctr.getPlIdx)}")
 
   def turnOptions =
     println(s"What do you want to do?")
@@ -97,7 +104,7 @@ class Tui(ctr: ControllerInterface) extends Observer {
                 choose match { case "0" | "1" | "2" => ctr.assertGameState(ng) }
 
                 println(s"GameState: ${ctr.currState}")
-                println(ctr.getBrds(ctr.getPlIdx))
+                printfBoard
                 discContent(ctr.getDisc)
                 turnOptions
 

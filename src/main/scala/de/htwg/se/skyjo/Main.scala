@@ -54,7 +54,6 @@ def main(args: Array[String]): Unit = {
     val t = new Tui(ctr)
     // println("GAMESTATE")
     // println(ctr.getGameState.toString())
-
     t.startGame
 
     println("After finished")
