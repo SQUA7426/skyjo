@@ -54,6 +54,17 @@ class Tui(ctr: ControllerInterface) extends Observer {
 
   def turnOfPlayer(i: Int) = (println(s"Player ${i}:"))
 
+  def discContent(disc: DiscardPileInterface) =
+    println(s"| ${disc.toString()} |\n")
+
+  def turnOptions =
+    println(s"What do you want to do?")
+    println("[0] Take discard and switch with a board card")
+    println("[1] Take deck card and choose:")
+    println("\t[1] switch with board card")
+    println("\t[2] put on discard and flip board card")
+    println("[help] Show help")
+
   def finishedConf() = (
     println(s"someone is finished: \n")
   )
@@ -62,21 +73,16 @@ class Tui(ctr: ControllerInterface) extends Observer {
     val b = ctr.getBrds(ctr.getPlIdx)
     val d = ctr.getDeck
     val disc = ctr.getDisc
-    turnOfPlayer(ctr.getPlIdx)
-    println(b)
-    println(s"| ${disc.toString()} |\n")
-    println(s"What do you want to do?")
-    println("[0] Take discard and switch with a board card")
-    println("[1] Take deck card and choose:")
-    println("\t[1] switch with board card")
-    println("\t[2] put on discard and flip board card")
-    println("[help] Show help")
+    // turnOfPlayer(ctr.getPlIdx)
+    // println(b)
+    // discContent(disc)
+    // turnOptions
 
     val tempD = d
     val h = SupportHandler(ctr, b, tempD, disc)
     val c = SupportCommand(ctr, b, tempD, disc)
 
-    val action : Try[GameState] =
+    val action: Try[GameState] =
       Try {
         choose match {
           case "0" | "1" | "2" | "undo" | "help" | "redo" | "quit" =>
@@ -88,14 +94,23 @@ class Tui(ctr: ControllerInterface) extends Observer {
             return_H match {
               case Success(gs) => {
                 val ng = gs.copy(currentState = gs.currentState.nextState())
-                ctr.assertGameState(ng)
+                choose match { case "0" | "1" | "2" => ctr.assertGameState(ng) }
+
                 println(s"GameState: ${ctr.currState}")
+                println(ctr.getBrds(ctr.getPlIdx))
+                discContent(ctr.getDisc)
+                turnOptions
+
                 ng
               }
-              case Failure(e)  => ctr.getGameState
+              case Failure(e) => ctr.getGameState
             }
           case _ =>
-            println(s"${choose} is not valid, doing nothing.")
+            println(s"${choose} is not valid, doing nothing.\n")
+            println(s"GameState: ${ctr.currState}")
+            println(ctr.getBrds(ctr.getPlIdx))
+            discContent(ctr.getDisc)
+            turnOptions
             ctr.getGameState
         }
       }
@@ -110,8 +125,10 @@ class Tui(ctr: ControllerInterface) extends Observer {
         // println(e.getMessage)
         println("Inside Action - Failure")
         val nState = ctr.getGameState.currentState.nextState()
-        ctr.assertGameState(ctr.copy(currentState = nState))
-        c.execute(choose)
+        if c.execute(choose) then
+          ctr.assertGameState(ctr.copy(currentState = nState))
+        else ctr.assertGameState(ctr.copy(currentState = ctr.currState.reset()))
+        true
     }
 
 }

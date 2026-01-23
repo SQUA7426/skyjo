@@ -14,6 +14,7 @@ import de.htwg.se.skyjo.model.{
   DiscardPileInterface
 }
 import de.htwg.se.skyjo.model.modelInterfaceImplementation.{Deck, DiscardPile, Board, Card}
+import scala.io.StdIn.readLine
 
 def main(args: Array[String]): Unit = {
   val plCount = 1
@@ -45,7 +46,7 @@ def main(args: Array[String]): Unit = {
   ctr.setup()
   println("input => g for GUI")
   // val choose = "g"
-  val choose = ""
+  val choose = readLine()
   if choose == "g" then
     Gui.init(ctr)
     Gui.main(args)
