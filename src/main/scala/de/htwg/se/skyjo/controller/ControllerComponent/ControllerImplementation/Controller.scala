@@ -93,33 +93,44 @@ class Controller @Inject() (var state: GameState)
     }
     notifyObservers
 
-  def drawFromDeck(): Unit = {
+  def drawFromDeck(pos: Int): GameState = {
     val (card, newDeck) = state.deck.draw()
     
-    mem = Memento(true, card, 0, card, getDisc, card.isTurned)
+    mem = Memento(true, card, pos, card, getDisc, card.isTurned) // takenCard
+    getMementos(getPlIdx).save(mem)
+    println(getDrawn.get)
+
+    // BoardSWITCH //
+    val (swCard, tmpBrd) = getBrds(getPlIdx).switch(getDrawn.get, pos)
+
+    mem = mem.copy(replacedCard = swCard) //replaced Card
     getMementos(getPlIdx).save(mem)
 
-    
+    // UPT BRD
+    state = state.copy(boards = getBrds.updated(getPlIdx, tmpBrd))
+
     val newState = state.copy(deck = newDeck)
-    assertGameState(newState)
+    newState
   }
 
-  def drawFromDisc(): Unit = {
+  def drawFromDisc(pos: Int): GameState = {
     getDiscCard() match {
       case Some(card) => {
         mem = new Memento(
           false,
           getDeck.getCard.get,
-          0,
+          pos,
           card,
           getDisc,
           card.isTurned
         )
         val newDisc = remove()
         getMementos(getPlIdx).save(mem)
-        notifyObservers
+        val newState = state.copy(mementos = getMementos.updated(getPlIdx, getMementos(getPlIdx)))
+        newState
+        // notifyObservers
       }
-      case None => printf("DISC EMPTY")
+      case None => printf("DISC EMPTY"); getGameState
     }
   }
 

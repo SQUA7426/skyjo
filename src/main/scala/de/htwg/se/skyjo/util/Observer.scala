@@ -2,7 +2,7 @@ package de.htwg.se.skyjo.util
 
 import scalafx.event.Event
 trait Observer {
-   def update: Boolean
+   def update(choose: String): Boolean
 }
 
 class Observable:

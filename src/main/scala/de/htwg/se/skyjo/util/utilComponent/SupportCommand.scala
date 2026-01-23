@@ -21,4 +21,5 @@ case class SupportCommand(
       case "undo" => UndoCommand(ctrl,b,d,disc).execute(command)
       case "quit" => QuitCommand(ctrl,b,d,disc).execute(command)
       case "help" => HelpCommand(ctrl,b,d,disc).execute(command)
+      case _ => false
     }

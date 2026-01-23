@@ -9,8 +9,8 @@ trait ControllerInterface extends Observable {
   def save(mem: Memento): Unit
   def undo(): Unit
   def redo(): Unit
-  def drawFromDeck(): Unit
-  def drawFromDisc(): Unit
+  def drawFromDeck(pos: Int): GameState
+  def drawFromDisc(pos: Int): GameState
 
   // OUTSIDE FUNCS //
   def getSize: (Int, Int)

@@ -58,8 +58,7 @@ object UIConstants {
 
 object Gui extends JFXApp3 with Observer {
 
-  val boardLayer = new Pane()
- 
+  var boardLayer: Pane = _
   var ctr: ControllerInterface = _
   var b: BoardView = _
   var currentStage: Stage = _
@@ -67,6 +66,7 @@ object Gui extends JFXApp3 with Observer {
   def init(control: ControllerInterface): Unit = {
     ctr = control
     ctr.add(this)
+    boardLayer = new Pane()
   }
 
   override def start(): Unit = {
@@ -92,11 +92,11 @@ object Gui extends JFXApp3 with Observer {
         }
       }
     }
-   
+
     currentStage = stage
   }
 
-  override def update: Boolean = {
+  override def update(choose: String): Boolean = {
     Platform.runLater {
       // b.syncWithController()
 

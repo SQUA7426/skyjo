@@ -77,7 +77,7 @@ var currentState: State = State.BEGIN
 case class BoardView(ctr: ControllerInterface) extends Observer {
   ctr.add(this)
 
-  def update: Boolean = true
+  def update(choose: String): Boolean = true
 
   // val _med: Mediator = new ConcreteMediator()
   val _med = ctr.getMediator
