@@ -141,6 +141,10 @@ class Tui(ctr: ControllerInterface) extends Observer {
           ctr.assertGameState(ctr.copy(currentState = nState))
         else ctr.assertGameState(ctr.copy(currentState = ctr.currState.reset()))
     }
+    if ctr.getGameState == State.BEGIN then {
+      val nextPl = ctr.getGameState.copy(plIdx = (ctr.getPlIdx + 1) % ctr.getBrds.size)
+      ctr.assertGameState(nextPl)
+    }
     true
 
 }

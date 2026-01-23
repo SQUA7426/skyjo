@@ -17,7 +17,8 @@ import de.htwg.se.skyjo.model.modelInterfaceImplementation.{Deck, DiscardPile, B
 import scala.io.StdIn.readLine
 
 def main(args: Array[String]): Unit = {
-  val plCount = 1
+  println("How many players:")
+  val plCount = scala.io.StdIn.readInt
   val med = new ConcreteMediator()
 
   // val tempState = new GameState(med, Vector.empty, null, null, 0, None)
