@@ -72,18 +72,23 @@ class Tui(ctr: ControllerInterface) extends Observer {
     println("\t[2] put on discard and flip board card")
     println("[help] Show help")
 
-  def finishedConf() = (
-    println(s"someone is finished: \n")
-  )
+  def finished: Boolean =
+    ctr.getBoard.forall(row => row.forall(c => c.isTurned == true))
+
+  def ending: Unit =
+    for i <- 0 until ctr.getBrds.size do {
+      val tmpState = ctr.getGameState.copy(plIdx = i )
+      turnOfPlayer(i)
+      println(
+        s"SUM:  ${ctr.getBoard.flatten.map(c => c.getValue).fold(0)((x, y) => x + y).toString()}"
+      )
+    }
+    System.exit(0)
 
   override def update(choose: String): Boolean =
     val b = ctr.getBrds(ctr.getPlIdx)
     val d = ctr.getDeck
     val disc = ctr.getDisc
-    // turnOfPlayer(ctr.getPlIdx)
-    // println(b)
-    // discContent(disc)
-    // turnOptions
 
     val tempD = d
     val h = SupportHandler(ctr, b, tempD, disc)
@@ -119,6 +124,7 @@ class Tui(ctr: ControllerInterface) extends Observer {
             discContent(ctr.getDisc)
             turnOptions
             ctr.getGameState
+            return true
         }
       }
 
@@ -126,7 +132,6 @@ class Tui(ctr: ControllerInterface) extends Observer {
       case Success(result) => {
         val nState = ctr.getGameState.currentState.reset()
         ctr.assertGameState(ctr.copy(currentState = nState))
-        true
       }
       case Failure(e) =>
         // println(e.getMessage)
@@ -135,7 +140,7 @@ class Tui(ctr: ControllerInterface) extends Observer {
         if c.execute(choose) then
           ctr.assertGameState(ctr.copy(currentState = nState))
         else ctr.assertGameState(ctr.copy(currentState = ctr.currState.reset()))
-        true
     }
+    true
 
 }
