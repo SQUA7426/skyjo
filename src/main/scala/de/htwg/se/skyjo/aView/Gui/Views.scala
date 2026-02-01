@@ -62,21 +62,11 @@ import de.htwg.se.skyjo.util.Observer
 
 val fontname = "Parisienne"
 
-enum State(str: String = "BEGIN", var pre: String = "BOARD") {
-  def nextState(): State = {
-    if str == "BEGIN" then State.MID
-    else State.END
-  }
-  case BEGIN extends State()
-  case MID extends State("MID")
-  case END extends State("END")
-  def reset(): State = BEGIN
-}
-var currentState: State = State.BEGIN
 
 case class BoardView(ctr: ControllerInterface) extends Observer {
   ctr.add(this)
 
+  var currentState: State = ctr.currState
   def update(choose: String): Boolean = true
 
   // val _med: Mediator = new ConcreteMediator()
@@ -226,7 +216,7 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
   }
 
   // BOARDVIEW
-  var manyCards: Seq[BoardView#CardView] = BOARD_INIT()
+  var manyCards: Seq[BoardView#CardView] = BOARD_INIT(false)
 
   def BOARD_INIT(begin: Boolean = true): Seq[BoardView#CardView] = {
     val (cols, rows) = ctr.getSize
@@ -238,7 +228,7 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
         row <- 0 until rows
         col <- 0 until cols
       } yield {
-        val index = rows * col + col
+        val index = row * cols + col
         new CardView(
           x_pos = (padding + ((padding + 132) * col)),
           y_pos = (padding + ((padding + 198) * row)),
@@ -288,7 +278,7 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
             val preBoard = termBoard
             termBoard = tmpBoard
             manyCards.apply(index).cCard = ctr.toCard(aDeck.toString())
-            aDeck = new Deck(tmpDeck.getDeckCards, ctr)
+            aDeck = new Deck(tmpDeck.remove(1), ctr)
             vDeck.cCard = ctr.toCard(aDeck.turnUpperCard)
 
             memStack.save(

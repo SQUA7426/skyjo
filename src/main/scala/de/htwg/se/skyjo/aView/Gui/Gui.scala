@@ -57,52 +57,48 @@ object UIConstants {
 }
 
 object Gui extends JFXApp3 with Observer {
-
-  var boardLayer: Pane = _
   var ctr: ControllerInterface = _
+  var boardLayer: Pane = _
   var b: BoardView = _
-  var currentStage: Stage = _
-
-  def init(control: ControllerInterface): Unit = {
-    ctr = control
-    ctr.add(this)
-    boardLayer = new Pane()
-  }
 
   override def start(): Unit = {
-    require(
-      ctr != null,
-      "Controller muss vor start() mit Gui.init() gesetzt werden!"
-    )
-
-    b = new BoardView(ctr)
-
-    stage = new JFXApp3.PrimaryStage {
-      val mainStage = this
-
-      title.value = "ScalaFX Skyjo"
-      width = 1000
-      height = 1000
-
-      scene = new Scene {
-        root = new Pane {
-          style = "-fx-background-color: darkgreen;"
-          boardLayer.children = b.viewBoard()
-          children = Seq(boardLayer, guiButtons(mainStage))
+    try {
+      require(ctr != null, "Controller must be set before launching GUI!")
+      boardLayer = new Pane()
+      b = new BoardView(ctr)
+      print(b.termBoard.toString())
+      stage = new JFXApp3.PrimaryStage {
+        scene = new Scene {
+          root = new Pane {
+            style = "-fx-background-color: darkgreen;"
+            boardLayer.children = b.viewBoard()
+            children = Seq(boardLayer, guiButtons(stage))
+          }
         }
       }
+      stage.show()
+      ctr.add(this)
+      update("")
+    } catch {
+      case e: Exception =>
+        println(s"Statup error ${e.getMessage()}")
+        e.printStackTrace()
     }
-
-    currentStage = stage
   }
-
   override def update(choose: String): Boolean = {
-    Platform.runLater {
-      // b.syncWithController()
-
-      boardLayer.children = b.viewBoard()
-
-    }
+    val newUI: Seq[Node] = b.viewBoard() :+ guiButtons(stage)
+    boardLayer.children_=(newUI)
+    b.vDiscard.uptCardView
+    b.vDeck.uptCardView
+    b.manyCards.map(_.uptCardView)
+    ctr.assertGameState(
+      ctr.getGameState.copy(
+        boards = ctr.getBrds.updated(ctr.getPlIdx, b.termBoard),
+        deck = b.aDeck,
+        disc = b.aDisc,
+        currentState = b.currentState,
+      )
+    )
     true
   }
   def guiButtons(stage: Stage): HBox = {

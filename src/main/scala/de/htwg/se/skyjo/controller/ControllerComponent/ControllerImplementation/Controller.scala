@@ -10,6 +10,7 @@ import de.htwg.se.skyjo.model.{
 }
 import de.htwg.se.skyjo.model.modelInterfaceImplementation.{Deck, Card, Board}
 
+import de.htwg.se.skyjo.aView.Gui.Gui
 import de.htwg.se.skyjo.aView.Tui
 import de.htwg.se.skyjo.controller.ControllerComponent._
 import de.htwg.se.skyjo.util.{Observable, Memento, MoveCaretaker}
@@ -96,7 +97,7 @@ class Controller @Inject() (var state: GameState)
 
   def drawFromDeck(pos: Int): GameState = {
     val (card, newDeck) = state.deck.draw()
-    
+
     mem = Memento(true, card, pos, card, getDisc, card.isTurned) // takenCard
     save(mem)
     // println(getDrawn.get)
@@ -104,7 +105,7 @@ class Controller @Inject() (var state: GameState)
     // BoardSWITCH //
     val (swCard, tmpBrd) = getBrds(getPlIdx).switch(getDrawn.get, pos)
 
-    mem = mem.copy(replacedCard = swCard) //replaced Card
+    mem = mem.copy(replacedCard = swCard) // replaced Card
     save(mem)
 
     // UPT BRD
@@ -115,7 +116,12 @@ class Controller @Inject() (var state: GameState)
     val deckCard = newDeck.getCard.get
     println(s"new Deckcard: ${deckCard.toString()}")
 
-    val newState = state.copy(deck = newDeck, disc = newDisc, plIdx = (getPlIdx + 1) % getBrds.size, currentState = currState.reset())
+    val newState = state.copy(
+      deck = newDeck,
+      disc = newDisc,
+      plIdx = (getPlIdx + 1) % getBrds.size,
+      currentState = currState.reset()
+    )
 
     println(newState.disc)
     newState
@@ -134,7 +140,10 @@ class Controller @Inject() (var state: GameState)
         )
         val newDisc = remove()
         getMementos(getPlIdx).save(mem)
-        val newState = state.copy(mementos = getMementos.updated(getPlIdx, getMementos(getPlIdx)), disc = newDisc)
+        val newState = state.copy(
+          mementos = getMementos.updated(getPlIdx, getMementos(getPlIdx)),
+          disc = newDisc
+        )
         newState
         // notifyObservers
       }
@@ -197,7 +206,7 @@ class Controller @Inject() (var state: GameState)
 
       case a: Int =>
         if (valRange.contains(a)) Card(a, true, this)
-        else Card(0, false, this) 
+        else Card(0, false, this)
 
       case b: String =>
         val tryInt = scala.util.Try(b.toInt)
@@ -238,7 +247,7 @@ class Controller @Inject() (var state: GameState)
     val shuffled = Random.shuffle(diffs)
     shuffled
   }
-  
+
   def getDrawn: Option[CardInterface] =
     currMemento.undoStack
       .lift(getPlIdx)
@@ -251,11 +260,11 @@ class Controller @Inject() (var state: GameState)
       CardInterface,
       DeckInterface
   ) = state.deck.draw()
-  
+
   def getDeckCards: Vector[CardInterface] = state.deck.getDeckCards
   def getDiscCard(): Option[CardInterface] =
     state.disc.getDiscCard()
-  
+
   def putToDiscardPile(from: Any): (
       DiscardPileInterface,
       DeckInterface
@@ -264,7 +273,7 @@ class Controller @Inject() (var state: GameState)
     state.deck.remove(amount)
   def remove(): DiscardPileInterface =
     state.disc.remove()
-  
+
   def turnUpperCard: String = state.deck.turnUpperCard
 
   def getBoard: Vector[Vector[CardInterface]] =
@@ -275,7 +284,7 @@ class Controller @Inject() (var state: GameState)
     state.boards(state.plIdx).reduce(row, col)
 
   def getPlIdx: Int = state.plIdx
-  
+
   def currState: State = state.currentState
 
   def getMementos: Vector[MoveCaretaker] = state.mementos
@@ -292,8 +301,7 @@ class Controller @Inject() (var state: GameState)
       d: DeckInterface = getDeck,
       disc: DiscardPileInterface = getDisc,
       idx: Int = getPlIdx,
-      anotherState: State =
-        currState 
+      anotherState: State = currState
   ): GameState = {
     state.copy(
       med = med,
@@ -302,8 +310,7 @@ class Controller @Inject() (var state: GameState)
       deck = d,
       disc = disc,
       plIdx = idx,
-      currentState =
-        anotherState 
+      currentState = anotherState
     )
   }
 

@@ -49,7 +49,7 @@ case class Board @Inject() (
   def getBoard = brd
 
   def getBoardCard(pos: Int): CardInterface = {
-    if pos < 0 || pos > (ySize * xSize - 1) then
+    if pos < 0 || pos > ((ySize - 1) * xSize + (xSize - 1) ) then
       throw new IndexOutOfBoundsException(
         s"Idx: ${pos} is not a valid Board entry!"
       )

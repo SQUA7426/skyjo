@@ -17,10 +17,11 @@ import de.htwg.se.skyjo.model.modelInterfaceImplementation.{Deck, DiscardPile, B
 import scala.io.StdIn.readLine
 
 def main(args: Array[String]): Unit = {
-  println("How many players:")
-  var pl = scala.io.StdIn.readLine()
-  if pl == "" then pl = "1"
-  val plCount = Integer.parseInt(pl)
+  // println("How many players:")
+  // var pl = scala.io.StdIn.readLine()
+  // if pl == "" then pl = "1"
+  // val plCount = Integer.parseInt(pl)
+  val plCount = 1
   val med = new ConcreteMediator()
 
   // val tempState = new GameState(med, Vector.empty, null, null, 0, None)
@@ -36,7 +37,6 @@ def main(args: Array[String]): Unit = {
   val plBoards = Vector.fill(plCount)(new Board(med, 4, 3, Vector.empty))
 
   println("updating Controllerstate")
-  // ctr.state = new GameState(med, plBoards, deck, disc, 0, None)
   ctr.state = new GameState(med, plMoveC, plBoards, deck, disc, 0, State.BEGIN)
   ctr.state = ctr.state.copy(
     deck = Deck(ctr),
@@ -48,15 +48,13 @@ def main(args: Array[String]): Unit = {
   val t = new Tui(ctr)
   ctr.setup()
   println("input => g for GUI")
-  // val choose = "g"
-  var choose = readLine()
+  val choose = "g"
+  // var choose = readLine()
   if choose == "g" then
-    Gui.init(ctr)
+    Gui.ctr = ctr
     Gui.main(args)
   else
     val t = new Tui(ctr)
-    // println("GAMESTATE")
-    // println(ctr.getGameState.toString())
     t.startGame
 
     println("After finished")
