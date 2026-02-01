@@ -11,21 +11,15 @@ class RedoCommand(
     val disc: DiscardPileInterface
 ) extends CommandInterface:
   override val cmd: String = "redo"
-  // override val next: CommandInterface = QuitCommand(ctrl, b, d, disc)
 
-  // override def execute(command: String): Option[(Board, Deck, DiscardPile)] =
   override def execute(command: String): Boolean =
     if command.compareTo(cmd) == 0 then {
       println(s"RedoCommand executed command: ${command}")
       if (!ctrl.currMemento.redoStack.isEmpty) {
-        val mem: Memento = ctrl.currMemento.redoStack(0)
-        Some(ctrl.currMemento.redo(mem, d, b, disc))
-          // .getOrElse(next.execute(cmd))
+        ctrl.redo()
         true
       }
-      // else next.execute(cmd)
       else false
     }
-  // else this.next.execute(command)
     else false
 

@@ -22,7 +22,7 @@ import de.htwg.se.skyjo.model.{
 
 class Tui(ctr: ControllerInterface) extends Observer {
   ctr.add(this)
-  var iter: Int = 0
+  private def clearTerm = print("\u001b[2J")
 
   def startGame: Unit =
     turnOfPlayer(ctr.getPlIdx)
@@ -77,7 +77,7 @@ class Tui(ctr: ControllerInterface) extends Observer {
 
   def ending: Unit =
     for i <- 0 until ctr.getBrds.size do {
-      val tmpState = ctr.getGameState.copy(plIdx = i )
+      val tmpState = ctr.getGameState.copy(plIdx = i)
       turnOfPlayer(i)
       println(
         s"SUM:  ${ctr.getBoard.flatten.map(c => c.getValue).fold(0)((x, y) => x + y).toString()}"
@@ -86,6 +86,7 @@ class Tui(ctr: ControllerInterface) extends Observer {
     System.exit(0)
 
   override def update(choose: String): Boolean =
+    turnOfPlayer(ctr.getPlIdx)
     val b = ctr.getBrds(ctr.getPlIdx)
     val d = ctr.getDeck
     val disc = ctr.getDisc
@@ -94,57 +95,101 @@ class Tui(ctr: ControllerInterface) extends Observer {
     val h = SupportHandler(ctr, b, tempD, disc)
     val c = SupportCommand(ctr, b, tempD, disc)
 
-    val action: Try[GameState] =
-      Try {
-        choose match {
-          case "0" | "1" | "2" | "undo" | "help" | "redo" | "quit" =>
-            if (choose == "1")
-              inputRequestDeck(d.getCard.get.toString())
+    val action: GameState =
+      choose match
+        case "0" | "1" | "2" | "undo" | "help" | "redo" | "quit" => {
+          if c.execute(choose) then ctr.getGameState
+          else
+            if (choose == "1") then
+              inputRequestDeck(ctr.getDeck.getCard.get.toString())
             print(">> Position: ")
-            val pos = readLine()
+            var pos = readLine()
+            if pos == "" then pos = "0"
             val return_H = h.handle(choose, pos.toInt)
-            return_H match {
+            return_H match
               case Success(gs) => {
-                val ng = gs.copy(currentState = gs.currentState.nextState())
-                choose match { case "0" | "1" | "2" => ctr.assertGameState(ng) }
-
-                println(s"GameState: ${ctr.currState}")
-                printfBoard
-                discContent(ctr.getDisc)
-                turnOptions
-
-                ng
+                println("\nIn HANDLE SUCCESS \n")
+                gs
               }
               case Failure(e) => ctr.getGameState
-            }
-          case _ =>
-            println(s"${choose} is not valid, doing nothing.\n")
-            println(s"GameState: ${ctr.currState}")
-            println(ctr.getBrds(ctr.getPlIdx))
-            discContent(ctr.getDisc)
-            turnOptions
-            ctr.getGameState
-            return true
         }
-      }
-
-    action match {
-      case Success(result) => {
-        val nState = ctr.getGameState.currentState.reset()
-        ctr.assertGameState(ctr.copy(currentState = nState))
-      }
-      case Failure(e) =>
-        // println(e.getMessage)
-        println("Inside Action - Failure")
-        val nState = ctr.getGameState.currentState.nextState()
-        if c.execute(choose) then
-          ctr.assertGameState(ctr.copy(currentState = nState))
-        else ctr.assertGameState(ctr.copy(currentState = ctr.currState.reset()))
-    }
-    if ctr.getGameState == State.BEGIN then {
-      val nextPl = ctr.getGameState.copy(plIdx = (ctr.getPlIdx + 1) % ctr.getBrds.size)
-      ctr.assertGameState(nextPl)
-    }
+        case _ => ctr.getGameState
+    ctr.assertGameState(action)
+    turnOfPlayer(ctr.getPlIdx)
+    println(ctr.getBrds(ctr.getPlIdx))
+    discContent(ctr.getDisc)
+    turnOptions
+    // val action: Try[GameState] =
+    //   Try {
+    //     choose match {
+    //       case "0" | "1" | "2" | "undo" | "help" | "redo" | "quit" =>
+    //         // problem beim undo, dass das 'vorherige Deck' all the time used wird
+    //         if (choose == "1")
+    //           inputRequestDeck(ctr.getDeck.getCard.get.toString())
+    //         print(">> Position: ")
+    //         val pos = readLine()
+    //         val return_H = h.handle(choose, pos.toInt)
+    //         return_H match {
+    //           case Success(gs) => {
+    //             // clearTerm
+    //             println("\nIn HANDLE SUCCESS \n")
+    //             val nState = ctr.getGameState.currentState.reset()
+    //             val nextPl =
+    //               ctr.getGameState.copy(plIdx =
+    //                 (ctr.getPlIdx + 1) % ctr.getBrds.size,
+    //                 currentState = nState
+    //               )
+    //             ctr.assertGameState(nextPl)
+    //             // ctr.assertGameState(ctr.getGameState)
+    //
+    //             nextPl
+    //           }
+    //           case Failure(e) => ctr.getGameState
+    //         }
+    //       case _ =>
+    //         // clearTerm
+    //         if finished then ending
+    //         else
+    //           println("\nIn INPUT FAILURE \n")
+    //
+    //           println(s"${choose} is not valid, doing nothing.\n")
+    //
+    //           turnOfPlayer(ctr.getPlIdx)
+    //           println(ctr.getBrds(ctr.getPlIdx))
+    //           discContent(ctr.getDisc)
+    //           turnOptions
+    //         return true
+    //     }
+    //   }
+    //
+    // action match {
+    //   case Success(result) => {
+    //     val nState = ctr.getGameState.currentState.reset()
+    //     println("\nAFTER HANDLE SUCCESS \n")
+    //     val nextPl =
+    //       ctr.getGameState.copy(
+    //         // plIdx = (ctr.getPlIdx + 1) % ctr.getBrds.size,
+    //         plIdx = ctr.getPlIdx,
+    //         currentState = nState
+    //       )
+    //     // clearTerm
+    //     ctr.assertGameState(nextPl)
+    //
+    //     // println(s"GameState: ${ctr.currState}")
+    //     turnOfPlayer(ctr.getPlIdx)
+    //     printfBoard
+    //     discContent(ctr.getDisc)
+    //     turnOptions
+    //   }
+    //   case Failure(e) =>
+    //     // println(e.getMessage)
+    //     println("Inside Action - Failure")
+    //     val nState = ctr.getGameState.currentState.nextState()
+    //     if c.execute(choose) then
+    //       println("\nIn EXECUTE SUCCESS \n")
+    //       ctr.assertGameState(ctr.copy(currentState = nState))
+    // }
+    if finished then ending
     true
 
 }

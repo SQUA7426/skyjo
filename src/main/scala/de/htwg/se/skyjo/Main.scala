@@ -47,7 +47,7 @@ def main(args: Array[String]): Unit = {
   ctr.setup()
   println("input => g for GUI")
   // val choose = "g"
-  val choose = readLine()
+  var choose = readLine()
   if choose == "g" then
     Gui.init(ctr)
     Gui.main(args)

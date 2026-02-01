@@ -53,6 +53,7 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
       redoStack.push(memento)
       undoStack.clear()
       undoStack.push(memento)
+      // println(redoStack)
 
       Some(newBoard, deck, memento.lastDisc)
     } else {
@@ -62,6 +63,7 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
       redoStack.push(memento)
       undoStack.clear()
       undoStack.push(memento)
+      // println(redoStack)
       Some(newBoard, updtDeck, disc2)
     }
   }
@@ -89,6 +91,8 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
       )
       undoStack.push(tmpMemento)
       redoStack.clear()
+      redoStack.push(tmpMemento)
+      // println(undoStack)
       Some((newBoard, updtDeck, tmpDisc))
     } else {
       val disc2: DiscardPileInterface =
@@ -104,8 +108,9 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
         memento.lastDisc.isTurned
       )
       undoStack.push(tmpMemento)
-
       redoStack.clear()
+      redoStack.push(tmpMemento)
+      // println(undoStack)
       Some((newBoard, updtDeck, disc2))
     }
   }

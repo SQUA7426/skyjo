@@ -20,6 +20,7 @@ import scala.util.Random
 
 import jakarta.inject.Inject
 import scala.util.{Try, Success, Failure}
+import de.htwg.se.skyjo.model.modelInterfaceImplementation.DiscardPile
 
 class Controller @Inject() (var state: GameState)
     extends Observable
@@ -52,7 +53,7 @@ class Controller @Inject() (var state: GameState)
     getMementos(getPlIdx).save(mementoSave)
 
   def undo(): Unit =
-    getMementos(state.plIdx).undo(
+    getMementos(getPlIdx).undo(
       mem,
       getDeck,
       getBrds(getPlIdx),
@@ -68,7 +69,7 @@ class Controller @Inject() (var state: GameState)
           if getMementos(getPlIdx).undoStack(getPlIdx)._1 then "DECK"
           else "DISC"
       }
-      case None => { println("Couln't UNDO") }
+      case None => { println("Couldn't UNDO") }
     }
     notifyObservers
 
@@ -89,7 +90,7 @@ class Controller @Inject() (var state: GameState)
           if getMementos(getPlIdx).redoStack(getPlIdx)._1 then "DECK"
           else "DISC"
       }
-      case None => { println("Couln't REDO") }
+      case None => { println("Couldn't REDO") }
     }
     notifyObservers
 
@@ -97,19 +98,26 @@ class Controller @Inject() (var state: GameState)
     val (card, newDeck) = state.deck.draw()
     
     mem = Memento(true, card, pos, card, getDisc, card.isTurned) // takenCard
-    getMementos(getPlIdx).save(mem)
-    println(getDrawn.get)
+    save(mem)
+    // println(getDrawn.get)
 
     // BoardSWITCH //
     val (swCard, tmpBrd) = getBrds(getPlIdx).switch(getDrawn.get, pos)
 
     mem = mem.copy(replacedCard = swCard) //replaced Card
-    getMementos(getPlIdx).save(mem)
+    save(mem)
 
     // UPT BRD
     state = state.copy(boards = getBrds.updated(getPlIdx, tmpBrd))
 
-    val newState = state.copy(deck = newDeck)
+    val newDisc = new DiscardPile(this, swCard.trueCopy.toString(), true)
+    println(s"newDisc: ${newDisc.toString()}")
+    val deckCard = newDeck.getCard.get
+    println(s"new Deckcard: ${deckCard.toString()}")
+
+    val newState = state.copy(deck = newDeck, disc = newDisc, plIdx = (getPlIdx + 1) % getBrds.size, currentState = currState.reset())
+
+    println(newState.disc)
     newState
   }
 

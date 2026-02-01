@@ -10,10 +10,10 @@ import jakarta.inject.Inject
 
 case class DiscardPile @Inject() (
     val ctrl: ControllerInterface,
-    val discPile: String = "Disc"
+    val discPile: String = "Disc",
+    var turned: Boolean = false
 ) extends Colleague with DiscardPileInterface {
 
-  var turned: Boolean = false
   val _mediator = ctrl.getMediator
 
   def isTurned: Boolean = turned
