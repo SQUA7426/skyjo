@@ -134,7 +134,7 @@ class Controller @Inject() (var state: GameState)
         )
         val newDisc = remove()
         getMementos(getPlIdx).save(mem)
-        val newState = state.copy(mementos = getMementos.updated(getPlIdx, getMementos(getPlIdx)))
+        val newState = state.copy(mementos = getMementos.updated(getPlIdx, getMementos(getPlIdx)), disc = newDisc)
         newState
         // notifyObservers
       }

@@ -18,7 +18,9 @@ import scala.io.StdIn.readLine
 
 def main(args: Array[String]): Unit = {
   println("How many players:")
-  val plCount = scala.io.StdIn.readInt
+  var pl = scala.io.StdIn.readLine()
+  if pl == "" then pl = "1"
+  val plCount = Integer.parseInt(pl)
   val med = new ConcreteMediator()
 
   // val tempState = new GameState(med, Vector.empty, null, null, 0, None)
