@@ -40,6 +40,7 @@ import de.htwg.se.skyjo.model.{
 }
 import de.htwg.se.skyjo.model.modelInterfaceImplementation.{Deck, DiscardPile}
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
+import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.Controller
 
 import scalafx.scene.text.Font
 import scalafx.scene.layout.StackPane
@@ -102,13 +103,15 @@ object Gui extends JFXApp3 with Observer {
     true
   }
   def guiButtons(stage: Stage): HBox = {
+    val ht = 20
+    val wt = 60
 
     val bt_help = new Button("Help") {
       onAction = _ => {
         val alert = new Alert(AlertType.Information) {
           initOwner(stage)
           title = "Help"
-          headerText = "Spielablauf"
+          headerText = "Viewing Help"
           contentText = (
             "Rules:\n" ++
               "STATE: BEGIN\n" ++
@@ -128,24 +131,101 @@ object Gui extends JFXApp3 with Observer {
         alert.showAndWait()
       }
     }
-    val bt_undo = new Button("Undo") {
-      onAction = _ => if (ctr.currState == State.BEGIN) ctr.undo()
+
+    val bt_undo = new Button("undo")
+    bt_undo.tooltip = "Undoing Turn"
+    bt_undo.setPrefHeight(ht)
+    bt_undo.setPrefWidth(wt)
+    bt_undo.onMouseClicked = _ => {
+      if b.currentState == State.BEGIN then
+        // println(s"MemStack.undoStack:\n${ctr.currMemento.undoStack.toString()}\n")
+        // val ctrl = new Controller(b._med, Array(b.termBoard), b.aDeck, b.aDisc)
+        val mem: Memento = ctr.currMemento.undoStack(0)
+        ctr.currMemento.undo(mem, b.aDeck, b.termBoard, b.aDisc) match {
+          case Some(resBoard, resDeck, resDisc) => {
+            b.termBoard = resBoard
+            b.aDeck = resDeck
+            b.aDisc = resDisc
+            b.manyCards = b.BOARD_INIT(false)
+            b.vDeck.cCard = ctr.toCard(b._med, b.aDeck.turnUpperCard)
+            b.vDiscard.cCard = ctr.toCard(b._med, b.aDisc.toString())
+
+            // upt views
+            val newUI: Seq[Node] = b.viewBoard() :+ guiButtons(stage)
+            boardLayer.children_=(newUI)
+            b.vDiscard.uptCardView
+            b.vDeck.uptCardView
+            b.manyCards.map(_.uptCardView)
+
+            println("\nREDOSTACK\n")
+            println(ctr.currMemento.redoStack(0))
+            b.syncController
+            println()
+          }
+          case None => {}
+        }
     }
 
-    val bt_redo = new Button("Redo") {
-      onAction = _ => if (ctr.currState == State.BEGIN) ctr.redo()
+    val bt_redo = new Button("redo")
+    bt_redo.tooltip = "Redoing last Turn"
+    bt_redo.setPrefHeight(ht)
+    bt_redo.setPrefWidth(wt)
+    bt_redo.onMouseClicked = _ => {
+      if b.currentState == State.BEGIN then
+        val mem: Memento = ctr.currMemento.redoStack(0)
+        ctr.currMemento.redo(mem, b.aDeck, b.termBoard, b.aDisc) match {
+          case Some(resBoard, resDeck, resDisc) => {
+            b.termBoard = resBoard
+            b.aDeck = resDeck
+            b.aDisc = resDisc
+            b.manyCards = b.BOARD_INIT(false)
+            b.vDeck.cCard = ctr.toCard(b._med, resDeck.turnUpperCard.toString())
+            b.vDiscard.cCard = ctr.toCard(b._med, b.aDisc.toString())
+
+            // upt views
+            val newUI: Seq[Node] = b.viewBoard() :+ guiButtons(stage)
+            boardLayer.children_=(newUI)
+            b.vDiscard.uptCardView
+            b.vDeck.uptCardView
+            b.manyCards.map(_.uptCardView)
+
+            println("\nUNDOSTACK\n")
+            val preUndoStack = ctr.currMemento.undoStack(0)
+            val tmpMem = Memento(preUndoStack.fromDeck, preUndoStack.replacedCard, preUndoStack.boardIndex, preUndoStack.takenCard, preUndoStack.lastDisc, preUndoStack.lastDisc.isTurned)
+            ctr.currMemento.undoStack.clear()
+            ctr.currMemento.undoStack.push(tmpMem)
+            println(ctr.currMemento.undoStack(0))
+            b.syncController
+            println()
+          }
+          case None => {}
+        }
     }
 
-    val bt_quit = new Button("Quit") {
-      onAction = _ => Platform.exit()
+    val bt_quit = new Button("quit")
+    bt_quit.tooltip = "quitting GAME"
+    bt_quit.setPrefHeight(ht)
+    bt_quit.setPrefWidth(wt)
+    bt_quit.onMouseClicked = _ => {
+      val alert = new Alert(AlertType.Confirmation) {
+        initOwner(stage)
+        title = "Quitting Game"
+      }
+      alert.headerText = "Do you really want to quit?"
+      alert.contentText = "Your progress will not be saved."
+
+      val result: Option[ButtonType] = alert.showAndWait()
+
+      if (result.contains(ButtonType.OK)) {
+        println("Quitting Game")
+        Platform.exit()
+      }
     }
 
-    new HBox {
-      spacing = 20
-      layoutX = 20
-      layoutY = 60
+    val buttonBox = new HBox {
+      spacing = 120
       children = List(bt_help, bt_undo, bt_redo, bt_quit)
     }
+    buttonBox
   }
-
 }
