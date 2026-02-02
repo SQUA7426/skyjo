@@ -292,7 +292,7 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
                 // aDeck.getUpperCard(),
                 preDisc,
                 index,
-                preBoard.getBoard.flatten.apply(index),
+                preBoard.getBoard.flatten.apply(index).trueCopy,
                 DiscardPile(ctr, preDisc.toString()),
                 preBoard.getBoard.flatten.apply(index).isTurned
               )

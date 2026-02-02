@@ -20,7 +20,7 @@ case class Memento(
       s + (s"Taken Deck Card: ${takenCard}; turned: ${takenCard.isTurned}\n")
     val s2 = s1 + (s"last Board Idx: ${boardIndex}\n")
     val s3 =
-      s2 + (s"replacedCard: ${replacedCard.toString()}; turned: ${replacedCard.isTurned}\n")
+      s2 + (s"replacedCard: ${replacedCard.getValue.toString()}; turned: ${replacedCard.isTurned}\n")
     val s4 = s3 + (s"lastDisc: ${lastDisc}")
     s4
   }

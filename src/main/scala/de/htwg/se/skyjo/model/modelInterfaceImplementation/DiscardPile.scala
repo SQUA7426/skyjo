@@ -38,7 +38,7 @@ case class DiscardPile @Inject() (
   override def putToDiscardPile(from: Any): (DiscardPile, DeckInterface) = {
     from match {
       case card: CardInterface =>
-        (new DiscardPile(ctrl, card.trueCopy.toString), ctrl.getGameState.deck)
+        (new DiscardPile(ctrl, card.trueCopy.toString), new Deck(ctrl.getDeck.remove(1), ctrl))
       case d: DeckInterface => {
         (
           new DiscardPile(ctrl, d.toString()),
@@ -48,7 +48,7 @@ case class DiscardPile @Inject() (
       case s: String => {
         (
           new DiscardPile(ctrl, s),
-          new Deck(Deck(ctrl).remove(1), ctrl, s)
+          new Deck(ctrl.getDeck.remove(1), ctrl, s)
         )
       }
       case _ => throw new  MatchError(s"Connot process this type: ${from.getClass}")
