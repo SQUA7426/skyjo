@@ -111,10 +111,12 @@ class Controller @Inject() (var state: GameState)
     // UPT BRD
     state = state.copy(boards = getBrds.updated(getPlIdx, tmpBrd))
 
-    val newDisc = new DiscardPile(this, swCard.trueCopy.toString(), true)
-    println(s"newDisc: ${newDisc.toString()}")
+    // val newDisc = new DiscardPile(this, swCard.trueCopy.toString(), true)
+    val newDisc = putToDiscardPile(swCard)._1
+    // println(s"Disc: ${newDisc} ;  Disc.pre: ${newDisc.remove().toString()}")
+    // println(s"newDisc: ${newDisc.toString()}")
     val deckCard = newDeck.getCard.get
-    println(s"new Deckcard: ${deckCard.toString()}")
+    // println(s"new Deckcard: ${deckCard.toString()}")
 
     val newState = state.copy(
       deck = newDeck,
@@ -138,12 +140,18 @@ class Controller @Inject() (var state: GameState)
           getDisc,
           card.isTurned
         )
-        val newDisc = remove()
         getMementos(getPlIdx).save(mem)
+        // val newDisc = remove()
+        val (newCard, newBrd) = getBrds(getPlIdx).switch(getDiscCard().get, pos)
+        val newDisc = new DiscardPile(this, newCard.toString())
+        // println(s"newBrd: ${newBrd}")
         val newState = state.copy(
+          boards = getBrds.updated(getPlIdx, newBrd),
           mementos = getMementos.updated(getPlIdx, getMementos(getPlIdx)),
           disc = newDisc
         )
+        // println(s"Disc: ${newState.disc} ;  Disc.pre: ${newState.disc.remove().toString()}")
+        // println(s"new State Board: ${newState.boards(getPlIdx)}")
         newState
         // notifyObservers
       }
@@ -325,5 +333,21 @@ class Controller @Inject() (var state: GameState)
     state = state.copy(boards = state.boards.updated(getPlIdx, b))
     notifyObservers
     b
-
+  def getReducedBrd(updatedBoard: BoardInterface): BoardInterface = {
+    val (x, y) = updatedBoard.getSize
+    val reducedBoards: Array[(BoardInterface, Boolean)] = new Array(
+      x + y
+    )
+    for j <- 0 until x do reducedBoards(j) = updatedBoard.reduce(-1, j)
+    for j <- 0 until y do reducedBoards(j + x) = updatedBoard.reduce(j, -1)
+    val r = reducedBoards.map(_._2).exists(_ == true)
+    val endBoard: BoardInterface = if r == true then
+      val allUpdatedBrds =
+        reducedBoards.filter((brds, bools) => bools == true).map(_._1).toArray
+      allUpdatedBrds(0)
+    else updatedBoard
+    println(endBoard)
+    notifyObservers
+    endBoard
+  }
 }

@@ -64,4 +64,5 @@ trait ControllerInterface extends Observable {
 
   def swapFromMem(c: CardInterface, pos: Int): BoardInterface
 
+  def getReducedBrd(updatedBoard: BoardInterface): BoardInterface
 }

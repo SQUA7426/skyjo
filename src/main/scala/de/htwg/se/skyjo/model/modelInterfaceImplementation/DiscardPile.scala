@@ -15,6 +15,7 @@ case class DiscardPile @Inject() (
 ) extends Colleague with DiscardPileInterface {
 
   val _mediator = ctrl.getMediator
+  var preDisc = "Disc"
 
   def isTurned: Boolean = turned
 
@@ -26,7 +27,7 @@ case class DiscardPile @Inject() (
   }
 
   override def remove(): DiscardPileInterface =
-    new DiscardPile(ctrl, "Disc")
+    new DiscardPile(ctrl, this.preDisc)
 
   override def getDiscCard(): Option[CardInterface] =
     if discPile == "Disc" || discPile == "" then None else Some(ctrl.toCard(discPile))
@@ -38,16 +39,22 @@ case class DiscardPile @Inject() (
   override def putToDiscardPile(from: Any): (DiscardPile, DeckInterface) = {
     from match {
       case card: CardInterface =>
-        (new DiscardPile(ctrl, card.trueCopy.toString), new Deck(ctrl.getDeck.remove(1), ctrl))
+        val retDisc = new DiscardPile(ctrl, card.trueCopy.toString)
+        retDisc.preDisc = this.discPile
+        (retDisc, new Deck(ctrl.getDeck.remove(1), ctrl))
       case d: DeckInterface => {
+        val retDisc = new DiscardPile(ctrl, d.toString())
+        retDisc.preDisc = this.discPile
         (
-          new DiscardPile(ctrl, d.toString()),
+          retDisc,
           new Deck(d.remove(1), ctrl)
         )
       }
       case s: String => {
+        val retDisc = new DiscardPile(ctrl, s)
+        retDisc.preDisc = this.discPile
         (
-          new DiscardPile(ctrl, s),
+          retDisc,
           new Deck(ctrl.getDeck.remove(1), ctrl, s)
         )
       }

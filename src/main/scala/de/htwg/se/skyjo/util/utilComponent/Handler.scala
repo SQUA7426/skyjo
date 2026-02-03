@@ -36,7 +36,7 @@ class SwitchHandler(ctrl: ControllerInterface, b: BoardInterface, d: DeckInterfa
     if request == "s" && ctrl.currState == State.BEGIN then
       Try {
         println("Switch")
-        val (swDisc, swDeck) = ctrl.getDisc.putToDiscardPile(d)
+        val (swDisc, swDeck) = ctrl.putToDiscardPile(d)
         // println(s"swDisc: ${swDisc}")
         val tmpMem = Memento(fromDeck = true, takenCard = swDisc.getDiscCard().get, boardIndex = 0, replacedCard = disc.getDiscCard().get, disc, disc.isTurned)
 
