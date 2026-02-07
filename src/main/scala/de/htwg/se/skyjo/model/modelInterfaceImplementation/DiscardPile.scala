@@ -12,13 +12,15 @@ case class DiscardPile @Inject() (
     val ctrl: ControllerInterface,
     val discPile: String = "Disc",
     var turned: Boolean = false
-) extends Colleague with DiscardPileInterface {
+) extends Colleague with DiscardPileInterface:
 
-  val _mediator = ctrl.getMediator
   var preDisc = "Disc"
+  override def toString(): String = s"${discPile}"
 
-  def isTurned: Boolean = turned
+  // MEDIATOR //
+  val _mediator = ctrl.getMediator
 
+  override def send(msg: String): Unit = ctrl.getMediator.send(this, msg)
   override def receive(msg: String): Boolean = {
     msg match
       case "REQUEST PUT TO DISCARDPILE" =>
@@ -26,15 +28,11 @@ case class DiscardPile @Inject() (
       case _ => false
   }
 
-  override def remove(): DiscardPileInterface =
-    new DiscardPile(ctrl, this.preDisc)
-
+  // CTRL //
   override def getDiscCard(): Option[CardInterface] =
     if discPile == "Disc" || discPile == "" then None else Some(ctrl.toCard(discPile))
 
-  override def send(msg: String): Unit = ctrl.getMediator.send(this, msg)
-
-  override def toString(): String = s"${discPile}"
+  def isTurned: Boolean = turned
 
   override def putToDiscardPile(from: Any): (DiscardPile, DeckInterface) = {
     from match {
@@ -42,23 +40,25 @@ case class DiscardPile @Inject() (
         val retDisc = new DiscardPile(ctrl, card.trueCopy.toString)
         retDisc.preDisc = this.discPile
         (retDisc, new Deck(ctrl.getDeck.remove(1), ctrl))
-      case d: DeckInterface => {
-        val retDisc = new DiscardPile(ctrl, d.toString())
+      case deck: DeckInterface => {
+        val retDisc = new DiscardPile(ctrl, deck.toString())
         retDisc.preDisc = this.discPile
         (
           retDisc,
-          new Deck(d.remove(1), ctrl)
+          new Deck(deck.remove(1), ctrl)
         )
       }
-      case s: String => {
-        val retDisc = new DiscardPile(ctrl, s)
+      case str: String => {
+        val retDisc = new DiscardPile(ctrl, str)
         retDisc.preDisc = this.discPile
         (
           retDisc,
-          new Deck(ctrl.getDeck.remove(1), ctrl, s)
+          new Deck(ctrl.getDeck.remove(1), ctrl, str)
         )
       }
       case _ => throw new  MatchError(s"Connot process this type: ${from.getClass}")
     }
   }
-}
+
+  override def remove(): DiscardPileInterface =
+    new DiscardPile(ctrl, this.preDisc)

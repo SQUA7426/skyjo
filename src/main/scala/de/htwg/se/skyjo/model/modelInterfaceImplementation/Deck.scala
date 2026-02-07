@@ -15,8 +15,16 @@ case class Deck @Inject() (
     val ctrl: ControllerInterface,
     val upperCard: String = "Deck"
 ) extends Colleague
-    with DeckInterface {
+    with DeckInterface:
+
+  override def toString(): String =
+    if upperCard.compareTo("Deck") == 0 then "Deck" else upperCard
+
+  // MEDIATOR //
   val _mediator = ctrl.getMediator
+
+  override def send(msg: String): Unit = _mediator.send(this, msg)
+
   override def receive(msg: String): Boolean = {
     msg match
       case "REQUEST REMOVE UPPERCARD" =>
@@ -25,7 +33,9 @@ case class Deck @Inject() (
         println(s"Deck Received Message: ${msg}"); true
       case _ => false
   }
-  override def send(msg: String): Unit = _mediator.send(this, msg)
+
+  // CTRL //
+  override def getDeck: DeckInterface = this
 
   override def getCard: Try[CardInterface] =
     Try {
@@ -37,22 +47,13 @@ case class Deck @Inject() (
       )
     }
 
+  override def getDeckCards: Vector[CardInterface] = deck
+
   override def turnUpperCard: String =
     upperCard.compareTo("Deck") match {
       case 0 => deck.last.toString()
       case _ => "Deck"
     }
-
-  override def getDeckCards: Vector[CardInterface] = deck
-
-  override def getDeck: DeckInterface = this
-
-  override def remove(amount: Int): Vector[CardInterface] =
-    val nDeck = deck.dropRight(amount)
-    nDeck
-
-  // override def leftOf(worth: Int): Int =
-  //   deck.count(_ == ctrl.toCard(_mediator, worth))
 
   override def draw(): (CardInterface, DeckInterface) = {
     if (upperCard != "Deck") {
@@ -63,9 +64,14 @@ case class Deck @Inject() (
       (card, new Deck(this.remove(1), ctrl, "Deck"))
     }
   }
-  override def toString(): String =
-    if upperCard.compareTo("Deck") == 0 then "Deck" else upperCard
-}
+
+  override def remove(amount: Int): Vector[CardInterface] =
+    val nDeck = deck.dropRight(amount)
+    nDeck
+
+  // override def leftOf(worth: Int): Int =
+  //   deck.count(_ == ctrl.toCard(_mediator, worth))
+
 
 object Deck:
   def apply(ctrl: ControllerInterface): DeckInterface =

@@ -19,9 +19,7 @@ import scalafx.event.ActionEvent
 import scalafx.scene.layout.Pane
 import scalafx.scene.input.MouseEvent
 import scalafx.scene.control.Alert.*
-// import javafx.scene.control.Alert
 import scalafx.scene.control.ButtonType.*
-// import javafx.scene.control.ButtonType
 import scala.util.{Try, Success, Failure}
 
 import scalafx.scene.control.Alert
@@ -52,7 +50,7 @@ import de.htwg.se.skyjo.model.{
 }
 import de.htwg.se.skyjo.model.modelInterfaceImplementation.{
   Card,
-  Board,  
+  Board,
   Deck,
   DiscardPile
 }
@@ -62,7 +60,8 @@ import de.htwg.se.skyjo.util.Observer
 
 val fontname = "Parisienne"
 
-case class BoardView(ctr: ControllerInterface) extends Observer {
+case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
+    extends Observer {
   ctr.add(this)
 
   var currentState: State = ctr.currState
@@ -73,13 +72,13 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
   var termBoard = ctr.getBrds(ctr.getPlIdx)
   var aDisc = ctr.getDisc
 
-  def syncController =
-    val tmpBrd: Seq[CardInterface] = manyCards.collect { case (bcv) => bcv.cCard}
+  def syncBoard(board: BoardInterface): BoardInterface =
+    val tmpBrd = manyCards.map(_.cCard)
     val (cols, rows) = ctr.getSize
 
     var tmpEndVec = Vector.empty[Vector[CardInterface]]
     var tmpVec = Vector.empty[CardInterface]
-    for{
+    for {
       row <- 0 until rows
       col <- 0 until cols
     } {
@@ -90,8 +89,11 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
         tmpEndVec = tmpEndVec :+ tmpVec
         tmpVec = Vector.empty[CardInterface]
     }
+    Board(ctr.getMediator, cols, rows, tmpEndVec)
 
-    termBoard = new Board(ctr.getMediator, cols, rows, tmpEndVec)
+  def syncController =
+
+    termBoard = syncBoard(ctr.getReducedBrd(termBoard))
 
     val newGameState = ctr.getGameState.copy(
       boards = ctr.getBrds.updated(ctr.getPlIdx, termBoard),
@@ -100,15 +102,32 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
       plIdx = (ctr.getPlIdx + 1) % ctr.getBrds.size,
       currentState = this.currentState
     )
-    println(s"${termBoard}")
-    // println("Synchronize..")
+    termBoard = ctr.getReducedBrd(termBoard)
+    println(s"termBoard:\n${termBoard}")
     ctr.assertGameState(newGameState)
-    // println("Sync finished..")
-    // println(s"${ctr.getBoard}")
-    // println(s"Deck: ${ctr.getDeck}")
-    // println(s"Disc: ${ctr.getDisc}")
+    // update("")
+
+  def uptBoardPane =
+    manyCards = BOARD_INIT(false)
+    val newUI: Seq[Node] = viewBoard()
+    boardPane.children_=(newUI)
+    vDiscard.uptCardView
+    vDeck.uptCardView
+    manyCards.map(_.uptCardView)
+    ctr.assertGameState(
+      ctr.getGameState.copy(
+        boards = ctr.getBrds.updated(ctr.getPlIdx, termBoard),
+        deck = aDeck,
+        disc = aDisc,
+        currentState = currentState
+      )
+    )
 
   def update(choose: String): Boolean =
+    termBoard = ctr.getReducedBrd(termBoard)
+    syncController
+    println("In Views update")
+    uptBoardPane
     true
 
   case class CardView(
@@ -181,7 +200,6 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
           else
             selected = !selected
             currentState.pre = "BOARD"
-          // println(s"changed to State: ${currentState.toString}")
           uptCardView
         }
         case State.MID => {
@@ -190,17 +208,12 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
           if currentState.pre.compareTo("DISC") == 0 then
             if vDiscard.turned then
               turned = true
-              // println("switching Disc / Board")
               switchDiscB()
             else println("Cannot get from Empty DiscardPile")
           else if currentState.pre.compareTo("DECK") == 0 then
             turned = true
-            if isDisc then
-              // println("switching Deck / Disc")
-              vDiscard.switchDeckDisc()
-            else if !isDisc && !isDeck then
-              // println("switching Deck / Board")
-              switchDeckB()
+            if isDisc then vDiscard.switchDeckDisc()
+            else if !isDisc && !isDeck then switchDeckB()
 
           selected = !selected
           vDiscard.turned =
@@ -213,21 +226,15 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
           vDeck.uptCardView
 
           uptCardView
-          if currentState == State.MID then
-            currentState = currentState.reset()
-            // println(s"changed to State: ${currentState.toString}")
+          if currentState == State.MID then currentState = currentState.reset()
         }
         case State.END => {
           endTurn()
           uptCardView
         }
       }
-      // println(s"currentState: ${currentState.toString()}")
-      // println(ctr.getBoard.flatten)
-      // println(s"aDisc:\n${aDisc.toString()}")
-      // println(s"aDeck:\n${aDeck.toString()}")
-      if termBoard.getBoard.forall(row => row.forall(c => c.isTurned == true)) then
-        popup(termBoard)
+      if termBoard.getBoard.forall(row => row.forall(c => c.isTurned == true))
+      then popup(termBoard)
     }
 
     def uptCardView: Unit = {
@@ -254,10 +261,8 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
   var manyCards: Seq[BoardView#CardView] = BOARD_INIT(false)
 
   def BOARD_INIT(begin: Boolean = true): Seq[BoardView#CardView] = {
-    val (cols, rows) = ctr.getSize
+    val (cols, rows) = termBoard.getBoard.head.size -> termBoard.getBoard.size
     val flattened = termBoard.getBoard.flatten
-    // def BOARD_INIT(begin: Boolean = true): Seq[CardView] = {
-    // println(ctr.getBoard.flatten.map(c => c.trueCopy))
     val br: Seq[CardView] = {
       for {
         row <- 0 until rows
@@ -289,7 +294,6 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
             ctr.currMemento.save(
               Memento(
                 false,
-                // aDeck.getUpperCard(),
                 preDisc,
                 index,
                 preBoard.getBoard.flatten.apply(index),
@@ -299,7 +303,8 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
             )
             println(ctr.currMemento.undoStack(0))
             currentState = currentState.reset()
-            syncController
+            // syncController
+            update("")
           },
           switchDeckB = () => {
             val preDisc = aDisc
@@ -331,15 +336,18 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
             )
             println(ctr.currMemento.undoStack(0))
             currentState = currentState.reset()
-            syncController
+            // syncController
+            update("")
           },
           endTurn = () => {
             termBoard = termBoard.turnBoardCard(index)
-            manyCards.apply(index).cCard = termBoard.getBoard.flatten.apply(index)
+            manyCards.apply(index).cCard =
+              termBoard.getBoard.flatten.apply(index)
             manyCards.apply(index).turned = true
             manyCards.map(_.uptCardView)
             currentState = currentState.reset()
-            syncController
+            // syncController
+            update("")
           }
         )
       }
@@ -352,7 +360,6 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
   }
 
   // VIEW DISC
-
   val vDiscard: CardView =
     (CardView(
       100,
@@ -365,7 +372,6 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
         val turnedDeck =
           new Deck(aDeck.getDeckCards, ctr, aDeck.turnUpperCard)
         val toDisc = aDisc.putToDiscardPile(turnedDeck.getCard.get)
-        // print(s"toDisc: _1: ${toDisc._1} ; _2: ${toDisc._2.turnUpperCard}")
         aDisc = toDisc._1
         aDeck = toDisc._2
 
@@ -374,7 +380,6 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
 
         currentState = currentState.nextState()
         currentState.pre = "BOARD"
-        // println(s"currentState: ${currentState.toString()}")
         val newMem = Memento(
           fromDeck = false,
           takenCard = turnedDeck.getCard.get,
@@ -382,9 +387,10 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
           lastDisc = aDisc,
           replacedCard = ctr.toCard(ctr, turnedDeck.toString()),
           replacedCardTurned = turnedDeck.getCard.get.isTurned
-          )
+        )
         ctr.save(newMem)
-        syncController
+        // syncController
+        update("")
       },
       switchDiscB = () => {},
       switchDeckB = () => {},
@@ -427,7 +433,6 @@ case class BoardView(ctr: ControllerInterface) extends Observer {
 
 def popup(b: BoardInterface) = {
   val finished = new Alert(AlertType.Information) {
-    // initOwner(stage)
     title = "finished window"
   }
   finished.headerText = "FINISHED"

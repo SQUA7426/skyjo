@@ -48,8 +48,8 @@ def main(args: Array[String]): Unit = {
   val t = new Tui(ctr)
   ctr.setup()
   println("input => g for GUI")
-  // val choose = "g"
-  val choose = ""
+  val choose = "g"
+  // val choose = ""
   // var choose = readLine()
   if choose == "g" then
     Gui.ctr = ctr

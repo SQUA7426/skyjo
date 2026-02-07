@@ -105,7 +105,7 @@ class Tui(ctr: ControllerInterface) extends Observer {
 
             print(">> Position: ")
             var pos = readLine()
-            // clearTerm
+            clearTerm
             if pos == "s" then
               val tmpDeck = new Deck(ctr.getDeckCards, ctr, d.turnUpperCard)
               // switch

@@ -15,13 +15,7 @@ case class Board @Inject() (
     val xSize: Int,
     val ySize: Int,
     val brd: Vector[Vector[CardInterface]] = Vector.empty
-) extends Colleague with BoardInterface {
-  override def send(msg: String): Unit = _mediator.send(this, msg)
-
-  override def receive(msg: String): Boolean = {
-    println(s"Board Received Message: ${msg}")
-    true
-  }
+) extends Colleague with BoardInterface:
 
   override def toString(): String =
     if brd.isEmpty then "Empty Bpard"
@@ -32,7 +26,27 @@ case class Board @Inject() (
         else ((" " * ((aCard.toString().length()))) + s"${aCard.toString()}|")
       }.mkString
 
-  def turnBoardCard(pos: Int): BoardInterface = {
+  // MEDIATOR //
+  override def send(msg: String): Unit = _mediator.send(this, msg)
+
+  override def receive(msg: String): Boolean = {
+    println(s"Board Received Message: ${msg}")
+    true
+  }
+
+  // CTRL //
+  def getBoardCard(pos: Int): CardInterface =
+    if pos < 0 || pos > ((ySize - 1) * xSize + (xSize - 1) ) then
+      throw new IndexOutOfBoundsException(
+        s"Idx: ${pos} is not a valid Board entry!"
+      )
+    brd.flatten.apply(pos).trueCopy
+
+  def getSize: (Int, Int) = (xSize, ySize)
+
+  def getBoard = brd
+
+  def turnBoardCard(pos: Int): BoardInterface =
     val turnedIdxBrd: Vector[Vector[CardInterface]] = brd.zipWithIndex.collect {
       case (vectorRow, vectorNum) =>
         vectorRow.zipWithIndex.collect { case (cCard, idx) =>
@@ -42,21 +56,8 @@ case class Board @Inject() (
         }
     }
     new Board(_mediator, xSize, ySize, turnedIdxBrd)
-  }
 
-  def getSize: (Int, Int) = (xSize, ySize)
-
-  def getBoard = brd
-
-  def getBoardCard(pos: Int): CardInterface = {
-    if pos < 0 || pos > ((ySize - 1) * xSize + (xSize - 1) ) then
-      throw new IndexOutOfBoundsException(
-        s"Idx: ${pos} is not a valid Board entry!"
-      )
-    brd.flatten.apply(pos).trueCopy
-  }
-
-  def swapFromMem(c: CardInterface, pos: Int): BoardInterface = {
+  def swapFromMem(c: CardInterface, pos: Int): BoardInterface =
     val uptBrd: Vector[Vector[CardInterface]] = brd.zipWithIndex.collect { case (vec,vecPos) =>
       vec.zipWithIndex.collect {
         case (cCard, cardPos) => {
@@ -65,12 +66,11 @@ case class Board @Inject() (
       }
     }
     new Board(_mediator, xSize, ySize, uptBrd)
-  }
 
   def switch(
       newCard: CardInterface,
       pos: Int
-  ): (CardInterface, BoardInterface) = {
+  ): (CardInterface, BoardInterface) =
     val oldCard = getBoardCard(pos)
     val updatedBrd = brd.zipWithIndex.map { case (row, y) =>
       row.zipWithIndex.map { case (card, x) =>
@@ -78,9 +78,8 @@ case class Board @Inject() (
       }
     }
     (oldCard, new Board(_mediator, xSize, ySize, updatedBrd))
-  }
 
-  def reduce(row: Int, col: Int): (BoardInterface, Boolean) = {
+  def reduce(row: Int, col: Int): (BoardInterface, Boolean) =
     if (col != -1) {
       val checkCol: Vector[Boolean] = (0 until xSize).toVector.map { colIdx =>
         brd.map(_(colIdx)).distinct.size == 1 && brd.size != 1
@@ -113,11 +112,8 @@ case class Board @Inject() (
       }
     }
     (new Board(_mediator, xSize, ySize, brd), false)
-  }
-}
 
-object Board {
+object Board:
   def apply(ctrl: ControllerInterface): (BoardInterface, DeckInterface) = {
     ctrl.fillBoard(4, 3, Deck(ctrl))
   }
-}

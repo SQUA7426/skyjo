@@ -11,8 +11,14 @@ case class Card @Inject() (
     val value: Int,
     var turned: Boolean,
     val ctrl: ControllerInterface
-) extends Colleague with CardInterface {
+) extends Colleague with CardInterface:
+
+  override def toString(): String = if turned then s"${value}" else "#"
+
+  // MEDIATOR //
   val _mediator = ctrl.getMediator
+
+  override def send(msg: String): Unit = ctrl.getMediator.send(this, msg)
   override def receive(msg: String): Boolean = {
     msg match
       case "REQUEST GET UPPERCARD" => {
@@ -20,30 +26,19 @@ case class Card @Inject() (
       }
       case _ => false
   }
-  override def send(msg: String): Unit = ctrl.getMediator.send(this, msg)
 
+  //  CTRL //
+  def getValue: Int = value
+
+  def isVal: Boolean =
+      if !(value > -3 && value < 13) then true else false
   def isTurned: Boolean = turned
 
-  def falseCopy: CardInterface = new Card(value, false, ctrl)
-
   def trueCopy: CardInterface = new Card(value, true, ctrl)
+  def falseCopy: CardInterface = new Card(value, false, ctrl)
 
   def turn: Unit = { turned = !turned }
 
-  override def toString(): String = if turned then s"${value}" else "#"
-
-  def getVal: Try[Int] =
-    Try {
-      if !(value > -3 && value < 13)then Integer.MIN_VALUE
-      else { value }
-    }
-  def isVal: Boolean =
-    getVal match {
-      case Success(v) => true
-      case Failure(exception) => false
-    }
-  def getValue: Int = value
-}
 object Card:
   def apply(value: Int, ctrl:ControllerInterface): CardInterface =
     if value > (-3) && value < (13) then new Card(value, true, ctrl)

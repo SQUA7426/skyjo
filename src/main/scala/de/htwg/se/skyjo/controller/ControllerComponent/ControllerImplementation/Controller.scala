@@ -25,16 +25,17 @@ import de.htwg.se.skyjo.model.modelInterfaceImplementation.DiscardPile
 
 class Controller @Inject() (var state: GameState)
     extends Observable
-    with ControllerInterface {
+    with ControllerInterface:
 
   var mem: Memento = _
 
+  // GAME MECHANICS //
   def setup(): Unit =
-    var currentDeck = state.deck
+    var currentDeck = getGameState.deck
 
-    for (i <- 0 until state.boards.size) {
-      val (x, y) = state.boards(i).getSize
-      val tmpMed = this.getMediator
+    for (i <- 0 until getBrds.size) {
+      val (x, y) = getSize
+      val tmpMed = getMediator
 
       val (afterBoard, nextDeck) = fillBoard(x, y, currentDeck)
       currentDeck = nextDeck
@@ -75,7 +76,7 @@ class Controller @Inject() (var state: GameState)
     notifyObservers
 
   def redo(): Unit =
-    getMementos(state.plIdx).redo(
+    currMemento.redo(
       mem,
       getDeck,
       getBrds(getPlIdx),
@@ -88,77 +89,37 @@ class Controller @Inject() (var state: GameState)
           disc = memDisc
         )
         state.currentState.pre =
-          if getMementos(getPlIdx).redoStack(getPlIdx)._1 then "DECK"
+          if currMemento.redoStack(getPlIdx)._1 then "DECK"
           else "DISC"
       }
       case None => { println("Couldn't REDO") }
     }
     notifyObservers
 
-  def drawFromDeck(pos: Int): GameState = {
-    val (card, newDeck) = state.deck.draw()
 
-    mem = Memento(true, card, pos, card, getDisc, card.isTurned) // takenCard
-    save(mem)
-    // println(getDrawn.get)
+  // GAMESTATE MECHANICS //
+  def getGameState: GameState = state
+  def assertGameState(newState: GameState): Unit =
+    state = newState
+    notifyObservers
 
-    // BoardSWITCH //
-    val (swCard, tmpBrd) = getBrds(getPlIdx).switch(getDrawn.get, pos)
+  // MEDIATOR //
+  def getMediator: Mediator = this.getGameState.med
 
-    mem = mem.copy(replacedCard = swCard) // replaced Card
-    save(mem)
+  // Memento //
+  def getMementos: Vector[MoveCaretaker] = state.mementos
+  def currMemento: MoveCaretaker = getMementos(getPlIdx)
+  def hasDrawn: Boolean =
+    currMemento.undoStack
+      .lift(getPlIdx)
+      .exists(_._2.isVal)
 
-    // UPT BRD
-    state = state.copy(boards = getBrds.updated(getPlIdx, tmpBrd))
+  def getDrawn: Option[CardInterface] =
+    currMemento.undoStack
+      .lift(getPlIdx)
+      .map(_._2)
 
-    // val newDisc = new DiscardPile(this, swCard.trueCopy.toString(), true)
-    val newDisc = putToDiscardPile(swCard)._1
-    // println(s"Disc: ${newDisc} ;  Disc.pre: ${newDisc.remove().toString()}")
-    // println(s"newDisc: ${newDisc.toString()}")
-    val deckCard = newDeck.getCard.get
-    // println(s"new Deckcard: ${deckCard.toString()}")
-
-    val newState = state.copy(
-      deck = newDeck,
-      disc = newDisc,
-      plIdx = (getPlIdx + 1) % getBrds.size,
-      currentState = currState.reset()
-    )
-
-    println(newState.disc)
-    newState
-  }
-
-  def drawFromDisc(pos: Int): GameState = {
-    getDiscCard() match {
-      case Some(card) => {
-        mem = new Memento(
-          false,
-          getDeck.getCard.get,
-          pos,
-          card,
-          getDisc,
-          card.isTurned
-        )
-        getMementos(getPlIdx).save(mem)
-        // val newDisc = remove()
-        val (newCard, newBrd) = getBrds(getPlIdx).switch(getDiscCard().get, pos)
-        val newDisc = new DiscardPile(this, newCard.toString())
-        // println(s"newBrd: ${newBrd}")
-        val newState = state.copy(
-          boards = getBrds.updated(getPlIdx, newBrd),
-          mementos = getMementos.updated(getPlIdx, getMementos(getPlIdx)),
-          disc = newDisc
-        )
-        // println(s"Disc: ${newState.disc} ;  Disc.pre: ${newState.disc.remove().toString()}")
-        // println(s"new State Board: ${newState.boards(getPlIdx)}")
-        newState
-        // notifyObservers
-      }
-      case None => printf("DISC EMPTY"); getGameState
-    }
-  }
-
+  // BOARD //
   def fillBoard(
       xSize: Int,
       ySize: Int,
@@ -204,7 +165,142 @@ class Controller @Inject() (var state: GameState)
       remainingDeck
     )
   }
-  def getMediator: Mediator = this.getGameState.med
+
+  def getSize: (Int, Int) = getBrds(getPlIdx).getSize
+  def turnUpperCard: String = state.deck.turnUpperCard
+  def reduce(row: Int, col: Int): (BoardInterface, Boolean) =
+    getBrds(getPlIdx).reduce(row, col)
+  def swapFromMem(c: CardInterface, pos: Int): BoardInterface =
+    val b: BoardInterface = getBrds(state.plIdx).swapFromMem(c, pos)
+    state = state.copy(boards = getBrds.updated(getPlIdx, b))
+    notifyObservers
+    b
+
+  // CTRL - BOARD //
+  def getBrds: Vector[BoardInterface] = state.boards
+  def getBoard: Vector[Vector[CardInterface]] =
+    state.boards(state.plIdx).getBoard
+
+  def getReducedBrd(updatedBoard: BoardInterface): BoardInterface =
+    val (x, y) = updatedBoard.getSize
+    val reducedBoards: Array[(BoardInterface, Boolean)] = new Array(
+      x + y
+    )
+    for j <- 0 until x do reducedBoards(j) = updatedBoard.reduce(-1, j)
+    for j <- 0 until y do reducedBoards(j + x) = updatedBoard.reduce(j, -1)
+    val r = reducedBoards.map(_._2).exists(_ == true)
+    val endBoard: BoardInterface = if r == true then
+      val allUpdatedBrds =
+        reducedBoards.filter((brds, bools) => bools == true).map(_._1).toArray
+      allUpdatedBrds(0)
+    else updatedBoard
+    println(s"Board after reduced:\n$endBoard")
+    notifyObservers
+    endBoard
+
+  // DECK //
+  def getDeck: DeckInterface = state.deck
+  def fullDeck(): Vector[CardInterface] = {
+    val seqCards = Seq.empty[CardInterface]
+    val v1: Vector[CardInterface] =
+      (for { i <- 1 to 10; j <- -1 to 12 } yield toCard(j)).toVector
+    val v2: Vector[CardInterface] = (for {
+      i <- 1 to 5; j <- -2 to 0; if j == -2 || j == 0
+    } yield toCard(j)).toVector
+    val fullDeck: Vector[CardInterface] = v1 ++ v2
+    val diffs: Vector[CardInterface] = fullDeck.diff(seqCards)
+    val shuffled = Random.shuffle(diffs)
+    shuffled
+  }
+
+  def getDeckCards: Vector[CardInterface] = state.deck.getDeckCards
+  def remove(amount: Int): Vector[CardInterface] =
+    state.deck.remove(amount)
+  def draw(): (
+      CardInterface,
+      DeckInterface
+  ) = state.deck.draw()
+
+  def drawFromDeck(pos: Int): GameState = {
+    val (card, newDeck) = state.deck.draw()
+
+    mem = Memento(true, card, pos, card, getDisc, card.isTurned) // takenCard
+    save(mem)
+
+    // BoardSWITCH //
+    val (swCard, tmpBrd) = getBrds(getPlIdx).switch(getDrawn.get, pos)
+
+    mem = mem.copy(replacedCard = swCard) // replaced Card
+    save(mem)
+
+    // UPT BRD
+    state = state.copy(boards = getBrds.updated(getPlIdx, tmpBrd))
+
+    val newDisc = putToDiscardPile(swCard)._1
+
+    val deckCard = newDeck.getCard.get
+
+    val newState = state.copy(
+      deck = newDeck,
+      disc = newDisc,
+      plIdx = (getPlIdx + 1) % getBrds.size,
+      currentState = currState.reset()
+    )
+
+    println(newState.disc)
+    newState
+  }
+
+
+  // DISCARDPILE //
+  def putToDiscardPile(from: Any): (
+      DiscardPileInterface,
+      DeckInterface
+  ) = state.disc.putToDiscardPile(from)
+  def remove(): DiscardPileInterface =
+    state.disc.remove()
+
+  // CTR - DISCARDPILE //
+  def getDisc: DiscardPileInterface = state.disc
+  def getDiscCard(): Option[CardInterface] =
+    state.disc.getDiscCard()
+
+  def drawFromDisc(pos: Int): GameState = {
+    getDiscCard() match {
+      case Some(card) => {
+        mem = new Memento(
+          false,
+          getDeck.getCard.get,
+          pos,
+          card,
+          getDisc,
+          card.isTurned
+        )
+        getMementos(getPlIdx).save(mem)
+
+        val (newCard, newBrd) = getBrds(getPlIdx).switch(getDiscCard().get, pos)
+        val newDisc = new DiscardPile(this, newCard.toString())
+
+        val newState = state.copy(
+          boards = getBrds.updated(getPlIdx, newBrd),
+          mementos = getMementos.updated(getPlIdx, getMementos(getPlIdx)),
+          disc = newDisc
+        )
+
+        newState
+      }
+      case None => println("DISC EMPTY"); getGameState
+    }
+  }
+
+  // PLAYER //
+  def getPlIdx: Int = state.plIdx
+  def nextPlayer: Unit = copy(idx = (getPlIdx + 1) % getBrds.size)
+
+  // STATE //
+  def currState: State = state.currentState
+
+  // OUTSIDE FUNCTIONS //
 
   def toCard(x: Any): CardInterface = {
     val valRange = (-2 to 12).toSet
@@ -238,68 +334,10 @@ class Controller @Inject() (var state: GameState)
       case _ => Card(0, false, this)
     }
   }
+
   def isCard(c: Any): Boolean = c match {
     case _: CardInterface => true
     case _                => false
-  }
-
-  def fullDeck(): Vector[CardInterface] = {
-    val seqCards = Seq.empty[CardInterface]
-    val v1: Vector[CardInterface] =
-      (for { i <- 1 to 10; j <- -1 to 12 } yield toCard(j)).toVector
-    val v2: Vector[CardInterface] = (for {
-      i <- 1 to 5; j <- -2 to 0; if j == -2 || j == 0
-    } yield toCard(j)).toVector
-    val fullDeck: Vector[CardInterface] = v1 ++ v2
-    val diffs: Vector[CardInterface] = fullDeck.diff(seqCards)
-    val shuffled = Random.shuffle(diffs)
-    shuffled
-  }
-
-  def getDrawn: Option[CardInterface] =
-    currMemento.undoStack
-      .lift(getPlIdx)
-      .map(_._2)
-  def hasDrawn: Boolean =
-    currMemento.undoStack
-      .lift(getPlIdx)
-      .exists(_._2.isVal)
-  def draw(): (
-      CardInterface,
-      DeckInterface
-  ) = state.deck.draw()
-
-  def getDeckCards: Vector[CardInterface] = state.deck.getDeckCards
-  def getDiscCard(): Option[CardInterface] =
-    state.disc.getDiscCard()
-
-  def putToDiscardPile(from: Any): (
-      DiscardPileInterface,
-      DeckInterface
-  ) = state.disc.putToDiscardPile(from)
-  def remove(amount: Int): Vector[CardInterface] =
-    state.deck.remove(amount)
-  def remove(): DiscardPileInterface =
-    state.disc.remove()
-
-  def turnUpperCard: String = state.deck.turnUpperCard
-
-  def getBoard: Vector[Vector[CardInterface]] =
-    state.boards(state.plIdx).getBoard
-  def getGameState: GameState = state
-
-  def reduce(row: Int, col: Int): (BoardInterface, Boolean) =
-    state.boards(state.plIdx).reduce(row, col)
-
-  def getPlIdx: Int = state.plIdx
-
-  def currState: State = state.currentState
-
-  def getMementos: Vector[MoveCaretaker] = state.mementos
-
-  def assertGameState(newState: GameState): Unit = {
-    state = newState
-    notifyObservers
   }
 
   def copy(
@@ -321,33 +359,3 @@ class Controller @Inject() (var state: GameState)
       currentState = anotherState
     )
   }
-
-  def getBrds: Vector[BoardInterface] = state.boards
-  def getDeck: DeckInterface = state.deck
-  def getDisc: DiscardPileInterface = state.disc
-  def getSize: (Int, Int) = state.boards(state.plIdx).getSize
-  def currMemento: MoveCaretaker = getMementos(state.plIdx)
-
-  def swapFromMem(c: CardInterface, pos: Int): BoardInterface =
-    val b: BoardInterface = getBrds(state.plIdx).swapFromMem(c, pos)
-    state = state.copy(boards = state.boards.updated(getPlIdx, b))
-    notifyObservers
-    b
-  def getReducedBrd(updatedBoard: BoardInterface): BoardInterface = {
-    val (x, y) = updatedBoard.getSize
-    val reducedBoards: Array[(BoardInterface, Boolean)] = new Array(
-      x + y
-    )
-    for j <- 0 until x do reducedBoards(j) = updatedBoard.reduce(-1, j)
-    for j <- 0 until y do reducedBoards(j + x) = updatedBoard.reduce(j, -1)
-    val r = reducedBoards.map(_._2).exists(_ == true)
-    val endBoard: BoardInterface = if r == true then
-      val allUpdatedBrds =
-        reducedBoards.filter((brds, bools) => bools == true).map(_._1).toArray
-      allUpdatedBrds(0)
-    else updatedBoard
-    println(endBoard)
-    notifyObservers
-    endBoard
-  }
-}
