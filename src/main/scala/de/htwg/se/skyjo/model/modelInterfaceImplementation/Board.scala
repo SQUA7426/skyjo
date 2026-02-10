@@ -79,16 +79,17 @@ case class Board @Inject() (
     }
     (oldCard, new Board(_mediator, xSize, ySize, updatedBrd))
 
-  def reduce(row: Int, col: Int): (BoardInterface, Boolean) =
+  def reduce(row: Int, col: Int): (BoardInterface, Boolean, Int, Int) =
     if (col != -1) {
       val checkCol: Vector[Boolean] = (0 until xSize).toVector.map { colIdx =>
         brd.map(_(colIdx)).distinct.size == 1 && brd.size != 1
       }
       if checkCol(col) == true then
+        // println(s"reduce col: $col")
         val slicedBoard = brd.map(_.patch(col, Nil, 1))
-        return (new Board(_mediator, xSize - 1, ySize, slicedBoard), true)
+        return (new Board(_mediator, xSize - 1, ySize, slicedBoard), true, -1, col)
       else {
-        (new Board(_mediator, xSize, ySize, brd), false)
+        (new Board(_mediator, xSize, ySize, brd), false, -1, -1)
       }
     }
 
@@ -98,6 +99,7 @@ case class Board @Inject() (
       }
 
       if checkRow(row) == true then
+        // println(s"reduce row: $row")
         return (
           new Board(
             _mediator,
@@ -105,13 +107,15 @@ case class Board @Inject() (
             ySize - 1,
             brd.slice(0, row) ++ brd.drop(row + 1)
           ),
-          true
+          true,
+          row,
+          -1
         )
       else {
-        (new Board(_mediator, xSize, ySize, brd), false)
+        (new Board(_mediator, xSize, ySize, brd), false, -1,-1)
       }
     }
-    (new Board(_mediator, xSize, ySize, brd), false)
+    (new Board(_mediator, xSize, ySize, brd), false, -1, -1)
 
 object Board:
   def apply(ctrl: ControllerInterface): (BoardInterface, DeckInterface) = {

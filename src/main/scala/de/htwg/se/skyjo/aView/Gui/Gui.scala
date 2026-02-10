@@ -89,7 +89,7 @@ object Gui extends JFXApp3 with Observer {
   override def update(choose: String): Boolean = {
     println("In GUI update")
     b.syncController
-    b.termBoard = ctr.getReducedBrd(b.termBoard)
+    b.termBoard = ctr.getReducedBrd(b.termBoard)._1
     b.manyCards = b.BOARD_INIT(false)
     val newUI: Seq[Node] = b.viewBoard() :+ guiButtons(stage)
     boardLayer.children_=(newUI)

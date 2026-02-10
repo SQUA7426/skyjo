@@ -93,7 +93,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
 
   def syncController =
 
-    termBoard = syncBoard(ctr.getReducedBrd(termBoard))
+    termBoard = syncBoard(ctr.getReducedBrd(termBoard)._1)
 
     val newGameState = ctr.getGameState.copy(
       boards = ctr.getBrds.updated(ctr.getPlIdx, termBoard),
@@ -102,13 +102,19 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
       plIdx = (ctr.getPlIdx + 1) % ctr.getBrds.size,
       currentState = this.currentState
     )
-    termBoard = ctr.getReducedBrd(termBoard)
+    termBoard = ctr.getReducedBrd(termBoard)._1
     println(s"termBoard:\n${termBoard}")
     ctr.assertGameState(newGameState)
     // update("")
 
-  def uptBoardPane =
+  def uptBoardPane(r: Int, c: Int) =
     manyCards = BOARD_INIT(false)
+    if r==(-1) && c==(-1) then
+      val flattenTerm: Vector[CardInterface] = termBoard.getBoard.flatten
+      println(s"flattenTerm:\n$flattenTerm")
+      for i <- 0 until flattenTerm.size do
+        manyCards(i).cCard = flattenTerm(i)
+        manyCards(i).turned = flattenTerm(i).isTurned
     val newUI: Seq[Node] = viewBoard()
     boardPane.children_=(newUI)
     vDiscard.uptCardView
@@ -124,10 +130,11 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
     )
 
   def update(choose: String): Boolean =
-    termBoard = ctr.getReducedBrd(termBoard)
+    val (row,col) = (ctr.getReducedBrd(termBoard)._2,ctr.getReducedBrd(termBoard)._3)
+    termBoard = ctr.getReducedBrd(termBoard)._1
     syncController
     println("In Views update")
-    uptBoardPane
+    uptBoardPane(row,col)
     true
 
   case class CardView(

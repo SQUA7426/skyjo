@@ -168,7 +168,7 @@ class Controller @Inject() (var state: GameState)
 
   def getSize: (Int, Int) = getBrds(getPlIdx).getSize
   def turnUpperCard: String = state.deck.turnUpperCard
-  def reduce(row: Int, col: Int): (BoardInterface, Boolean) =
+  def reduce(row: Int, col: Int): (BoardInterface, Boolean, Int, Int) =
     getBrds(getPlIdx).reduce(row, col)
   def swapFromMem(c: CardInterface, pos: Int): BoardInterface =
     val b: BoardInterface = getBrds(state.plIdx).swapFromMem(c, pos)
@@ -181,20 +181,22 @@ class Controller @Inject() (var state: GameState)
   def getBoard: Vector[Vector[CardInterface]] =
     state.boards(state.plIdx).getBoard
 
-  def getReducedBrd(updatedBoard: BoardInterface): BoardInterface =
+  def getReducedBrd(updatedBoard: BoardInterface): (BoardInterface, Int, Int) =
     val (x, y) = updatedBoard.getSize
-    val reducedBoards: Array[(BoardInterface, Boolean)] = new Array(
+    val reducedBoards: Array[(BoardInterface, Boolean, Int, Int)] = new Array(
       x + y
     )
+    // REDUCE through all rows
     for j <- 0 until x do reducedBoards(j) = updatedBoard.reduce(-1, j)
+    // REDUCE through all cols
     for j <- 0 until y do reducedBoards(j + x) = updatedBoard.reduce(j, -1)
     val r = reducedBoards.map(_._2).exists(_ == true)
-    val endBoard: BoardInterface = if r == true then
+    val endBoard: (BoardInterface, Int, Int) = if r == true then
       val allUpdatedBrds =
-        reducedBoards.filter((brds, bools) => bools == true).map(_._1).toArray
+        reducedBoards.filter((brds, bools, row, col) => bools == true).map((brd, bool,row, col) => (brd, row, col)).toArray
       allUpdatedBrds(0)
-    else updatedBoard
-    println(s"Board after reduced:\n$endBoard")
+    else (updatedBoard, -1, -1)
+    // println(s"Board after reduced:\n$endBoard")
     notifyObservers
     endBoard
 

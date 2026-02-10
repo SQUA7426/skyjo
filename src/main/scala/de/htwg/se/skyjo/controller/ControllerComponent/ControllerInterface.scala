@@ -33,13 +33,13 @@ trait ControllerInterface extends Observable:
   ): (BoardInterface, DeckInterface)
   def getSize: (Int, Int)
   def turnUpperCard: String
-  def reduce(row: Int, col: Int): (BoardInterface, Boolean)
+  def reduce(row: Int, col: Int): (BoardInterface, Boolean, Int, Int)
   def swapFromMem(c: CardInterface, pos: Int): BoardInterface
 
   // CTRL - BOARD //
   def getBrds: Vector[BoardInterface]
   def getBoard: Vector[Vector[CardInterface]]
-  def getReducedBrd(updatedBoard: BoardInterface): BoardInterface
+  def getReducedBrd(updatedBoard: BoardInterface): (BoardInterface, Int, Int)
 
   // DECK //
   def getDeck: DeckInterface

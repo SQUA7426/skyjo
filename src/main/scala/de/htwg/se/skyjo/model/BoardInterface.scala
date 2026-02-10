@@ -14,4 +14,4 @@ trait BoardInterface:
   def swapFromMem(c: CardInterface, pos: Int): BoardInterface
   def switch(newCard: CardInterface, pos: Int): (CardInterface, BoardInterface)
 
-  def reduce(row: Int, col: Int): (BoardInterface, Boolean)
+  def reduce(row: Int, col: Int): (BoardInterface, Boolean, Int, Int)

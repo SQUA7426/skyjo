@@ -118,7 +118,7 @@ class Tui(ctr: ControllerInterface) extends Observer {
                   pos = readLine()
                   val idx = Integer.parseInt(pos)
                   val (oldCard, tmpBrd) = b.switch(b.getBoardCard(idx), idx)
-                  val newBrd = ctr.getReducedBrd(tmpBrd)
+                  val newBrd = ctr.getReducedBrd(tmpBrd)._1
                   val gottenMem = ctr.getMementos(ctr.getPlIdx).undoStack(0)
                   val uptMem = gottenMem.copy(takenCard = Card(Integer.parseInt(tmpDeck.toString()), ctr), replacedCard = oldCard)
                   ctr.save(uptMem)
@@ -130,7 +130,7 @@ class Tui(ctr: ControllerInterface) extends Observer {
               val return_H = h.handle(choose, pos.toInt)
               return_H match
                 case Success(gs:GameState) => {
-                  val newBrd: BoardInterface = ctr.getReducedBrd(gs.boards(ctr.getPlIdx))
+                  val newBrd: BoardInterface = ctr.getReducedBrd(gs.boards(ctr.getPlIdx))._1
                   val copyGameState = gs.copy(
                     boards = gs.boards.updated(ctr.getPlIdx, newBrd)
                     )
