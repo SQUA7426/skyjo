@@ -187,7 +187,7 @@ class Controller @Inject() (var state: GameState)
       x + y
     )
     // REDUCE through all rows
-    for j <- 0 until x do reducedBoards(j) = updatedBoard.reduce(-1, j)
+    for i <- 0 until x do reducedBoards(i) = updatedBoard.reduce(-1, i)
     // REDUCE through all cols
     for j <- 0 until y do reducedBoards(j + x) = updatedBoard.reduce(j, -1)
     val r = reducedBoards.map(_._2).exists(_ == true)

@@ -93,7 +93,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
 
   def syncController =
 
-    termBoard = syncBoard(ctr.getReducedBrd(termBoard)._1)
+    // termBoard = syncBoard(ctr.getReducedBrd(termBoard)._1)
 
     val newGameState = ctr.getGameState.copy(
       boards = ctr.getBrds.updated(ctr.getPlIdx, termBoard),
@@ -102,24 +102,29 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
       plIdx = (ctr.getPlIdx + 1) % ctr.getBrds.size,
       currentState = this.currentState
     )
-    termBoard = ctr.getReducedBrd(termBoard)._1
-    println(s"termBoard:\n${termBoard}")
+    // termBoard = ctr.getReducedBrd(termBoard)._1
+    // println(s"termBoard:\n${termBoard}")
     ctr.assertGameState(newGameState)
     // update("")
 
   def uptBoardPane(r: Int, c: Int) =
+    // println("In Upt Board Pane")
     manyCards = BOARD_INIT(false)
-    if r==(-1) && c==(-1) then
-      val flattenTerm: Vector[CardInterface] = termBoard.getBoard.flatten
-      println(s"flattenTerm:\n$flattenTerm")
-      for i <- 0 until flattenTerm.size do
-        manyCards(i).cCard = flattenTerm(i)
-        manyCards(i).turned = flattenTerm(i).isTurned
+    // if r==(-1) && c==(-1) then
+    val flattenTerm: Vector[CardInterface] = termBoard.getBoard.flatten
+    // println(s"flattenTerm:\n$flattenTerm")
+    for i <- 0 until flattenTerm.size do
+      manyCards(i).cCard = flattenTerm(i)
+      manyCards(i).turned = flattenTerm(i).isTurned
+    // println(s"ManyCards: Size: ${manyCards.size}")
+    // for c <- manyCards do println(c.cCard.toString())
     val newUI: Seq[Node] = viewBoard()
     boardPane.children_=(newUI)
     vDiscard.uptCardView
     vDeck.uptCardView
+    // println("Pre ManyCards MAP")
     manyCards.map(_.uptCardView)
+    // println("AFTER ManyCards MAP")
     ctr.assertGameState(
       ctr.getGameState.copy(
         boards = ctr.getBrds.updated(ctr.getPlIdx, termBoard),
@@ -128,13 +133,20 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
         currentState = currentState
       )
     )
+    // println("END UPT BOARD PANE")
 
   def update(choose: String): Boolean =
-    val (row,col) = (ctr.getReducedBrd(termBoard)._2,ctr.getReducedBrd(termBoard)._3)
-    termBoard = ctr.getReducedBrd(termBoard)._1
+    val (newTerm, row,col) = ctr.getReducedBrd(termBoard)
+    termBoard = newTerm
     syncController
-    println("In Views update")
+    // if row != (-1) && col != (-1) then
+      // println("In Views update")
     uptBoardPane(row,col)
+    // println("UPDATE:")
+    // println(s"termBoard:\n${termBoard.toString()}")
+    // println(s"manyCards (Size: ${manyCards.size}):\n${manyCards.foreach(_.cCard.toString())}")
+    // println("current Board:")
+    // println(ctr.getBrds(ctr.getPlIdx).toString)
     true
 
   case class CardView(
@@ -317,7 +329,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
             val preDisc = aDisc
             aDisc = DiscardPile(ctr, termBoard.getBoardCard(index).toString())
             val turnedDeck: DeckInterface =
-              new Deck(aDeck.getDeckCards, ctr, aDeck.getCard.toString())
+              new Deck(aDeck.getDeckCards, ctr, aDeck.getCard.get.toString())
             val (tmpDeckCard, tmpBoard: BoardInterface) = (termBoard.switch(
               ctr.toCard(turnedDeck.toString()),
               index
@@ -419,7 +431,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
       400,
       720,
       colour = Color.SteelBlue,
-      cCard = ctr.toCard(aDeck.getCard).falseCopy,
+      cCard = ctr.toCard(aDeck.getCard.get).falseCopy,
       med = _med,
       isDeck = true,
       switchDeckDisc = () => {},

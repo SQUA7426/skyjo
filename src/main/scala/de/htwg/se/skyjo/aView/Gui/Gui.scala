@@ -217,7 +217,7 @@ object Gui extends JFXApp3 with Observer {
       then {
         if b.currentState == State.BEGIN then
           val mem: Memento = ctr.currMemento.redoStack(0)
-          ctr.currMemento.redo(mem, b.aDeck, b.termBoard, b.aDisc) match {
+          ctr.currMemento.redo(mem, ctr.getDeck, ctr.getBrds(ctr.getPlIdx), ctr.getDisc) match {
             case Some(resBoard, resDeck, resDisc) => {
               val lDisc = ctr.currMemento.undoStack(0).lastDisc
               // println("REDO")

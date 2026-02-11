@@ -89,6 +89,7 @@ case class Board @Inject() (
         val slicedBoard = brd.map(_.patch(col, Nil, 1))
         return (new Board(_mediator, xSize - 1, ySize, slicedBoard), true, -1, col)
       else {
+        // println("no col reduced")
         (new Board(_mediator, xSize, ySize, brd), false, -1, -1)
       }
     }
@@ -97,6 +98,8 @@ case class Board @Inject() (
       val checkRow: Vector[Boolean] = brd.map { r =>
         r.forall(_ == r.head)
       }
+      // println("CheckRow:\n")
+      // checkRow.foreach(println)
 
       if checkRow(row) == true then
         // println(s"reduce row: $row")
@@ -112,9 +115,11 @@ case class Board @Inject() (
           -1
         )
       else {
+        // println("no row reduced")
         (new Board(_mediator, xSize, ySize, brd), false, -1,-1)
       }
     }
+    // println("no row and col reduced")
     (new Board(_mediator, xSize, ySize, brd), false, -1, -1)
 
 object Board:
