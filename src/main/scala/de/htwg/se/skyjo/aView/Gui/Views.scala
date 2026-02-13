@@ -92,19 +92,17 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
     Board(ctr.getMediator, cols, rows, tmpEndVec)
 
   def syncController =
-
-    // termBoard = syncBoard(ctr.getReducedBrd(termBoard)._1)
-
     val newGameState = ctr.getGameState.copy(
       boards = ctr.getBrds.updated(ctr.getPlIdx, termBoard),
       deck = aDeck,
-      disc = aDisc,
-      plIdx = (ctr.getPlIdx + 1) % ctr.getBrds.size,
-      currentState = this.currentState
+      disc = aDisc
+      // plIdx = if currentState != State.BEGIN then (ctr.getPlIdx + 1) % ctr.getBrds.size else ctr.getPlIdx,
+      // currentState = currentState.reset()
     )
-    // termBoard = ctr.getReducedBrd(termBoard)._1
-    // println(s"termBoard:\n${termBoard}")
+
+
     ctr.assertGameState(newGameState)
+    println(s"Player: ${ctr.getPlIdx}")
     // update("")
 
   def uptBoardPane(r: Int, c: Int) =
@@ -142,11 +140,13 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
     // if row != (-1) && col != (-1) then
       // println("In Views update")
     uptBoardPane(row,col)
-    // println("UPDATE:")
-    // println(s"termBoard:\n${termBoard.toString()}")
-    // println(s"manyCards (Size: ${manyCards.size}):\n${manyCards.foreach(_.cCard.toString())}")
-    // println("current Board:")
-    // println(ctr.getBrds(ctr.getPlIdx).toString)
+
+    println(s"CURRENT STATE: ${ctr.currState.getStr}")
+    if currentState == State.BEGIN then ctr.assertGameState(ctr.getGameState.copy(plIdx = (ctr.getPlIdx + 1) % ctr.getBrds.size))
+    termBoard = ctr.getBrds(ctr.getPlIdx)
+    syncController
+    uptBoardPane(-1,-1)
+
     true
 
   case class CardView(
@@ -253,7 +253,9 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
         }
       }
       if termBoard.getBoard.forall(row => row.forall(c => c.isTurned == true))
-      then popup(termBoard)
+      then
+        // println("FINISHED")
+        popup(ctr)
     }
 
     def uptCardView: Unit = {
@@ -450,13 +452,21 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
   }
 }
 
-def popup(b: BoardInterface) = {
+def popup(ctr: ControllerInterface) = {
   val finished = new Alert(AlertType.Information) {
     title = "finished window"
   }
+  var arr = Seq.empty[String]
+  for i <- 0 until ctr.getBrds.size do
+    arr = arr :++ Seq(s"${ctr.getBrds(i).getBoard.flatten.map(c => c.getValue).fold(0)((x, y) => x + y).toString()}")
+
+  var str = ""
+  for j <- 0 until arr.size do
+    str = str :++ (arr(j) + "; ")
+  println(str)
+
   finished.headerText = "FINISHED"
-  finished.contentText =
-    s"SUM:  ${b.getBoard.flatten.map(c => c.getValue).fold(0)((x, y) => x + y).toString()}"
+  finished.contentText = str
   val re = finished.showAndWait()
   re match {
     case Some(ButtonType.OK) => {

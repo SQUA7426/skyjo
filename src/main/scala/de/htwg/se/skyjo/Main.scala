@@ -21,7 +21,7 @@ def main(args: Array[String]): Unit = {
   // var pl = scala.io.StdIn.readLine()
   // if pl == "" then pl = "1"
   // val plCount = Integer.parseInt(pl)
-  val plCount = 1
+  val plCount = 2
   val med = new ConcreteMediator()
 
   // val tempState = new GameState(med, Vector.empty, null, null, 0, None)
@@ -47,6 +47,10 @@ def main(args: Array[String]): Unit = {
 
   val t = new Tui(ctr)
   ctr.setup()
+
+  println("BOARDS:")
+  ctr.getBrds.foreach(println)
+
   println("input => g for GUI")
   val choose = "g"
   // val choose = ""

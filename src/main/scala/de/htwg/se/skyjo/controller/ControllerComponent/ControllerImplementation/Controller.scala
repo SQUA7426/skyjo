@@ -49,7 +49,8 @@ class Controller @Inject() (var state: GameState)
       )
     }
     state = state.copy(plIdx = 0)
-    notifyObservers
+    assertGameState(state)
+    // notifyObservers
 
   def save(mementoSave: Memento): Unit =
     getMementos(getPlIdx).save(mementoSave)
