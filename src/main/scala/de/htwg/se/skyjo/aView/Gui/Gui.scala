@@ -151,8 +151,9 @@ object Gui extends JFXApp3 with Observer {
         val mem: Memento = ctr.currMemento.undoStack(0)
         ctr.currMemento.undo(mem, b.aDeck, b.termBoard, b.aDisc) match {
           case Some(resBoard, resDeck, resDisc) => {
+
             // println("UNDO")
-            // println(s"resBoard: ${resBoard}")
+            // println(s"resBoard:\n${resBoard}")
             // println(s"resDeck: ${resDeck.turnUpperCard}")
             // println(s"resDisc: ${resDisc}")
             b.termBoard = resBoard
@@ -169,9 +170,7 @@ object Gui extends JFXApp3 with Observer {
             val tmpRedo = ctr.currMemento
               .undoStack(0)
               .copy(
-                takenCard = oldUndo.replacedCard,
-                replacedCard = oldUndo.takenCard,
-                lastDisc = DiscardPile(ctr, oldUndo.replacedCard.toString())
+                lastDisc = DiscardPile(ctr, oldUndo.replacedCard.trueCopy.toString())
               )
 
             b.manyCards = b.BOARD_INIT(false)
@@ -186,21 +185,20 @@ object Gui extends JFXApp3 with Observer {
             b.vDeck.uptCardView
             b.manyCards.map(_.uptCardView)
 
-            println("\nREDOSTACK\n")
+            // println("\nREDOSTACK\n")
 
             ctr.save(tmpRedo)
-            ctr.assertGameState(
-              ctr.getGameState.copy(mementos =
-                ctr.getMementos.updated(ctr.getPlIdx, ctr.currMemento)
-              )
-            )
+            // ctr.assertGameState(
+            //   ctr.getGameState.copy(mementos =
+            //     ctr.getMementos.updated(ctr.getPlIdx, ctr.currMemento)
+            //   )
+            // )
             ctr.currMemento.undoStack.clear()
             ctr.currMemento.redoStack.clear()
             ctr.currMemento.redoStack.push(tmpRedo)
             b.syncController
-            println(ctr.currMemento.redoStack(0))
+            // println(ctr.currMemento.redoStack(0))
 
-            // println(s"\nDisc: ${ctr.getDisc} ; aDisc: ${b.aDisc} ; vDisc: ${b.vDiscard}")
             println()
           }
           case None => {}
@@ -220,8 +218,9 @@ object Gui extends JFXApp3 with Observer {
           ctr.currMemento.redo(mem, ctr.getDeck, ctr.getBrds(ctr.getPlIdx), ctr.getDisc) match {
             case Some(resBoard, resDeck, resDisc) => {
               val lDisc = ctr.currMemento.undoStack(0).lastDisc
+
               // println("REDO")
-              // println(s"resBoard: ${resBoard}")
+              // println(s"resBoard:\n${resBoard}")
               // println(s"resDeck: ${resDeck.turnUpperCard}")
               // println(s"resDisc: ${resDisc}")
               b.termBoard = resBoard
@@ -247,19 +246,10 @@ object Gui extends JFXApp3 with Observer {
 
               println("\nUNDOSTACK\n")
               val preUndoStack = ctr.currMemento.undoStack(0)
-              val tmpMem = Memento(
-                preUndoStack.fromDeck,
-                preUndoStack.replacedCard,
-                preUndoStack.boardIndex,
-                preUndoStack.takenCard,
-                preUndoStack.lastDisc,
-                preUndoStack.lastDisc.isTurned
-              )
+
               ctr.save(preUndoStack)
-              // ctr.currMemento.undoStack.clear()
-              // ctr.currMemento.undoStack.push(tmpMem)
+              ctr.currMemento.redoStack.clear()
               println(ctr.currMemento.undoStack(0))
-              // println(s"\nDisc: ${ctr.getDisc} ; aDisc: ${b.aDisc} ; vDisc: ${b.vDiscard}")
               b.syncController
               println()
             }

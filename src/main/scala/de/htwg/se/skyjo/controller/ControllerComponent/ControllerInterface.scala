@@ -54,6 +54,8 @@ trait ControllerInterface extends Observable:
   def putToDiscardPile(from: Any): (DiscardPileInterface, DeckInterface)
   def remove(): DiscardPileInterface
 
+  def switchDeckDisc(gs: GameState, b:BoardInterface, tmpDeck: DeckInterface, idx: Int): GameState
+
   // CTR - DISCARDPILE //
   def getDisc: DiscardPileInterface
   def getDiscCard(): Option[CardInterface]

@@ -296,6 +296,15 @@ class Controller @Inject() (var state: GameState)
     }
   }
 
+  def switchDeckDisc(gs: GameState, b:BoardInterface, tmpDeck: DeckInterface, idx: Int): GameState =
+      val (oldCard, tmpBrd) = b.switch(b.getBoardCard(idx), idx)
+      val newBrd = getReducedBrd(tmpBrd)._1
+      val gottenMem = getMementos(getPlIdx).undoStack(0)
+      val uptMem = gottenMem.copy(takenCard = Card(Integer.parseInt(tmpDeck.toString()), this), replacedCard = oldCard)
+      save(uptMem)
+      val newGameState = gs.copy(boards = getBrds.updated(getPlIdx, newBrd), currentState = currState.reset())
+      newGameState
+
   // PLAYER //
   def getPlIdx: Int = state.plIdx
   def nextPlayer: Unit = copy(idx = (getPlIdx + 1) % getBrds.size)

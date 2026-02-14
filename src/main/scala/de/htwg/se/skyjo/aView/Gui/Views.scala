@@ -96,33 +96,29 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
       boards = ctr.getBrds.updated(ctr.getPlIdx, termBoard),
       deck = aDeck,
       disc = aDisc
-      // plIdx = if currentState != State.BEGIN then (ctr.getPlIdx + 1) % ctr.getBrds.size else ctr.getPlIdx,
-      // currentState = currentState.reset()
     )
 
 
     ctr.assertGameState(newGameState)
-    println(s"Player: ${ctr.getPlIdx}")
-    // update("")
+    // println(s"Player: ${ctr.getPlIdx}")
 
   def uptBoardPane(r: Int, c: Int) =
-    // println("In Upt Board Pane")
+
     manyCards = BOARD_INIT(false)
-    // if r==(-1) && c==(-1) then
+
     val flattenTerm: Vector[CardInterface] = termBoard.getBoard.flatten
-    // println(s"flattenTerm:\n$flattenTerm")
+
     for i <- 0 until flattenTerm.size do
       manyCards(i).cCard = flattenTerm(i)
       manyCards(i).turned = flattenTerm(i).isTurned
-    // println(s"ManyCards: Size: ${manyCards.size}")
-    // for c <- manyCards do println(c.cCard.toString())
+
     val newUI: Seq[Node] = viewBoard()
     boardPane.children_=(newUI)
     vDiscard.uptCardView
     vDeck.uptCardView
-    // println("Pre ManyCards MAP")
+
     manyCards.map(_.uptCardView)
-    // println("AFTER ManyCards MAP")
+
     ctr.assertGameState(
       ctr.getGameState.copy(
         boards = ctr.getBrds.updated(ctr.getPlIdx, termBoard),
@@ -131,17 +127,15 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
         currentState = currentState
       )
     )
-    // println("END UPT BOARD PANE")
 
   def update(choose: String): Boolean =
     val (newTerm, row,col) = ctr.getReducedBrd(termBoard)
     termBoard = newTerm
     syncController
-    // if row != (-1) && col != (-1) then
-      // println("In Views update")
+
     uptBoardPane(row,col)
 
-    println(s"CURRENT STATE: ${ctr.currState.getStr}")
+    // println(s"CURRENT STATE: ${ctr.currState.getStr}")
     if currentState == State.BEGIN then ctr.assertGameState(ctr.getGameState.copy(plIdx = (ctr.getPlIdx + 1) % ctr.getBrds.size))
     termBoard = ctr.getBrds(ctr.getPlIdx)
     syncController
@@ -254,7 +248,6 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
       }
       if termBoard.getBoard.forall(row => row.forall(c => c.isTurned == true))
       then
-        // println("FINISHED")
         popup(ctr)
     }
 
@@ -324,7 +317,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
             )
             println(ctr.currMemento.undoStack(0))
             currentState = currentState.reset()
-            // syncController
+
             update("")
           },
           switchDeckB = () => {
@@ -357,7 +350,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
             )
             println(ctr.currMemento.undoStack(0))
             currentState = currentState.reset()
-            // syncController
+
             update("")
           },
           endTurn = () => {
@@ -367,7 +360,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
             manyCards.apply(index).turned = true
             manyCards.map(_.uptCardView)
             currentState = currentState.reset()
-            // syncController
+
             update("")
           }
         )
@@ -410,7 +403,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
           replacedCardTurned = turnedDeck.getCard.get.isTurned
         )
         ctr.save(newMem)
-        // syncController
+
         update("")
       },
       switchDiscB = () => {},
@@ -458,11 +451,11 @@ def popup(ctr: ControllerInterface) = {
   }
   var arr = Seq.empty[String]
   for i <- 0 until ctr.getBrds.size do
-    arr = arr :++ Seq(s"${ctr.getBrds(i).getBoard.flatten.map(c => c.getValue).fold(0)((x, y) => x + y).toString()}")
+    arr = arr :++ Seq(s"Player $i: ${ctr.getBrds(i).getBoard.flatten.map(c => c.getValue).fold(0)((x, y) => x + y).toString()}\n")
 
   var str = ""
   for j <- 0 until arr.size do
-    str = str :++ (arr(j) + "; ")
+    str = str :++ arr(j)
   println(str)
 
   finished.headerText = "FINISHED"
