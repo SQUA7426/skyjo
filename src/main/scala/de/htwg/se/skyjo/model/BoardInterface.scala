@@ -2,6 +2,7 @@ package de.htwg.se.skyjo.model
 
 import de.htwg.se.skyjo.model.{CardInterface, BoardInterface}
 import de.htwg.se.skyjo.util.*
+import scala.xml.Node
 
 trait BoardInterface:
 
@@ -15,3 +16,8 @@ trait BoardInterface:
   def switch(newCard: CardInterface, pos: Int): (CardInterface, BoardInterface)
 
   def reduce(row: Int, col: Int): (BoardInterface, Boolean, Int, Int)
+
+  // FILEIO //
+
+  def toXml: Node
+  def fromXml(xml: Node): BoardInterface

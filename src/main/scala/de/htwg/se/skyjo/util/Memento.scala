@@ -5,6 +5,7 @@ import de.htwg.se.skyjo.model.modelInterfaceImplementation.{DiscardPile, Deck}
 import scala.collection.mutable.Stack
 import de.htwg.se.skyjo.util.Mediator
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
+import scala.xml.Node
 
 case class Memento(
     fromDeck: Boolean,
@@ -114,4 +115,44 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
       Some((newBoard, updtDeck, disc2))
     }
   }
+
+  // FILEIO //
+
+  private def Node2Bool(ns: NodeSeq): Boolean =
+    n.head.text.replace(" ", "").toBoolean
+  private def Node2Int(ns: NodeSeq): Int =
+    n.head.text.replace(" ", "").toInt
+
+  private def memToXml: Node =
+
+  private def undoToXml: Node =
+    if !undostack.isEmpty then
+      <undostack>
+        <fromdeck>{undoStack(0).fromDeck}</fromdeck>
+        <takenCard>{undoStack(0).takenCard.toXml}</takenCard>
+        <boardIndex>{undoStack(0).boardIndex}</boardIndex>
+        <replacedCard>{undoStack(0).replacedCard.toXml}</replacedCard>
+        <lastDisc>{undoStack(0).lastDisc.toXml}</lastDisc>
+        <replacedCardTurned>{undoStack(0).replacedCardTurned}</replacedCardTurned>
+      </undostack>
+    else <undostack></undostack>
+
+  private def redoToXml: Node =
+    if !redostack.isEmpty then
+      <redostack>
+        <fromdeck>{redoStack(0).fromDeck}</fromdeck>
+        <takenCard>{redoStack(0).takenCard.toXml}</takenCard>
+        <boardIndex>{redoStack(0).boardIndex}</boardIndex>
+        <replacedCard>{redoStack(0).replacedCard.toXml}</replacedCard>
+        <lastDisc>{redoStack(0).lastDisc.toXml}</lastDisc>
+        <replacedCardTurned>{redoStack(0).replacedCardTurned}</replacedCardTurned>
+      </redostack>
+    else <redostack></redostack>
+
+  def toXml: Node =
+    <movecaretaker>
+      undoToXml
+      redoToXml
+    </movecaretaker>
+  def fromXml(d: Node): MoveCaretaker
 }

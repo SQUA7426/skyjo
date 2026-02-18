@@ -12,7 +12,7 @@ import jakarta.inject.Inject
 
 case class Deck (
     val deck: Vector[CardInterface],
-    val ctrl: ControllerInterface,
+    // val ctrl: ControllerInterface,
     val upperCard: String = "Deck"
 ) extends DeckInterface:
 
@@ -71,7 +71,35 @@ case class Deck (
   // override def leftOf(worth: Int): Int =
   //   deck.count(_ == ctrl.toCard(_mediator, worth))
 
+  def toXml: Node =
+    <deck>
+      <deckcards>
+        {deck.map(card => card.toXml)}
+      </deckcards>
+      <uppercard>{upperCard}</uppercard>
+    </deck>
+  def fromXml(dn: Node): DeckInterface =
+    val upper = {dn \ "uppercard"}
+    val deckXml = {dn \ "deckcards"}
+    val cardXml = deckXml.map(c => c \ "card")
+    Deck(cardXml.map(
+      cXml => deck(0).fromXml(cXml)).toVector,
+      upper.text.toString
+    )
+
 
 object Deck:
-  def apply(ctrl: ControllerInterface): DeckInterface =
-    new Deck(ctrl.fullDeck(), ctrl)
+  private def fullDeck(): Vector[CardInterface] = {
+    val seqCards = Seq.empty[CardInterface]
+    val v1: Vector[CardInterface] =
+      (for { i <- 1 to 10; j <- -1 to 12 } yield toCard(j)).toVector
+    val v2: Vector[CardInterface] = (for {
+      i <- 1 to 5; j <- -2 to 0; if j == -2 || j == 0
+    } yield toCard(j)).toVector
+    val fullDeck: Vector[CardInterface] = v1 ++ v2
+    val diffs: Vector[CardInterface] = fullDeck.diff(seqCards)
+    val shuffled = Random.shuffle(diffs)
+    shuffled
+  }
+  def apply(): DeckInterface =
+    new Deck(fullDeck())

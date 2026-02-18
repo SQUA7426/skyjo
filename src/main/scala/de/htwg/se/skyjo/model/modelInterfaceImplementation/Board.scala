@@ -122,7 +122,75 @@ case class Board (
     // println("no row and col reduced")
     (new Board( xSize, ySize, brd), false, -1, -1)
 
+  // FILEIO //
+
+  def toXml: Node =
+    <board>
+      <xSize>{xSize}</xSize>
+      <ySize>{ySize}</ySize>
+      <brd>
+        {brd.map(row => <row>{row.map(card => card.toXml)}</row>)}
+      </brd>
+    </board>
+  def fromXml(xml: Node): BoardInterface =
+    val brdXml = {xml \\ "brd"}.head \\ "row"
+    val cardXml = brdXml.map(c => c \\ "card")
+    Board(Node2Int(xml \ "xSize"),
+          Node2Int(xml \ "ySize"),
+          cardXml.map(rowXml => {
+            rowXml.map(cXml => brd(0)(0).fromXml(cXml)).toVector
+          }).toVector
+        )
+
+  private def Node2Int(ns: NodeSeq): Int =
+    n.head.text.replace(" ", "").toInt
+
 object Board:
-  def apply(ctrl: ControllerInterface): (BoardInterface, DeckInterface) = {
-    ctrl.fillBoard(4, 3, Deck(ctrl))
+  private def fillBoard(
+      xSize: Int,
+      ySize: Int,
+      d: DeckInterface
+  ): (BoardInterface, DeckInterface) = {
+
+    if (d.getDeckCards.isEmpty) {
+      val newFullDeck = Deck(this)
+      return fillBoard(xSize, ySize, newFullDeck)
+    }
+
+    def drawOne(currentDeck: DeckInterface): (CardInterface, DeckInterface) = {
+      val (card, nextDeck) = currentDeck.draw()
+      (card.falseCopy, nextDeck)
+    }
+
+    def fillRows(
+        currentDeck: DeckInterface,
+        rowsLeft: Int
+    ): (Vector[Vector[CardInterface]], DeckInterface) = {
+      if (rowsLeft == 0) (Vector.empty, currentDeck)
+      else {
+        val (row, deckAfterRow) = fillRow(currentDeck, xSize)
+        val (remainingRows, finalDeck) = fillRows(deckAfterRow, rowsLeft - 1)
+        (row +: remainingRows, finalDeck)
+      }
+    }
+
+    def fillRow(
+        currentDeck: DeckInterface,
+        cardsLeft: Int
+    ): (Vector[CardInterface], DeckInterface) = {
+      if (cardsLeft == 0) (Vector.empty, currentDeck)
+      else {
+        val (card, nextDeck) = drawOne(currentDeck)
+        val (restOfRow, deckAfterRest) = fillRow(nextDeck, cardsLeft - 1)
+        (card +: restOfRow, deckAfterRest)
+      }
+    }
+    val (finalGrid, remainingDeck) = fillRows(d, ySize)
+    (
+      new Board(xSize, ySize, finalGrid),
+      remainingDeck
+    )
+  }
+  def apply(): (BoardInterface, DeckInterface) = {
+    fillBoard(4, 3, Deck())
   }

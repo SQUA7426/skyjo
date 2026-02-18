@@ -12,7 +12,9 @@ libraryDependencies ++= Seq(
   "org.scalameta" %% "munit" % "1.0.0",
   "org.apache.commons" % "commons-lang3" % "3.4",
   "org.apache.commons" % "commons-io" % "1.3.2",
-  "net.codingwell" %% "scala-guice" % "7.0.0"
+  "net.codingwell" %% "scala-guice" % "7.0.0",
+  "org.scala-lang.modules" %% "scala-xml" % "2.4.0",
+  "com.typesafe.play" %% "play-json" % "3.0.4"
 )
 
 coverageEnabled := true

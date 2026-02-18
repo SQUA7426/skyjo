@@ -4,13 +4,14 @@ import de.htwg.se.skyjo.util.*
 import de.htwg.se.skyjo.model.CardInterface
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
 
-import jakarta.inject.Inject
 import scala.util.{Try, Success, Failure}
+import play.api.libs.json._
+import scala.xml.{Node, NodeSeq}
 
 case class Card (
     val value: Int,
-    var turned: Boolean,
-    val ctrl: ControllerInterface
+    var turned: Boolean
+    // val ctrl: ControllerInterface
 ) extends CardInterface:
 
   override def toString(): String = if turned then s"${value}" else "#"
@@ -34,13 +35,30 @@ case class Card (
       if !(value > -3 && value < 13) then true else false
   def isTurned: Boolean = turned
 
-  def trueCopy: CardInterface = new Card(value, true, ctrl)
-  def falseCopy: CardInterface = new Card(value, false, ctrl)
+  def trueCopy: CardInterface = new Card(value, true)
+  def falseCopy: CardInterface = new Card(value, false)
 
   def turn: Unit = { turned = !turned }
 
+  // FILEIO //
+
+  def toXml: Node = {
+    <card>
+      <value>{value}</value>
+      <turned>{turned}</turned>
+    </card>
+  }
+  def fromXml(element: Node): CardInterface =
+    Card(Node2Int(element \ "value"),
+      Node2Bool(element \ "turned"))
+
+  private def Node2Bool(ns: NodeSeq): Boolean =
+    n.head.text.replace(" ", "").toBoolean
+  private def Node2Int(ns: NodeSeq): Int =
+    n.head.text.replace(" ", "").toInt
+
 object Card:
-  def apply(value: Int, ctrl:ControllerInterface): CardInterface =
-    if value > (-3) && value < (13) then new Card(value, true, ctrl)
+  def apply(value: Int): CardInterface =
+    if value > (-3) && value < (13) then new Card(value, true)
     else throw new IllegalArgumentException(s"Invalid Card number: ${value}")
 

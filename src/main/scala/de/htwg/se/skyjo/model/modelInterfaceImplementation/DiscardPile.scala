@@ -6,10 +6,11 @@ import de.htwg.se.skyjo.model.modelInterfaceImplementation.{DiscardPile, Deck}
 import de.htwg.se.skyjo.controller.ControllerComponent.*
 import de.htwg.se.skyjo.util.*
 
-import jakarta.inject.Inject
+import play.api.libs.json._
+import scala.xml.{Node, NodeSeq}
 
 case class DiscardPile (
-    val ctrl: ControllerInterface,
+    // val ctrl: ControllerInterface,
     val discPile: String = "Disc",
     var turned: Boolean = false
 ) extends DiscardPileInterface:
@@ -34,12 +35,12 @@ case class DiscardPile (
 
   def isTurned: Boolean = turned
 
-  override def putToDiscardPile(from: Any): (DiscardPile, DeckInterface) = {
+  override def putToDiscardPile(from: Any, ctr: ControllerInterface): (DiscardPile, DeckInterface) = {
     from match {
       case card: CardInterface =>
         val retDisc = new DiscardPile(ctrl, card.trueCopy.toString)
         retDisc.preDisc = this.discPile
-        (retDisc, new Deck(ctrl.getDeck.remove(1), ctrl))
+        (retDisc, new Deck(ctrl.getDeck.remove(1)))
       case deck: DeckInterface => {
         val retDisc = new DiscardPile(ctrl, deck.toString())
         retDisc.preDisc = this.discPile
@@ -49,11 +50,11 @@ case class DiscardPile (
         )
       }
       case str: String => {
-        val retDisc = new DiscardPile(ctrl, str)
+        val retDisc = new DiscardPile(str)
         retDisc.preDisc = this.discPile
         (
           retDisc,
-          new Deck(ctrl.getDeck.remove(1), ctrl, str)
+          new Deck(ctrl.getDeck.remove(1), str)
         )
       }
       case _ => throw new  MatchError(s"Connot process this type: ${from.getClass}")
@@ -61,4 +62,21 @@ case class DiscardPile (
   }
 
   override def remove(): DiscardPileInterface =
-    new DiscardPile(ctrl, this.preDisc)
+    new DiscardPile(this.preDisc)
+
+  // FILEIO //
+
+  def toXml: Node =
+    <discardpile>
+      <discpile>{discPile}<discpile>
+      <turned>{turned}<turned>
+    </discpile>
+    
+  def fromXml(xml: Node): DiscardPileInterface
+    val discXml = {xml \ "discardpile"}
+    val discPXml = {discXml \ "discpile"}
+    val discTXml = Node2Bool(discXml \ "turned")
+    DiscardPile(discPXml, discTXml)
+
+  private def Node2Bool(ns: NodeSeq): Boolean =
+    ns.head.text.replace(" ", "").toBoolean
