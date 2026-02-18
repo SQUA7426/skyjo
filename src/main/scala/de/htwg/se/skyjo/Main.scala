@@ -3,6 +3,7 @@ package de.htwg.se.skyjo
 import de.htwg.se.skyjo.aView.Gui.Gui
 import de.htwg.se.skyjo.aView.Tui
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.Controller
+import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
 import de.htwg.se.skyjo.util.MoveCaretaker
 import de.htwg.se.skyjo.util.*
 import de.htwg.se.skyjo.model.{
@@ -22,53 +23,16 @@ def main(args: Array[String]): Unit = {
   // if pl == "" then pl = "1"
   // val plCount = Integer.parseInt(pl)
   val plCount = 1
-  val med = new ConcreteMediator()
 
-  // val tempState = new GameState(med, Vector.empty, null, null, 0, None)
-  val tempState = new GameState(med, Vector.empty, Vector.empty, null, null, 0, State.BEGIN)
-  val ctr = new Controller(tempState)
+  val tempState = new GameState(Vector.empty, Vector.empty, null, null, 0, State.BEGIN)
+  val ctr = new Controller(tempState, plCount)
 
-  println("Init Deck & Disc")
-  val deck = new Deck(ctr.fullDeck(), ctr)
-  val disc = new DiscardPile(ctr)
-
-  println("Init MementoCs & Boards")
-  val plMoveC = Vector.fill(plCount)(new MoveCaretaker(ctr))
-  val plBoards = Vector.fill(plCount)(new Board(med, 4, 3, Vector.empty))
-
-  println("updating Controllerstate")
-  ctr.state = new GameState(med, plMoveC, plBoards, deck, disc, 0, State.BEGIN)
-  ctr.state = ctr.state.copy(
-    deck = Deck(ctr),
-    disc = DiscardPile(ctr)
-    )
-
-  println(ctr)
-
-  val t = new Tui(ctr)
   ctr.setup()
 
-  // println("BOARDS:")
-  // ctr.getBrds.foreach(println)
+  val tui = new Tui(ctr)
+  val tuiThread = new Thread(() => tui.startGame)
+  tuiThread.start()
 
-  println("input => g for GUI")
-  val choose = "g"
-  // val choose = ""
-  // var choose = readLine()
-  if choose == "g" then
-    Gui.ctr = ctr
-    Gui.main(args)
-  else
-    val t = new Tui(ctr)
-    t.startGame
-
-    println("After finished")
-    val simpleCard = new Card(3, true, ctr)
-    med.add(deck)
-    med.add(disc)
-    med.add(simpleCard)
-    med.add(plBoards(0))
-    med.send(deck, "REQUEST GET UPPERCARD")
-    med.send(plBoards(0), "REQUEST PUT TO DISCARDPILE")
-    med.send(disc, "REQUEST CARD FROM DECK")
+  Gui.ctr = ctr
+  Gui.main(args)
 }

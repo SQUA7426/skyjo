@@ -19,23 +19,40 @@ import de.htwg.se.skyjo.util.*
 import scala.io.StdIn.{readInt, readLine}
 import scala.util.Random
 
-import jakarta.inject.Inject
 import scala.util.{Try, Success, Failure}
 import de.htwg.se.skyjo.model.modelInterfaceImplementation.DiscardPile
 
-class Controller @Inject() (var state: GameState)
+import com.google.inject.{Guice, Inject, Injector}
+import de.htwg.se.skyjo.SkyjoModule
+import net.codingwell.scalaguice.InjectorExtensions.*
+
+class Controller @Inject() (var state: GameState, plCount: Int)
     extends Observable
     with ControllerInterface:
+
+  val injector = Guice.createInjector(SkyjoModule())
+  val med: Mediator = injector.instance
 
   var mem: Memento = _
 
   // GAME MECHANICS //
   def setup(): Unit =
+    val deck = new Deck(fullDeck(), this)
+    val disc = new DiscardPile(this)
+
+    val plMoveC = Vector.fill(plCount)(new MoveCaretaker(this))
+    val plBoards = Vector.fill(plCount)(new Board(4, 3, Vector.empty))
+
+    this.state = new GameState(plMoveC, plBoards, deck, disc, 0, State.BEGIN)
+    this.state = this.state.copy(
+      deck = Deck(this),
+      disc = DiscardPile(this)
+      )
     var currentDeck = getGameState.deck
 
     for (i <- 0 until getBrds.size) {
       val (x, y) = getSize
-      val tmpMed = getMediator
+      // val tmpMed = getMediator
 
       val (afterBoard, nextDeck) = fillBoard(x, y, currentDeck)
       currentDeck = nextDeck
@@ -105,7 +122,7 @@ class Controller @Inject() (var state: GameState)
     notifyObservers
 
   // MEDIATOR //
-  def getMediator: Mediator = this.getGameState.med
+  def getMediator: Mediator = med
 
   // Memento //
   def getMementos: Vector[MoveCaretaker] = state.mementos
@@ -162,7 +179,7 @@ class Controller @Inject() (var state: GameState)
     }
     val (finalGrid, remainingDeck) = fillRows(d, ySize)
     (
-      new Board(getMediator, xSize, ySize, finalGrid),
+      new Board(xSize, ySize, finalGrid),
       remainingDeck
     )
   }
@@ -353,7 +370,7 @@ class Controller @Inject() (var state: GameState)
   }
 
   def copy(
-      med: Mediator = getMediator,
+      // med: Mediator = getMediator,
       mems: Vector[MoveCaretaker] = getMementos,
       brds: Vector[BoardInterface] = getBrds,
       d: DeckInterface = getDeck,
@@ -362,7 +379,7 @@ class Controller @Inject() (var state: GameState)
       anotherState: State = currState
   ): GameState = {
     state.copy(
-      med = med,
+      // med = med,
       mementos = mems,
       boards = brds,
       deck = d,

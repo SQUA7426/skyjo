@@ -10,12 +10,12 @@ import de.htwg.se.skyjo.util.*
 
 import jakarta.inject.Inject
 
-case class Board @Inject() (
-    val _mediator: Mediator,
+case class Board (
+    // val _mediator: Mediator,
     val xSize: Int,
     val ySize: Int,
     val brd: Vector[Vector[CardInterface]] = Vector.empty
-) extends Colleague with BoardInterface:
+) extends BoardInterface:
 
   override def toString(): String =
     if brd.isEmpty then "Empty Bpard"
@@ -27,12 +27,12 @@ case class Board @Inject() (
       }.mkString
 
   // MEDIATOR //
-  override def send(msg: String): Unit = _mediator.send(this, msg)
+  // override def send(msg: String): Unit = _mediator.send(this, msg)
 
-  override def receive(msg: String): Boolean = {
-    println(s"Board Received Message: ${msg}")
-    true
-  }
+  // override def receive(msg: String): Boolean = {
+  //   println(s"Board Received Message: ${msg}")
+  //   true
+  // }
 
   // CTRL //
   def getBoardCard(pos: Int): CardInterface =
@@ -55,7 +55,7 @@ case class Board @Inject() (
           else cCard
         }
     }
-    new Board(_mediator, xSize, ySize, turnedIdxBrd)
+    new Board( xSize, ySize, turnedIdxBrd)
 
   def swapFromMem(c: CardInterface, pos: Int): BoardInterface =
     val uptBrd: Vector[Vector[CardInterface]] = brd.zipWithIndex.collect { case (vec,vecPos) =>
@@ -65,7 +65,7 @@ case class Board @Inject() (
         }
       }
     }
-    new Board(_mediator, xSize, ySize, uptBrd)
+    new Board( xSize, ySize, uptBrd)
 
   def switch(
       newCard: CardInterface,
@@ -77,7 +77,7 @@ case class Board @Inject() (
         if (y * xSize + x == pos) newCard.trueCopy else card
       }
     }
-    (oldCard, new Board(_mediator, xSize, ySize, updatedBrd))
+    (oldCard, new Board( xSize, ySize, updatedBrd))
 
   def reduce(row: Int, col: Int): (BoardInterface, Boolean, Int, Int) =
     if (col != -1) {
@@ -87,10 +87,10 @@ case class Board @Inject() (
       if checkCol(col) == true then
         // println(s"reduce col: $col")
         val slicedBoard = brd.map(_.patch(col, Nil, 1))
-        return (new Board(_mediator, xSize - 1, ySize, slicedBoard), true, -1, col)
+        return (new Board( xSize - 1, ySize, slicedBoard), true, -1, col)
       else {
         // println("no col reduced")
-        (new Board(_mediator, xSize, ySize, brd), false, -1, -1)
+        (new Board( xSize, ySize, brd), false, -1, -1)
       }
     }
 
@@ -105,7 +105,7 @@ case class Board @Inject() (
         // println(s"reduce row: $row")
         return (
           new Board(
-            _mediator,
+            
             xSize,
             ySize - 1,
             brd.slice(0, row) ++ brd.drop(row + 1)
@@ -116,11 +116,11 @@ case class Board @Inject() (
         )
       else {
         // println("no row reduced")
-        (new Board(_mediator, xSize, ySize, brd), false, -1,-1)
+        (new Board( xSize, ySize, brd), false, -1,-1)
       }
     }
     // println("no row and col reduced")
-    (new Board(_mediator, xSize, ySize, brd), false, -1, -1)
+    (new Board( xSize, ySize, brd), false, -1, -1)
 
 object Board:
   def apply(ctrl: ControllerInterface): (BoardInterface, DeckInterface) = {

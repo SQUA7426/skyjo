@@ -174,7 +174,7 @@ object Gui extends JFXApp3 with Observer {
               )
 
             b.manyCards = b.BOARD_INIT(false)
-            b.vDeck.cCard = ctr.toCard(b._med, b.aDeck.turnUpperCard)
+            b.vDeck.cCard = ctr.toCard(b.aDeck.turnUpperCard)
             b.vDiscard.cCard = ctr.getDiscCard().get
 
             b.syncController
@@ -234,7 +234,7 @@ object Gui extends JFXApp3 with Observer {
                 )
               )
               b.manyCards = b.BOARD_INIT(false)
-              b.vDeck.cCard = ctr.toCard(b._med, b.aDeck.turnUpperCard)
+              b.vDeck.cCard = ctr.toCard(b.aDeck.turnUpperCard)
               b.vDiscard.cCard = ctr.getDiscCard().get
 
               // upt views

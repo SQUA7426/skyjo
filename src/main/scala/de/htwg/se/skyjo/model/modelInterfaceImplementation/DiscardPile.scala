@@ -8,25 +8,25 @@ import de.htwg.se.skyjo.util.*
 
 import jakarta.inject.Inject
 
-case class DiscardPile @Inject() (
+case class DiscardPile (
     val ctrl: ControllerInterface,
     val discPile: String = "Disc",
     var turned: Boolean = false
-) extends Colleague with DiscardPileInterface:
+) extends DiscardPileInterface:
 
   var preDisc = "Disc"
   override def toString(): String = s"${discPile}"
 
   // MEDIATOR //
-  val _mediator = ctrl.getMediator
+  // val _mediator = ctrl.getMediator
 
-  override def send(msg: String): Unit = ctrl.getMediator.send(this, msg)
-  override def receive(msg: String): Boolean = {
-    msg match
-      case "REQUEST PUT TO DISCARDPILE" =>
-        println(s"DiscardPile Received Message: ${msg}"); true
-      case _ => false
-  }
+  // override def send(msg: String): Unit = ctrl.getMediator.send(this, msg)
+  // override def receive(msg: String): Boolean = {
+  //   msg match
+  //     case "REQUEST PUT TO DISCARDPILE" =>
+  //       println(s"DiscardPile Received Message: ${msg}"); true
+  //     case _ => false
+  // }
 
   // CTRL //
   override def getDiscCard(): Option[CardInterface] =

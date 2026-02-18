@@ -7,25 +7,25 @@ import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
 import jakarta.inject.Inject
 import scala.util.{Try, Success, Failure}
 
-case class Card @Inject() (
+case class Card (
     val value: Int,
     var turned: Boolean,
     val ctrl: ControllerInterface
-) extends Colleague with CardInterface:
+) extends CardInterface:
 
   override def toString(): String = if turned then s"${value}" else "#"
 
   // MEDIATOR //
-  val _mediator = ctrl.getMediator
+  // val _mediator = ctrl.getMediator
 
-  override def send(msg: String): Unit = ctrl.getMediator.send(this, msg)
-  override def receive(msg: String): Boolean = {
-    msg match
-      case "REQUEST GET UPPERCARD" => {
-        println(s"Card Received Message: ${msg}"); true
-      }
-      case _ => false
-  }
+  // override def send(msg: String): Unit = ctrl.getMediator.send(this, msg)
+  // override def receive(msg: String): Boolean = {
+  //   msg match
+  //     case "REQUEST GET UPPERCARD" => {
+  //       println(s"Card Received Message: ${msg}"); true
+  //     }
+  //     case _ => false
+  // }
 
   //  CTRL //
   def getValue: Int = value

@@ -66,7 +66,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
 
   var currentState: State = ctr.currState
 
-  val _med = ctr.getMediator
+  // val _med = ctr.getMediator
   val padding = 30
   var aDeck = ctr.getDeck
   var termBoard = ctr.getBrds(ctr.getPlIdx)
@@ -89,7 +89,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
         tmpEndVec = tmpEndVec :+ tmpVec
         tmpVec = Vector.empty[CardInterface]
     }
-    Board(ctr.getMediator, cols, rows, tmpEndVec)
+    Board(cols, rows, tmpEndVec)
 
   def syncController =
     val newGameState = ctr.getGameState.copy(
@@ -151,7 +151,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
       colour: Color = Color.DarkBlue,
       var cCard: CardInterface,
       var turned: Boolean = false,
-      val med: Mediator = _med,
+      // val med: Mediator = _med,
       val isDisc: Boolean = false,
       val isDeck: Boolean = false,
       switchDeckDisc: () => Unit,
@@ -380,7 +380,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
       720,
       colour = Color.SteelBlue,
       cCard = ctr.toCard(0).falseCopy,
-      med = _med,
+      // med = _med,
       isDisc = true,
       switchDeckDisc = () => {
         val turnedDeck =
@@ -427,7 +427,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
       720,
       colour = Color.SteelBlue,
       cCard = ctr.toCard(aDeck.getCard.get).falseCopy,
-      med = _med,
+      // med = _med,
       isDeck = true,
       switchDeckDisc = () => {},
       switchDiscB = () => {},

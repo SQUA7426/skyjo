@@ -10,29 +10,28 @@ import de.htwg.se.skyjo.controller.ControllerComponent.*
 
 import jakarta.inject.Inject
 
-case class Deck @Inject() (
+case class Deck (
     val deck: Vector[CardInterface],
     val ctrl: ControllerInterface,
     val upperCard: String = "Deck"
-) extends Colleague
-    with DeckInterface:
+) extends DeckInterface:
 
   override def toString(): String =
     if upperCard.compareTo("Deck") == 0 then "Deck" else upperCard
 
   // MEDIATOR //
-  val _mediator = ctrl.getMediator
+  // val _mediator = ctrl.getMediator
 
-  override def send(msg: String): Unit = _mediator.send(this, msg)
+  // override def send(msg: String): Unit = _mediator.send(this, msg)
 
-  override def receive(msg: String): Boolean = {
-    msg match
-      case "REQUEST REMOVE UPPERCARD" =>
-        println(s"Deck Received Message: ${msg}"); true
-      case "REQUEST CARD FROM DECK" =>
-        println(s"Deck Received Message: ${msg}"); true
-      case _ => false
-  }
+  // override def receive(msg: String): Boolean = {
+  //   msg match
+  //     case "REQUEST REMOVE UPPERCARD" =>
+  //       println(s"Deck Received Message: ${msg}"); true
+  //     case "REQUEST CARD FROM DECK" =>
+  //       println(s"Deck Received Message: ${msg}"); true
+  //     case _ => false
+  // }
 
   // CTRL //
   override def getDeck: DeckInterface = this
