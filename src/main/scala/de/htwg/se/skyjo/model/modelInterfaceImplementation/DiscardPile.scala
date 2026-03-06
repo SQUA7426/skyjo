@@ -18,35 +18,24 @@ case class DiscardPile (
   var preDisc = "Disc"
   override def toString(): String = s"${discPile}"
 
-  // MEDIATOR //
-  // val _mediator = ctrl.getMediator
-
-  // override def send(msg: String): Unit = ctrl.getMediator.send(this, msg)
-  // override def receive(msg: String): Boolean = {
-  //   msg match
-  //     case "REQUEST PUT TO DISCARDPILE" =>
-  //       println(s"DiscardPile Received Message: ${msg}"); true
-  //     case _ => false
-  // }
-
   // CTRL //
-  override def getDiscCard(): Option[CardInterface] =
+  override def getDiscCard(ctrl: ControllerInterface): Option[CardInterface] =
     if discPile == "Disc" || discPile == "" then None else Some(ctrl.toCard(discPile))
 
   def isTurned: Boolean = turned
 
-  override def putToDiscardPile(from: Any, ctr: ControllerInterface): (DiscardPile, DeckInterface) = {
+  override def putToDiscardPile(from: Any, ctrl: ControllerInterface): (DiscardPile, DeckInterface) = {
     from match {
       case card: CardInterface =>
-        val retDisc = new DiscardPile(ctrl, card.trueCopy.toString)
+        val retDisc = new DiscardPile(card.trueCopy.toString)
         retDisc.preDisc = this.discPile
         (retDisc, new Deck(ctrl.getDeck.remove(1)))
       case deck: DeckInterface => {
-        val retDisc = new DiscardPile(ctrl, deck.toString())
+        val retDisc = new DiscardPile(deck.toString())
         retDisc.preDisc = this.discPile
         (
           retDisc,
-          new Deck(deck.remove(1), ctrl)
+          new Deck(deck.remove(1))
         )
       }
       case str: String => {
@@ -65,16 +54,25 @@ case class DiscardPile (
     new DiscardPile(this.preDisc)
 
   // FILEIO //
+  def toJson: JsObject = Json.obj(
+    "discPile"  -> discPile,
+    "turned"    -> turned
+    )
+
+  def fromJson(js: JsObject): DiscardPileInterface =
+    val disc = (js \ "discPile").as[String]
+    val t = (js \ "turned").as[Boolean]
+    DiscardPile(disc,t)
 
   def toXml: Node =
     <discardpile>
-      <discpile>{discPile}<discpile>
-      <turned>{turned}<turned>
-    </discpile>
+      <discpile>{discPile}</discpile>
+      <turned>{turned}</turned>
+    </discardpile>
     
-  def fromXml(xml: Node): DiscardPileInterface
-    val discXml = {xml \ "discardpile"}
-    val discPXml = {discXml \ "discpile"}
+  def fromXml(srcXml: Node): DiscardPileInterface =
+    val discXml = {srcXml \ "discardpile"}
+    val discPXml = {discXml \ "discpile"}.text
     val discTXml = Node2Bool(discXml \ "turned")
     DiscardPile(discPXml, discTXml)
 

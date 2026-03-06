@@ -170,7 +170,7 @@ object Gui extends JFXApp3 with Observer {
             val tmpRedo = ctr.currMemento
               .undoStack(0)
               .copy(
-                lastDisc = DiscardPile(ctr, oldUndo.replacedCard.trueCopy.toString())
+                lastDisc = DiscardPile(oldUndo.replacedCard.trueCopy.toString())
               )
 
             b.manyCards = b.BOARD_INIT(false)

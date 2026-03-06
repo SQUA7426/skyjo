@@ -16,18 +16,6 @@ case class Card (
 
   override def toString(): String = if turned then s"${value}" else "#"
 
-  // MEDIATOR //
-  // val _mediator = ctrl.getMediator
-
-  // override def send(msg: String): Unit = ctrl.getMediator.send(this, msg)
-  // override def receive(msg: String): Boolean = {
-  //   msg match
-  //     case "REQUEST GET UPPERCARD" => {
-  //       println(s"Card Received Message: ${msg}"); true
-  //     }
-  //     case _ => false
-  // }
-
   //  CTRL //
   def getValue: Int = value
 
@@ -42,6 +30,16 @@ case class Card (
 
   // FILEIO //
 
+  def toJson: JsObject = Json.obj(
+    "value"   -> value,
+    "turned"  -> turned
+    )
+
+  def fromJson(js: JsObject): CardInterface =
+    val v = (js \ "value").as[Int]
+    val t = (js \ "turned").as[Boolean]
+    Card(v,t)
+
   def toXml: Node = {
     <card>
       <value>{value}</value>
@@ -53,9 +51,9 @@ case class Card (
       Node2Bool(element \ "turned"))
 
   private def Node2Bool(ns: NodeSeq): Boolean =
-    n.head.text.replace(" ", "").toBoolean
+    ns.head.text.replace(" ", "").toBoolean
   private def Node2Int(ns: NodeSeq): Int =
-    n.head.text.replace(" ", "").toInt
+    ns.head.text.replace(" ", "").toInt
 
 object Card:
   def apply(value: Int): CardInterface =

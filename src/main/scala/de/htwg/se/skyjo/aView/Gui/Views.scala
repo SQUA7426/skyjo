@@ -83,7 +83,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
       col <- 0 until cols
     } {
       val idx = row * cols + col
-      val tmpCard = new Card(tmpBrd(idx).getValue, tmpBrd(idx).isTurned, ctr)
+      val tmpCard = new Card(tmpBrd(idx).getValue, tmpBrd(idx).isTurned)
       tmpVec = tmpVec :+ tmpCard
       if (idx + 1) % 4 == 0 then
         tmpEndVec = tmpEndVec :+ tmpVec
@@ -208,7 +208,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
           if isDisc then currentState.pre = "DISC"
           else if isDeck then
             currentState.pre = "DECK"
-            aDeck = new Deck(aDeck.getDeckCards, ctr, aDeck.turnUpperCard)
+            aDeck = new Deck(aDeck.getDeckCards, aDeck.turnUpperCard)
             turned = true
           else
             selected = !selected
@@ -299,7 +299,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
             val preDisc = ctr.toCard(aDisc.toString())
             val (tmpDisc, tmpBoard) = (termBoard
               .switch(preDisc, index): @unchecked)
-            aDisc = DiscardPile(ctr, tmpDisc.toString())
+            aDisc = DiscardPile(tmpDisc.toString())
             vDiscard.cCard = ctr.getBoard.flatten.apply(index)
             val preBoard = termBoard
             termBoard = tmpBoard
@@ -311,7 +311,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
                 preDisc,
                 index,
                 preBoard.getBoard.flatten.apply(index),
-                DiscardPile(ctr, preDisc.toString()),
+                DiscardPile(preDisc.toString()),
                 preBoard.getBoard.flatten.apply(index).isTurned
               )
             )
@@ -322,20 +322,20 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
           },
           switchDeckB = () => {
             val preDisc = aDisc
-            aDisc = DiscardPile(ctr, termBoard.getBoardCard(index).toString())
+            aDisc = DiscardPile(termBoard.getBoardCard(index).toString())
             val turnedDeck: DeckInterface =
-              new Deck(aDeck.getDeckCards, ctr, aDeck.getCard.get.toString())
+              new Deck(aDeck.getDeckCards, aDeck.getCard.get.toString())
             val (tmpDeckCard, tmpBoard: BoardInterface) = (termBoard.switch(
               ctr.toCard(turnedDeck.toString()),
               index
             ): @unchecked)
             val tmpDeck =
-              Deck(turnedDeck.getDeckCards, ctr, tmpDeckCard.toString())
+              Deck(turnedDeck.getDeckCards, tmpDeckCard.toString())
             vDiscard.cCard = ctr.toCard(aDisc.toString())
             val preBoard = termBoard
             termBoard = tmpBoard
             manyCards.apply(index).cCard = ctr.toCard(aDeck.toString())
-            aDeck = new Deck(tmpDeck.remove(1), ctr)
+            aDeck = new Deck(tmpDeck.remove(1))
             vDeck.cCard = ctr.toCard(aDeck.turnUpperCard)
 
             ctr.currMemento.save(
@@ -384,8 +384,8 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
       isDisc = true,
       switchDeckDisc = () => {
         val turnedDeck =
-          new Deck(aDeck.getDeckCards, ctr, aDeck.turnUpperCard)
-        val toDisc = aDisc.putToDiscardPile(turnedDeck.getCard.get)
+          new Deck(aDeck.getDeckCards, aDeck.turnUpperCard)
+        val toDisc = aDisc.putToDiscardPile(turnedDeck.getCard.get, ctr)
         aDisc = toDisc._1
         aDeck = toDisc._2
 
@@ -399,7 +399,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
           takenCard = turnedDeck.getCard.get,
           boardIndex = 0, // Standard
           lastDisc = aDisc,
-          replacedCard = ctr.toCard(ctr, turnedDeck.toString()),
+          replacedCard = ctr.toCard(turnedDeck.toString()),
           replacedCardTurned = turnedDeck.getCard.get.isTurned
         )
         ctr.save(newMem)

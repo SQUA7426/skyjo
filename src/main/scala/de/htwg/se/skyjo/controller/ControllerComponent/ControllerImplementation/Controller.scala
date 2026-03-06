@@ -37,8 +37,8 @@ class Controller @Inject() (var state: GameState, plCount: Int)
 
   // GAME MECHANICS //
   def setup(): Unit =
-    val deck = new Deck(fullDeck(), this)
-    val disc = new DiscardPile(this)
+    val deck = new Deck(fullDeck())
+    val disc = new DiscardPile()
 
     val plMoveC = Vector.fill(plCount)(new MoveCaretaker(this))
     val plBoards = Vector.fill(plCount)(new Board(4, 3, Vector.empty))
@@ -46,7 +46,7 @@ class Controller @Inject() (var state: GameState, plCount: Int)
     this.state = new GameState(plMoveC, plBoards, deck, disc, 0, State.BEGIN)
     this.state = this.state.copy(
       deck = Deck(this),
-      disc = DiscardPile(this)
+      disc = DiscardPile()
       )
     var currentDeck = getGameState.deck
 
@@ -145,12 +145,12 @@ class Controller @Inject() (var state: GameState, plCount: Int)
   ): (BoardInterface, DeckInterface) = {
 
     if (d.getDeckCards.isEmpty) {
-      val newFullDeck = Deck(this)
+      val newFullDeck = Deck(this) 
       return fillBoard(xSize, ySize, newFullDeck)
     }
 
     def drawOne(currentDeck: DeckInterface): (CardInterface, DeckInterface) = {
-      val (card, nextDeck) = currentDeck.draw()
+      val (card, nextDeck) = currentDeck.draw(this)
       (card.falseCopy, nextDeck)
     }
 
@@ -239,10 +239,10 @@ class Controller @Inject() (var state: GameState, plCount: Int)
   def draw(): (
       CardInterface,
       DeckInterface
-  ) = state.deck.draw()
+  ) = state.deck.draw(this)
 
   def drawFromDeck(pos: Int): GameState = {
-    val (card, newDeck) = state.deck.draw()
+    val (card, newDeck) = state.deck.draw(this)
 
     mem = Memento(true, card, pos, card, getDisc, card.isTurned) // takenCard
     save(mem)
@@ -276,14 +276,14 @@ class Controller @Inject() (var state: GameState, plCount: Int)
   def putToDiscardPile(from: Any): (
       DiscardPileInterface,
       DeckInterface
-  ) = state.disc.putToDiscardPile(from)
+  ) = state.disc.putToDiscardPile(from, this)
   def remove(): DiscardPileInterface =
     state.disc.remove()
 
   // CTR - DISCARDPILE //
   def getDisc: DiscardPileInterface = state.disc
   def getDiscCard(): Option[CardInterface] =
-    state.disc.getDiscCard()
+    state.disc.getDiscCard(this)
 
   def drawFromDisc(pos: Int): GameState = {
     getDiscCard() match {
@@ -299,7 +299,7 @@ class Controller @Inject() (var state: GameState, plCount: Int)
         getMementos(getPlIdx).save(mem)
 
         val (newCard, newBrd) = getBrds(getPlIdx).switch(getDiscCard().get, pos)
-        val newDisc = new DiscardPile(this, newCard.toString())
+        val newDisc = new DiscardPile(newCard.toString())
 
         val newState = state.copy(
           boards = getBrds.updated(getPlIdx, newBrd),
@@ -317,7 +317,7 @@ class Controller @Inject() (var state: GameState, plCount: Int)
       val (oldCard, tmpBrd) = b.switch(b.getBoardCard(idx), idx)
       val newBrd = getReducedBrd(tmpBrd)._1
       val gottenMem = getMementos(getPlIdx).undoStack(0)
-      val uptMem = gottenMem.copy(takenCard = Card(Integer.parseInt(tmpDeck.toString()), this), replacedCard = oldCard)
+      val uptMem = gottenMem.copy(takenCard = Card(Integer.parseInt(tmpDeck.toString())), replacedCard = oldCard)
       save(uptMem)
       val newGameState = gs.copy(boards = getBrds.updated(getPlIdx, newBrd), currentState = currState.reset())
       newGameState
@@ -338,29 +338,29 @@ class Controller @Inject() (var state: GameState, plCount: Int)
       case c: CardInterface => c
 
       case a: Int =>
-        if (valRange.contains(a)) Card(a, true, this)
-        else Card(0, false, this)
+        if (valRange.contains(a)) Card(a, true) 
+        else Card(0, false) 
 
       case b: String =>
         val tryInt = scala.util.Try(b.toInt)
         if (tryInt.isSuccess) {
-          Card(tryInt.get, true, this)
+          Card(tryInt.get, true) 
         } else {
-          Card(0, false, this)
+          Card(0, false) 
         }
       case scala.util.Success(value) => toCard(value)
-      case scala.util.Failure(_)     => Card(0, false, this)
+      case scala.util.Failure(_)     => Card(0, false) 
 
       case Some(value) => toCard(value)
-      case None        => Card(0, false, this)
+      case None        => Card(0, false) 
 
       case d: DeckInterface =>
-        d.getCard.map(toCard).getOrElse(Card(0, false, this))
+        d.getCard.map(toCard).getOrElse(Card(0, false))
 
       case disc: DiscardPileInterface =>
-        disc.getDiscCard().map(toCard).getOrElse(Card(0, false, this))
+        disc.getDiscCard(this).map(toCard).getOrElse(Card(0, false))
 
-      case _ => Card(0, false, this)
+      case _ => Card(0, false) 
     }
   }
 

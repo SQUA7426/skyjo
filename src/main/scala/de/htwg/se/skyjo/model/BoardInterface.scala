@@ -3,6 +3,7 @@ package de.htwg.se.skyjo.model
 import de.htwg.se.skyjo.model.{CardInterface, BoardInterface}
 import de.htwg.se.skyjo.util.*
 import scala.xml.Node
+import play.api.libs.json.JsObject
 
 trait BoardInterface:
 
@@ -18,6 +19,7 @@ trait BoardInterface:
   def reduce(row: Int, col: Int): (BoardInterface, Boolean, Int, Int)
 
   // FILEIO //
+  def toJson: JsObject
 
   def toXml: Node
   def fromXml(xml: Node): BoardInterface

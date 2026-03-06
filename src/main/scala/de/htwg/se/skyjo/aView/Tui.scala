@@ -107,7 +107,7 @@ class Tui(ctr: ControllerInterface) extends Observer {
             var pos = readLine()
             clearTerm
             if pos == "s" then
-              val tmpDeck = new Deck(ctr.getDeckCards, ctr, d.turnUpperCard)
+              val tmpDeck = new Deck(ctr.getDeckCards, d.turnUpperCard)
               // switch
               h = SupportHandler(ctr, b, tmpDeck, disc)
               h.handle(pos, 0) match

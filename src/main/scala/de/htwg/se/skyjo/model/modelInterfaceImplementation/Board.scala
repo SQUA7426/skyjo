@@ -1,6 +1,7 @@
 package de.htwg.se.skyjo.model.modelInterfaceImplementation
 
 import de.htwg.se.skyjo.model.{BoardInterface, CardInterface, DeckInterface}
+import de.htwg.se.skyjo.model.modelInterfaceImplementation.{Deck}
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
 
 import scala.util.Random
@@ -9,9 +10,10 @@ import scala.collection.immutable.Seq
 import de.htwg.se.skyjo.util.*
 
 import jakarta.inject.Inject
+import play.api.libs.json._
+import scala.xml.{Node, NodeSeq}
 
 case class Board (
-    // val _mediator: Mediator,
     val xSize: Int,
     val ySize: Int,
     val brd: Vector[Vector[CardInterface]] = Vector.empty
@@ -25,14 +27,6 @@ case class Board (
           ((" " * ((aCard.toString().length()))) + s"${aCard.toString()}\n")
         else ((" " * ((aCard.toString().length()))) + s"${aCard.toString()}|")
       }.mkString
-
-  // MEDIATOR //
-  // override def send(msg: String): Unit = _mediator.send(this, msg)
-
-  // override def receive(msg: String): Boolean = {
-  //   println(s"Board Received Message: ${msg}")
-  //   true
-  // }
 
   // CTRL //
   def getBoardCard(pos: Int): CardInterface =
@@ -123,6 +117,15 @@ case class Board (
     (new Board( xSize, ySize, brd), false, -1, -1)
 
   // FILEIO //
+  def toJson: JsObject = Json.obj(
+      "xSize"   -> xSize,
+      "ySize"   -> ySize,
+      "brd"     -> brd.flatten.map(_.toJson)
+    )
+
+  implicit val boardIntWrites: Writes[BoardInterface] = Writes {
+    brd => Json.toJson(brd)
+  }
 
   def toXml: Node =
     <board>
@@ -143,54 +146,9 @@ case class Board (
         )
 
   private def Node2Int(ns: NodeSeq): Int =
-    n.head.text.replace(" ", "").toInt
+    ns.head.text.replace(" ", "").toInt
 
 object Board:
-  private def fillBoard(
-      xSize: Int,
-      ySize: Int,
-      d: DeckInterface
-  ): (BoardInterface, DeckInterface) = {
-
-    if (d.getDeckCards.isEmpty) {
-      val newFullDeck = Deck(this)
-      return fillBoard(xSize, ySize, newFullDeck)
-    }
-
-    def drawOne(currentDeck: DeckInterface): (CardInterface, DeckInterface) = {
-      val (card, nextDeck) = currentDeck.draw()
-      (card.falseCopy, nextDeck)
-    }
-
-    def fillRows(
-        currentDeck: DeckInterface,
-        rowsLeft: Int
-    ): (Vector[Vector[CardInterface]], DeckInterface) = {
-      if (rowsLeft == 0) (Vector.empty, currentDeck)
-      else {
-        val (row, deckAfterRow) = fillRow(currentDeck, xSize)
-        val (remainingRows, finalDeck) = fillRows(deckAfterRow, rowsLeft - 1)
-        (row +: remainingRows, finalDeck)
-      }
-    }
-
-    def fillRow(
-        currentDeck: DeckInterface,
-        cardsLeft: Int
-    ): (Vector[CardInterface], DeckInterface) = {
-      if (cardsLeft == 0) (Vector.empty, currentDeck)
-      else {
-        val (card, nextDeck) = drawOne(currentDeck)
-        val (restOfRow, deckAfterRest) = fillRow(nextDeck, cardsLeft - 1)
-        (card +: restOfRow, deckAfterRest)
-      }
-    }
-    val (finalGrid, remainingDeck) = fillRows(d, ySize)
-    (
-      new Board(xSize, ySize, finalGrid),
-      remainingDeck
-    )
-  }
-  def apply(): (BoardInterface, DeckInterface) = {
-    fillBoard(4, 3, Deck())
+  def apply(ctr: ControllerInterface): (BoardInterface, DeckInterface) = {
+    ctr.fillBoard(4, 3, Deck(ctr))
   }
