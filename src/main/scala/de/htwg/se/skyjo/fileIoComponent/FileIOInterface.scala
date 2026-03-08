@@ -5,5 +5,5 @@ import de.htwg.se.skyjo.model.GameState
 
 trait FileIOInterface {
   def load: GameState
-  def save(ctr: ControllerInterface): Unit
+  def save(gs: GameState): Unit
 }

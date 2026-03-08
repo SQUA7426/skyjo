@@ -6,30 +6,39 @@ import de.htwg.se.skyjo.model.{
   BoardInterface,
   CardInterface,
   DeckInterface,
-  DiscardPileInterface
+  DiscardPileInterface,
+  State
 }
-import de.htwg.se.skyjo.model.modelInterfaceImplementation.{Board, Card, Deck, DiscardPile}
 
-import de.htwg.se.skyjo.util.Memento
+import de.htwg.se.skyjo.model.modelInterfaceImplementation.{
+  Board,
+  Card,
+  Deck,
+  DiscardPile
+}
+
+import de.htwg.se.skyjo.util.{Memento, MoveCaretaker}
+
+import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
 
 import play.api.libs.json.{Json, JsObject, Writes, Reads}
 import play.api.libs.json.Format.GenericFormat
+import play.api.libs.json.OFormat.*
 import java.io.{PrintWriter, File}
 import scala.io.Source
-import de.htwg.se.skyjo.util.MoveCaretaker
 import java.nio.file.{Files, Paths}
 
-class JsonImpl extends FileIOInterface:
+class JsonImpl(ctrl: ControllerInterface) extends FileIOInterface:
   private val path = "./game_state_data.json"
 
   def load: GameState =
     val input = Files.readString(Paths.get(path))
     val out = Json.parse(input)
-    val gs: GameState = ( out \\ "GameState").head.as
+    val gs: GameState = (out \\ "GameState").head.as[GameState]
     gs
 
   def save(gs: GameState): Unit =
-    val gsJsonData = gs.toJson
+    val gsJsonData = Json.toJson(gs)
     val jsonString = Json.prettyPrint(gsJsonData)
     Files.write(Paths.get(path), jsonString.getBytes)
 
@@ -49,13 +58,17 @@ class JsonImpl extends FileIOInterface:
 
   implicit val deckIntWrites: Writes[DeckInterface] = Writes { deck =>
     Json.obj(
-      "deck" -> Json.toJson(deck.getDeckCards),
+      "deck" -> deck.getDeckCards,
       "uppercard" -> deck.toString()
     )
   }
 
   implicit val boardIntWrites: Writes[BoardInterface] = Writes { board =>
-    Json.obj("xSize" -> board.getSize._1, "ySize" ->  board.getSize._2, "brd" -> board.getBoard)
+    Json.obj(
+      "xSize" -> board.getSize._1,
+      "ySize" -> board.getSize._2,
+      "brd" -> board.getBoard.flatten
+    )
   }
 
   implicit val mementoWrites: Writes[Memento] = Writes { memento =>
@@ -70,7 +83,10 @@ class JsonImpl extends FileIOInterface:
   }
 
   implicit val moveCareWrites: Writes[MoveCaretaker] = Writes { mc =>
-    Json.obj("undoStack" -> mc.undoStack, "redoStack" -> mc.redoStack)
+    Json.obj(
+      "undoStack" -> mc.undoStack.toSeq,
+      "redoStack" -> mc.redoStack.toSeq
+    )
   }
   implicit val gameStateWrites: Writes[GameState] = Writes { gameState =>
     Json.obj(
@@ -85,43 +101,78 @@ class JsonImpl extends FileIOInterface:
 
   // READS //
 
-  implicit val cardIntReads: Reads[CardInterface] = Reads {json =>
+  implicit val cardIntReads: Reads[CardInterface] = Reads { json =>
     for
       value <- (json \ "value").validate[Int]
       turned <- (json \ "turned").validate[Boolean]
     yield Card(value, turned)
   }
 
-  implicit val discIntReads: Reads[DiscardPileInterface] = Reads {json =>
+  implicit val discIntReads: Reads[DiscardPileInterface] = Reads { json =>
     for
       dP <- (json \ "discPile").validate[String]
       turned <- (json \ "turned").validate[Boolean]
     yield DiscardPile(dP, turned)
   }
 
-  implicit val deckIntReads: Reads[DeckInterface] = Reads {json =>
+  implicit val deckIntReads: Reads[DeckInterface] = Reads { json =>
     for
       deckCards <- (json \ "deck").validate[Vector[CardInterface]]
       uppercard <- (json \ "uppercard").validate[String]
     yield Deck(deckCards, uppercard)
   }
 
-  implicit val boardIntReads: Reads[BoardInterface] = Reads {json =>
+  implicit val boardIntReads: Reads[BoardInterface] = Reads { json =>
     for
       x <- (json \ "xSize").validate[Int]
       y <- (json \ "ySize").validate[Int]
-      brd <- (json \ "brd").validate[Vector[Vector[CardInterface]]]
-    yield Board(x,y,brd)
+      flatBrd <- (json \ "brd").validate[Vector[CardInterface]]
+    yield {
+      val grid = flatBrd.grouped(y).toVector
+      Board(x, y, grid)
+    }
   }
 
-  implicit val mementoReads: Reads[Memento] = Reads {json =>
-     for
-       fD <- (json \ "fromDeck").validate[Boolean]
-       tC <- (json \ "takenCard").validate[CardInterface]
-       idx <- (json \ "boardIndex").validate[Int]
-       rC <- (json \ "replacedCard").validate[CardInterface]
-       lD <- (json \ "lastDisc").validate[DiscardPileInterface]
-       rCT <- (json \ "replacedCardTurned").validate[Boolean]
-     yield Memento(fD,tC,idx,rC,lD,rCT)
+  implicit val mementoReads: Reads[Memento] = Reads { json =>
+    for
+      fD <- (json \ "fromDeck").validate[Boolean]
+      tC <- (json \ "takenCard").validate[CardInterface]
+      idx <- (json \ "boardIndex").validate[Int]
+      rC <- (json \ "replacedCard").validate[CardInterface]
+      lD <- (json \ "lastDisc").validate[DiscardPileInterface]
+      rCT <- (json \ "replacedCardTurned").validate[Boolean]
+    yield Memento(fD, tC, idx, rC, lD, rCT)
   }
 
+  def moveCareReads(ctrl: ControllerInterface): Reads[MoveCaretaker] = Reads {
+    json =>
+      for {
+        uStack <- (json \ "undoStack").validate[Seq[Memento]]
+        rStack <- (json \ "redoStack").validate[Seq[Memento]]
+      } yield {
+        val caretaker = new MoveCaretaker(ctrl)
+        caretaker.undoStack.pushAll(uStack.reverse)
+        caretaker.redoStack.pushAll(rStack.reverse)
+        caretaker
+      }
+  }
+
+  implicit val mcReads: Reads[MoveCaretaker] = moveCareReads(ctrl)
+
+  implicit val stateReads: Reads[State] = Reads { json =>
+    for
+      s <- (json \ "str").validate[String]
+      p <- (json \ "pre").validate[String]
+    yield State.ASSERT(s, p)
+  }
+
+  implicit val gameStateReads: Reads[GameState] = Reads { json =>
+    for
+      mems <- (json \ "mementos").validate[Vector[MoveCaretaker]]
+      b <- (json \ "boards").validate[Vector[BoardInterface]]
+      de <- (json \ "deck").validate[DeckInterface]
+      di <- (json \ "disc").validate[DiscardPileInterface]
+      idx <- (json \ "plIdx").validate[Int]
+      cs <- (json \ "currentState").validate[State]
+    yield GameState(mems, b, de, di, idx, cs)
+  }

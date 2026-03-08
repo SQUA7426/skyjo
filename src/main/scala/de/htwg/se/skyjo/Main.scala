@@ -17,22 +17,27 @@ import de.htwg.se.skyjo.model.{
 import de.htwg.se.skyjo.model.modelInterfaceImplementation.{Deck, DiscardPile, Board, Card}
 import scala.io.StdIn.readLine
 
-def main(args: Array[String]): Unit = {
+import com.google.inject.{Guice, Inject, Injector}
+import de.htwg.se.skyjo.SkyjoModule
+import net.codingwell.scalaguice.InjectorExtensions.*
+
+@main def start(): Unit = {
   // println("How many players:")
   // var pl = scala.io.StdIn.readLine()
   // if pl == "" then pl = "1"
   // val plCount = Integer.parseInt(pl)
   val plCount = 1
+  val injector = Guice.createInjector(SkyjoModule(plCount))
 
-  val tempState = new GameState(Vector.empty, Vector.empty, null, null, 0, State.BEGIN)
-  val ctr = new Controller(tempState, plCount)
+  val ctr = injector.getInstance(classOf[ControllerInterface])
 
   ctr.setup()
 
   val tui = new Tui(ctr)
   val tuiThread = new Thread(() => tui.startGame)
+  tuiThread.setDaemon(true)
   tuiThread.start()
 
   Gui.ctr = ctr
-  Gui.main(args)
+  Gui.main(Array.empty)
 }

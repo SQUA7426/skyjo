@@ -3,6 +3,11 @@ package de.htwg.se.skyjo.model
 import de.htwg.se.skyjo.util.*
 import de.htwg.se.skyjo.model.modelInterfaceImplementation.{Deck, DiscardPile, Board,Card}
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.Controller
+
+import com.google.inject.{Guice, Inject, Injector}
+import de.htwg.se.skyjo.SkyjoModule
+import net.codingwell.scalaguice.InjectorExtensions.*
+
 import scala.xml.{Node,NodeSeq}
 import play.api.libs.json.{Json, JsObject}
 
@@ -18,15 +23,15 @@ case class GameState(
   // FILEIO //
 
   // XML //
-  def toJson: JsObject =
-    Json.obj(
-      "mementos" -> mementos.map(_.toJson),
-      "boards" -> boards.map(_.toJson),
-      "deck" -> deck.toJson,
-      "disc" -> disc.toJson,
-      "plIdx" -> plIdx,
-      "currentState" -> currentState.toJson
-    )
+  // def toJson: JsObject =
+  //   Json.obj(
+  //     "mementos" -> mementos.map(_.toJson),
+  //     "boards" -> boards.map(_.toJson),
+  //     "deck" -> deck.toJson,
+  //     "disc" -> disc.toJson,
+  //     "plIdx" -> plIdx,
+  //     "currentState" -> currentState.toJson
+  //   )
 
   def toXml: Node = {
     <gamestate>
@@ -84,7 +89,10 @@ case class GameState(
     val gsXml = { xml \ "gamestate"}.head
     val idx = {gsXml \ "plIdx"}.text.toInt
     val tempState = new GameState(Vector.empty, Vector.empty, null, null, 0, State.BEGIN)
-    val ctr = new Controller(tempState, idx)
+    
+    val injector = Guice.createInjector(SkyjoModule(boards.size))
+    val med = injector.getInstance(classOf[ConcreteMediator])
+    val ctr = new Controller(tempState, idx, med)
     val mc = MoveCaretaker(ctr)
 
     val memXml = { gsXml \ "mementos"}.head

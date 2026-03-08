@@ -29,6 +29,8 @@ coverageMinimumStmtPerFile := 100
 coverageMinimumBranchPerFile := 100
 coverageExcludedPackages := ".*Main.*"
 
+Compile / mainClass := Some("de.htwg.se.skyjo.start")
+
 // --------------------- SCALAFX CONF ---------------------------------------//
 
 val javaFxVersion = "21"

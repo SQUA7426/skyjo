@@ -25,13 +25,11 @@ import de.htwg.se.skyjo.model.modelInterfaceImplementation.DiscardPile
 import com.google.inject.{Guice, Inject, Injector}
 import de.htwg.se.skyjo.SkyjoModule
 import net.codingwell.scalaguice.InjectorExtensions.*
+import com.google.inject.name.Named
 
-class Controller @Inject() (var state: GameState, plCount: Int)
+class Controller @Inject() (var state: GameState, @Named("plCount") plCount: Int, val med: Mediator)
     extends Observable
     with ControllerInterface:
-
-  val injector = Guice.createInjector(SkyjoModule())
-  val med: Mediator = injector.instance
 
   var mem: Memento = _
 

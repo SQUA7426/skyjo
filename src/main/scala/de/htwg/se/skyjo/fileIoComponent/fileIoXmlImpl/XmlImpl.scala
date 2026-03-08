@@ -12,7 +12,7 @@ class XmlImpl extends FileIOInterface {
     val gs: GameState = Try(scala.xml.XML.loadFile("./game_state_data.xml")).map(tempState.fromXml).getOrElse(tempState)
     gs
 
-  def save(ctr: ControllerInterface): Unit =
-    val gsXml = ctr.getGameState.toXml
+  def save(gs: GameState): Unit =
+    val gsXml = gs.toXml
     scala.xml.XML.save("./game_state_data.xml", gsXml)
 }

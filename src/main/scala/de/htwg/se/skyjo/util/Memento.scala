@@ -6,7 +6,12 @@ import scala.collection.mutable.Stack
 import de.htwg.se.skyjo.util.Mediator
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
 import scala.xml.{Node, NodeSeq}
-import play.api.libs.json.{Json, JsObject}
+
+import play.api.libs.json.Format.GenericFormat
+import play.api.libs.json.OFormat.*
+
+import play.api.libs.json.{Json, JsObject, Reads}
+import play.api.libs.json.Json.JsValueWrapper
 
 case class Memento(
     fromDeck: Boolean,
@@ -43,7 +48,8 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
 
   def save(m: Memento): Unit = {
     // println("clearing undoStack...")
-    undoStack.clear()
+    // undoStack.clear()
+    undoStack.pop()
     // println("saving...")
     undoStack.push(m)
     // println(undoStack)
@@ -63,7 +69,8 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
 
       redoStack.push(memento)
       undoStack.clear()
-      undoStack.push(memento)
+      // undoStack.push(memento)
+      undoStack.pop()
       // println(redoStack)
 
       Some(newBoard, deck, memento.lastDisc)
@@ -72,7 +79,8 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
         disc.putToDiscardPile(memento.takenCard.toString(),ctrl)._1
       val updtDeck = disc.putToDiscardPile(memento.takenCard.toString(),ctrl)._2
       redoStack.push(memento)
-      undoStack.clear()
+      // undoStack.clear()
+      undoStack.pop
       undoStack.push(memento)
       // println(redoStack)
       Some(newBoard, updtDeck, disc2)
@@ -101,7 +109,8 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
         memento.lastDisc.isTurned
       )
       undoStack.push(tmpMemento)
-      redoStack.clear()
+      // redoStack.clear()
+      redoStack.pop()
       redoStack.push(tmpMemento)
       // println(undoStack)
       Some((newBoard, updtDeck, tmpDisc))
@@ -119,7 +128,8 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
         memento.lastDisc.isTurned
       )
       undoStack.push(tmpMemento)
-      redoStack.clear()
+      // redoStack.clear()
+      redoStack.pop()
       redoStack.push(tmpMemento)
       // println(undoStack)
       Some((newBoard, updtDeck, disc2))
@@ -127,10 +137,10 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
   }
 
   // FILEIO //
-  def toJson: JsObject = Json.obj(
-    "undoStack" -> undoStack.map(_.toJson),
-    "redoStack" -> redoStack.map(_.toJson)
-    )
+  // def toJson: JsObject = Json.obj(
+  //   "undoStack" -> Json.toJson(undoStack.toSeq.map(_.toJson)),
+  //   "redoStack" -> Json.toJson(redoStack.toSeq.map(_.toJson))
+  //   )
 
   // XML //
   private def Node2Bool(ns: NodeSeq): Boolean =

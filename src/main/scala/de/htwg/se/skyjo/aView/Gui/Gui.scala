@@ -87,25 +87,30 @@ object Gui extends JFXApp3 with Observer {
     }
   }
   override def update(choose: String): Boolean = {
-    println("In GUI update")
-    b.syncController
-    b.termBoard = ctr.getReducedBrd(b.termBoard)._1
-    b.manyCards = b.BOARD_INIT(false)
-    val newUI: Seq[Node] = b.viewBoard() :+ guiButtons(stage)
-    boardLayer.children_=(newUI)
-    b.vDiscard.uptCardView
-    b.vDeck.uptCardView
-    b.manyCards.map(_.uptCardView)
-    ctr.assertGameState(
-      ctr.getGameState.copy(
-        boards = ctr.getBrds.updated(ctr.getPlIdx, b.termBoard),
-        deck = b.aDeck,
-        disc = b.aDisc,
-        currentState = b.currentState
-      )
-    )
     Platform.runLater {
-      b.uptBoardPane
+      try {
+        println("In GUI update")
+        b.syncController
+        b.termBoard = ctr.getReducedBrd(b.termBoard)._1
+        b.manyCards = b.BOARD_INIT(false)
+        val newUI: Seq[Node] = b.viewBoard() :+ guiButtons(stage)
+        boardLayer.children_=(newUI)
+        b.vDiscard.uptCardView
+        b.vDeck.uptCardView
+        b.manyCards.map(_.uptCardView)
+        ctr.assertGameState(
+          ctr.getGameState.copy(
+            boards = ctr.getBrds.updated(ctr.getPlIdx, b.termBoard),
+            deck = b.aDeck,
+            disc = b.aDisc,
+            currentState = b.currentState
+          )
+        )
+        // Platform.runLater {
+        b.uptBoardPane
+      } catch {
+        case e: Exception => println(s"Update error: ${e.getMessage}")
+      }
     }
     true
   }
@@ -215,7 +220,12 @@ object Gui extends JFXApp3 with Observer {
       then {
         if b.currentState == State.BEGIN then
           val mem: Memento = ctr.currMemento.redoStack(0)
-          ctr.currMemento.redo(mem, ctr.getDeck, ctr.getBrds(ctr.getPlIdx), ctr.getDisc) match {
+          ctr.currMemento.redo(
+            mem,
+            ctr.getDeck,
+            ctr.getBrds(ctr.getPlIdx),
+            ctr.getDisc
+          ) match {
             case Some(resBoard, resDeck, resDisc) => {
               val lDisc = ctr.currMemento.undoStack(0).lastDisc
 
