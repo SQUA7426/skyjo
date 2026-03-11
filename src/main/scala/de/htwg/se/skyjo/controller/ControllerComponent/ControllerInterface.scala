@@ -3,7 +3,10 @@ package de.htwg.se.skyjo.controller.ControllerComponent
 import de.htwg.se.skyjo.model.{BoardInterface, CardInterface, DeckInterface, DiscardPileInterface, GameState, State}
 import de.htwg.se.skyjo.util.*
 
+import de.htwg.se.skyjo.aView.Gui.{BoardView, fontname}
+
 trait ControllerInterface extends Observable:
+  val path = "saves/"
 
   // GAME MECHANICS //
   def setup(): Unit
@@ -67,6 +70,18 @@ trait ControllerInterface extends Observable:
 
   // STATE //
   def currState: State
+
+  // GUI //
+  def guiUndo(resBoard: BoardInterface, resDeck: DeckInterface, resDisc: DiscardPileInterface, b: BoardView): Unit
+
+  def guiRedo(resBoard: BoardInterface, resDeck: DeckInterface, resDisc: DiscardPileInterface, b: BoardView): Unit
+
+  // FILEIO //
+  def xml_save: Unit
+  def json_save: Unit
+
+  def xml_load: Unit
+  def json_load: Unit
 
   // OUTSIDE FUNCTIONS //
   def toCard(x: Any): CardInterface

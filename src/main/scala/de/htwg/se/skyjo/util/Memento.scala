@@ -49,7 +49,7 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
   def save(m: Memento): Unit = {
     // println("clearing undoStack...")
     // undoStack.clear()
-    undoStack.pop()
+    if !undoStack.isEmpty then undoStack.pop()
     // println("saving...")
     undoStack.push(m)
     // println(undoStack)
@@ -68,9 +68,7 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
       val updtDeck = new Deck(tempV, memento.takenCard.toString())
 
       redoStack.push(memento)
-      undoStack.clear()
-      // undoStack.push(memento)
-      undoStack.pop()
+      if !undoStack.isEmpty then undoStack.pop()
       // println(redoStack)
 
       Some(newBoard, deck, memento.lastDisc)
@@ -79,8 +77,7 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
         disc.putToDiscardPile(memento.takenCard.toString(),ctrl)._1
       val updtDeck = disc.putToDiscardPile(memento.takenCard.toString(),ctrl)._2
       redoStack.push(memento)
-      // undoStack.clear()
-      undoStack.pop
+      if !undoStack.isEmpty then undoStack.pop()
       undoStack.push(memento)
       // println(redoStack)
       Some(newBoard, updtDeck, disc2)
@@ -109,8 +106,7 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
         memento.lastDisc.isTurned
       )
       undoStack.push(tmpMemento)
-      // redoStack.clear()
-      redoStack.pop()
+      if !redoStack.isEmpty then redoStack.pop()
       redoStack.push(tmpMemento)
       // println(undoStack)
       Some((newBoard, updtDeck, tmpDisc))
@@ -128,8 +124,7 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
         memento.lastDisc.isTurned
       )
       undoStack.push(tmpMemento)
-      // redoStack.clear()
-      redoStack.pop()
+      if !redoStack.isEmpty then redoStack.pop()
       redoStack.push(tmpMemento)
       // println(undoStack)
       Some((newBoard, updtDeck, disc2))

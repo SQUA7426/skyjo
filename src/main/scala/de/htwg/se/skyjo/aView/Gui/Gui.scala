@@ -50,12 +50,12 @@ import scalafx.geometry.Insets
 import sbt.testing.EventHandler
 import scalafx.scene.Node
 
-object UIConstants {
-  val cardWidth = 132
-  val cardHeight = 198
-  val padding = 30
-  val fontname = "Arial"
-}
+// object UIConstants {
+//   val cardWidth = 132
+//   val cardHeight = 198
+//   val padding = 30
+//   val fontname = "Arial"
+// }
 
 object Gui extends JFXApp3 with Observer {
   var ctr: ControllerInterface = _
@@ -86,6 +86,7 @@ object Gui extends JFXApp3 with Observer {
         e.printStackTrace()
     }
   }
+
   override def update(choose: String): Boolean = {
     Platform.runLater {
       try {
@@ -106,7 +107,6 @@ object Gui extends JFXApp3 with Observer {
             currentState = b.currentState
           )
         )
-        // Platform.runLater {
         b.uptBoardPane
       } catch {
         case e: Exception => println(s"Update error: ${e.getMessage}")
@@ -157,32 +157,15 @@ object Gui extends JFXApp3 with Observer {
         ctr.currMemento.undo(mem, b.aDeck, b.termBoard, b.aDisc) match {
           case Some(resBoard, resDeck, resDisc) => {
 
-            // println("UNDO")
-            // println(s"resBoard:\n${resBoard}")
-            // println(s"resDeck: ${resDeck.turnUpperCard}")
-            // println(s"resDisc: ${resDisc}")
-            b.termBoard = resBoard
-            b.aDeck = resDeck
-            b.aDisc = resDisc
-            val oldUndo = ctr.currMemento.undoStack(0)
-            ctr.assertGameState(
-              ctr.getGameState.copy(
-                boards = ctr.getBrds.updated(ctr.getPlIdx, resBoard),
-                deck = resDeck,
-                disc = resDisc
-              )
-            )
             val tmpRedo = ctr.currMemento
               .undoStack(0)
               .copy(
-                lastDisc = DiscardPile(oldUndo.replacedCard.trueCopy.toString())
+                // lastDisc = DiscardPile(oldUndo.replacedCard.trueCopy.toString())
+                lastDisc = DiscardPile(mem.replacedCard.trueCopy.toString())
               )
 
-            b.manyCards = b.BOARD_INIT(false)
-            b.vDeck.cCard = ctr.toCard(b.aDeck.turnUpperCard)
-            b.vDiscard.cCard = ctr.getDiscCard().get
+            ctr.guiUndo(resBoard, resDeck, resDisc, b)
 
-            b.syncController
             // upt views
             val newUI: Seq[Node] = b.viewBoard() :+ guiButtons(stage)
             boardLayer.children_=(newUI)
@@ -193,13 +176,10 @@ object Gui extends JFXApp3 with Observer {
             // println("\nREDOSTACK\n")
 
             ctr.save(tmpRedo)
-            // ctr.assertGameState(
-            //   ctr.getGameState.copy(mementos =
-            //     ctr.getMementos.updated(ctr.getPlIdx, ctr.currMemento)
-            //   )
-            // )
-            ctr.currMemento.undoStack.clear()
-            ctr.currMemento.redoStack.clear()
+            if !ctr.currMemento.undoStack.isEmpty then
+              ctr.currMemento.undoStack.pop()
+            if !ctr.currMemento.redoStack.isEmpty then
+              ctr.currMemento.redoStack.pop()
             ctr.currMemento.redoStack.push(tmpRedo)
             b.syncController
             // println(ctr.currMemento.redoStack(0))
@@ -227,26 +207,7 @@ object Gui extends JFXApp3 with Observer {
             ctr.getDisc
           ) match {
             case Some(resBoard, resDeck, resDisc) => {
-              val lDisc = ctr.currMemento.undoStack(0).lastDisc
-
-              // println("REDO")
-              // println(s"resBoard:\n${resBoard}")
-              // println(s"resDeck: ${resDeck.turnUpperCard}")
-              // println(s"resDisc: ${resDisc}")
-              b.termBoard = resBoard
-              b.aDeck = resDeck
-              b.aDisc = lDisc
-              ctr.assertGameState(
-                ctr.getGameState.copy(
-                  boards = ctr.getBrds.updated(ctr.getPlIdx, resBoard),
-                  deck = resDeck,
-                  disc = lDisc
-                )
-              )
-              b.manyCards = b.BOARD_INIT(false)
-              b.vDeck.cCard = ctr.toCard(b.aDeck.turnUpperCard)
-              b.vDiscard.cCard = ctr.getDiscCard().get
-
+              ctr.guiRedo(resBoard, resDeck, resDisc, b)
               // upt views
               val newUI: Seq[Node] = b.viewBoard() :+ guiButtons(stage)
               boardLayer.children_=(newUI)
@@ -258,13 +219,76 @@ object Gui extends JFXApp3 with Observer {
               val preUndoStack = ctr.currMemento.undoStack(0)
 
               ctr.save(preUndoStack)
-              ctr.currMemento.redoStack.clear()
+              // ctr.currMemento.redoStack.clear()
+              if !ctr.currMemento.redoStack.isEmpty then
+                ctr.currMemento.redoStack.pop()
               println(ctr.currMemento.undoStack(0))
               b.syncController
               println()
             }
             case None => {}
           }
+      }
+    }
+
+    val ButtonTypeJson = new ButtonType("Json")
+    val ButtonTypeXml = new ButtonType("Xml")
+
+    val bt_save = new Button("save")
+    bt_save.tooltip = "save GAME"
+    bt_save.setPrefHeight(ht)
+    bt_save.setPrefWidth(wt)
+    bt_save.onMouseClicked = _ => {
+      val alert = new Alert(AlertType.Confirmation) {
+        initOwner(stage)
+        title = "Saving"
+        headerText = "Saving current GameState inside ./saves/"
+        contentText = "Save as a..."
+        buttonTypes = Seq(
+          ButtonTypeJson,
+          ButtonTypeXml,
+          ButtonType.Cancel
+        )
+      }
+
+      val res = alert.showAndWait()
+
+      res match {
+        case Some(ButtonTypeJson) => {ctr.json_save; }
+        case Some(ButtonTypeXml)  => {ctr.xml_save; }
+        case _                 => { println("Canceled Saving."); }
+      }
+    }
+
+    val bt_load = new Button("load")
+    bt_load.tooltip = "load GAME"
+    bt_load.setPrefHeight(ht)
+    bt_load.setPrefWidth(wt)
+    bt_load.onMouseClicked = _ => {
+      val alert = new Alert(AlertType.Confirmation) {
+        initOwner(stage)
+        title = "Saving"
+        headerText = "Loading current GameState inside ./saves/"
+        contentText = "Loading from type..."
+        buttonTypes = Seq(
+          ButtonTypeJson,
+          ButtonTypeXml,
+          ButtonType.Cancel
+        )
+      }
+
+      val res = alert.showAndWait()
+
+      res match {
+        case Some(ButtonTypeJson) => {
+          ctr.json_load
+          update("")
+        }
+        case Some(ButtonTypeXml)  => {
+          ctr.xml_load
+          update("")
+        }
+        case _                 => { println("Canceled Loading."); }
       }
     }
 
@@ -289,8 +313,8 @@ object Gui extends JFXApp3 with Observer {
     }
 
     val buttonBox = new HBox {
-      spacing = 120
-      children = List(bt_help, bt_undo, bt_redo, bt_quit)
+      spacing = 50
+      children = List(bt_help, bt_undo, bt_redo, bt_save, bt_load, bt_quit)
     }
     buttonBox
   }

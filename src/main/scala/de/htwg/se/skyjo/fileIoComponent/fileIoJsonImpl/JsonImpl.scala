@@ -29,18 +29,20 @@ import scala.io.Source
 import java.nio.file.{Files, Paths}
 
 class JsonImpl(ctrl: ControllerInterface) extends FileIOInterface:
-  private val path = "./game_state_data.json"
+  // private val filename = "game_state_data.json"
 
-  def load: GameState =
-    val input = Files.readString(Paths.get(path))
+  def load(filename: String): GameState =
+    val input = Files.readString(Paths.get(f"${ctrl.path}$filename"))
     val out = Json.parse(input)
+    println("Searching for json")
     val gs: GameState = (out \\ "GameState").head.as[GameState]
+    println("gs Found!")
     gs
 
-  def save(gs: GameState): Unit =
+  def save(gs: GameState,filename: String): Unit =
     val gsJsonData = Json.toJson(gs)
     val jsonString = Json.prettyPrint(gsJsonData)
-    Files.write(Paths.get(path), jsonString.getBytes)
+    Files.write(Paths.get(f"${ctrl.path}$filename"), jsonString.getBytes)
 
   implicit val cardIntWrites: Writes[CardInterface] = Writes { card =>
     Json.obj(

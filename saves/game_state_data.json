@@ -1,0 +1,474 @@
+{
+  "mementos" : [ {
+    "undoStack" : [ ],
+    "redoStack" : [ ]
+  } ],
+  "boards" : [ {
+    "xSize" : 4,
+    "ySize" : 3,
+    "brd" : [ {
+      "value" : 1,
+      "turned" : false
+    }, {
+      "value" : 5,
+      "turned" : true
+    }, {
+      "value" : 4,
+      "turned" : false
+    }, {
+      "value" : -1,
+      "turned" : true
+    }, {
+      "value" : 6,
+      "turned" : false
+    }, {
+      "value" : 8,
+      "turned" : false
+    }, {
+      "value" : 2,
+      "turned" : false
+    }, {
+      "value" : 11,
+      "turned" : false
+    }, {
+      "value" : 5,
+      "turned" : false
+    }, {
+      "value" : 11,
+      "turned" : false
+    }, {
+      "value" : 12,
+      "turned" : false
+    }, {
+      "value" : -2,
+      "turned" : false
+    } ]
+  } ],
+  "deck" : {
+    "deck" : [ {
+      "value" : 10,
+      "turned" : true
+    }, {
+      "value" : 5,
+      "turned" : true
+    }, {
+      "value" : 2,
+      "turned" : true
+    }, {
+      "value" : 9,
+      "turned" : true
+    }, {
+      "value" : 12,
+      "turned" : true
+    }, {
+      "value" : 5,
+      "turned" : true
+    }, {
+      "value" : 11,
+      "turned" : true
+    }, {
+      "value" : 3,
+      "turned" : true
+    }, {
+      "value" : 10,
+      "turned" : true
+    }, {
+      "value" : 0,
+      "turned" : true
+    }, {
+      "value" : 4,
+      "turned" : true
+    }, {
+      "value" : 3,
+      "turned" : true
+    }, {
+      "value" : 7,
+      "turned" : true
+    }, {
+      "value" : 2,
+      "turned" : true
+    }, {
+      "value" : 4,
+      "turned" : true
+    }, {
+      "value" : 0,
+      "turned" : true
+    }, {
+      "value" : 6,
+      "turned" : true
+    }, {
+      "value" : 1,
+      "turned" : true
+    }, {
+      "value" : 12,
+      "turned" : true
+    }, {
+      "value" : 8,
+      "turned" : true
+    }, {
+      "value" : 2,
+      "turned" : true
+    }, {
+      "value" : 4,
+      "turned" : true
+    }, {
+      "value" : 11,
+      "turned" : true
+    }, {
+      "value" : 8,
+      "turned" : true
+    }, {
+      "value" : 12,
+      "turned" : true
+    }, {
+      "value" : 3,
+      "turned" : true
+    }, {
+      "value" : 0,
+      "turned" : true
+    }, {
+      "value" : 0,
+      "turned" : true
+    }, {
+      "value" : 0,
+      "turned" : true
+    }, {
+      "value" : 1,
+      "turned" : true
+    }, {
+      "value" : 7,
+      "turned" : true
+    }, {
+      "value" : 11,
+      "turned" : true
+    }, {
+      "value" : 2,
+      "turned" : true
+    }, {
+      "value" : 1,
+      "turned" : true
+    }, {
+      "value" : -2,
+      "turned" : true
+    }, {
+      "value" : 12,
+      "turned" : true
+    }, {
+      "value" : 3,
+      "turned" : true
+    }, {
+      "value" : 0,
+      "turned" : true
+    }, {
+      "value" : 6,
+      "turned" : true
+    }, {
+      "value" : -1,
+      "turned" : true
+    }, {
+      "value" : 6,
+      "turned" : true
+    }, {
+      "value" : 1,
+      "turned" : true
+    }, {
+      "value" : 10,
+      "turned" : true
+    }, {
+      "value" : 0,
+      "turned" : true
+    }, {
+      "value" : 2,
+      "turned" : true
+    }, {
+      "value" : 10,
+      "turned" : true
+    }, {
+      "value" : 10,
+      "turned" : true
+    }, {
+      "value" : 9,
+      "turned" : true
+    }, {
+      "value" : 0,
+      "turned" : true
+    }, {
+      "value" : 8,
+      "turned" : true
+    }, {
+      "value" : 6,
+      "turned" : true
+    }, {
+      "value" : 8,
+      "turned" : true
+    }, {
+      "value" : 7,
+      "turned" : true
+    }, {
+      "value" : 3,
+      "turned" : true
+    }, {
+      "value" : -1,
+      "turned" : true
+    }, {
+      "value" : 7,
+      "turned" : true
+    }, {
+      "value" : 11,
+      "turned" : true
+    }, {
+      "value" : 5,
+      "turned" : true
+    }, {
+      "value" : 7,
+      "turned" : true
+    }, {
+      "value" : 8,
+      "turned" : true
+    }, {
+      "value" : -1,
+      "turned" : true
+    }, {
+      "value" : 12,
+      "turned" : true
+    }, {
+      "value" : 7,
+      "turned" : true
+    }, {
+      "value" : 12,
+      "turned" : true
+    }, {
+      "value" : -2,
+      "turned" : true
+    }, {
+      "value" : 5,
+      "turned" : true
+    }, {
+      "value" : 9,
+      "turned" : true
+    }, {
+      "value" : 12,
+      "turned" : true
+    }, {
+      "value" : 4,
+      "turned" : true
+    }, {
+      "value" : 11,
+      "turned" : true
+    }, {
+      "value" : 12,
+      "turned" : true
+    }, {
+      "value" : 9,
+      "turned" : true
+    }, {
+      "value" : 0,
+      "turned" : true
+    }, {
+      "value" : 4,
+      "turned" : true
+    }, {
+      "value" : 2,
+      "turned" : true
+    }, {
+      "value" : 0,
+      "turned" : true
+    }, {
+      "value" : 5,
+      "turned" : true
+    }, {
+      "value" : 9,
+      "turned" : true
+    }, {
+      "value" : -1,
+      "turned" : true
+    }, {
+      "value" : -1,
+      "turned" : true
+    }, {
+      "value" : 5,
+      "turned" : true
+    }, {
+      "value" : 2,
+      "turned" : true
+    }, {
+      "value" : 5,
+      "turned" : true
+    }, {
+      "value" : -1,
+      "turned" : true
+    }, {
+      "value" : 9,
+      "turned" : true
+    }, {
+      "value" : 6,
+      "turned" : true
+    }, {
+      "value" : 10,
+      "turned" : true
+    }, {
+      "value" : 6,
+      "turned" : true
+    }, {
+      "value" : 3,
+      "turned" : true
+    }, {
+      "value" : 4,
+      "turned" : true
+    }, {
+      "value" : 8,
+      "turned" : true
+    }, {
+      "value" : 4,
+      "turned" : true
+    }, {
+      "value" : 0,
+      "turned" : true
+    }, {
+      "value" : 11,
+      "turned" : true
+    }, {
+      "value" : -1,
+      "turned" : true
+    }, {
+      "value" : 0,
+      "turned" : true
+    }, {
+      "value" : 8,
+      "turned" : true
+    }, {
+      "value" : 6,
+      "turned" : true
+    }, {
+      "value" : 9,
+      "turned" : true
+    }, {
+      "value" : -1,
+      "turned" : true
+    }, {
+      "value" : 3,
+      "turned" : true
+    }, {
+      "value" : 1,
+      "turned" : true
+    }, {
+      "value" : 3,
+      "turned" : true
+    }, {
+      "value" : 12,
+      "turned" : true
+    }, {
+      "value" : 0,
+      "turned" : true
+    }, {
+      "value" : 9,
+      "turned" : true
+    }, {
+      "value" : 1,
+      "turned" : true
+    }, {
+      "value" : 11,
+      "turned" : true
+    }, {
+      "value" : 9,
+      "turned" : true
+    }, {
+      "value" : 4,
+      "turned" : true
+    }, {
+      "value" : -1,
+      "turned" : true
+    }, {
+      "value" : 10,
+      "turned" : true
+    }, {
+      "value" : 1,
+      "turned" : true
+    }, {
+      "value" : 1,
+      "turned" : true
+    }, {
+      "value" : 4,
+      "turned" : true
+    }, {
+      "value" : 6,
+      "turned" : true
+    }, {
+      "value" : 2,
+      "turned" : true
+    }, {
+      "value" : 1,
+      "turned" : true
+    }, {
+      "value" : 10,
+      "turned" : true
+    }, {
+      "value" : 8,
+      "turned" : true
+    }, {
+      "value" : 6,
+      "turned" : true
+    }, {
+      "value" : 3,
+      "turned" : true
+    }, {
+      "value" : 7,
+      "turned" : true
+    }, {
+      "value" : 10,
+      "turned" : true
+    }, {
+      "value" : 5,
+      "turned" : true
+    }, {
+      "value" : 3,
+      "turned" : true
+    }, {
+      "value" : -2,
+      "turned" : true
+    }, {
+      "value" : 0,
+      "turned" : true
+    }, {
+      "value" : 8,
+      "turned" : true
+    }, {
+      "value" : 9,
+      "turned" : true
+    }, {
+      "value" : 7,
+      "turned" : true
+    }, {
+      "value" : -2,
+      "turned" : true
+    }, {
+      "value" : 10,
+      "turned" : true
+    }, {
+      "value" : 11,
+      "turned" : true
+    }, {
+      "value" : 0,
+      "turned" : true
+    }, {
+      "value" : 7,
+      "turned" : true
+    }, {
+      "value" : 2,
+      "turned" : true
+    }, {
+      "value" : 7,
+      "turned" : true
+    } ],
+    "uppercard" : "Deck"
+  },
+  "disc" : {
+    "discPile" : "Disc",
+    "turned" : false
+  },
+  "plIdx" : 0,
+  "currentState" : {
+    "str" : "BEGIN",
+    "pre" : "BOARD"
+  }
+}

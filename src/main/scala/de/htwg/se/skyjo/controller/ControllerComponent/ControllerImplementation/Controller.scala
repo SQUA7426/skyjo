@@ -8,7 +8,12 @@ import de.htwg.se.skyjo.model.{
   State,
   GameState
 }
-import de.htwg.se.skyjo.model.modelInterfaceImplementation.{Deck, Card, Board}
+import de.htwg.se.skyjo.model.modelInterfaceImplementation.{
+  Deck,
+  Card,
+  Board,
+  DiscardPile
+}
 
 import de.htwg.se.skyjo.aView.Gui.Gui
 import de.htwg.se.skyjo.aView.Tui
@@ -20,15 +25,22 @@ import scala.io.StdIn.{readInt, readLine}
 import scala.util.Random
 
 import scala.util.{Try, Success, Failure}
-import de.htwg.se.skyjo.model.modelInterfaceImplementation.DiscardPile
+import de.htwg.se.skyjo.aView.Gui.{BoardView, fontname}
 
 import com.google.inject.{Guice, Inject, Injector}
 import de.htwg.se.skyjo.SkyjoModule
 import net.codingwell.scalaguice.InjectorExtensions.*
 import com.google.inject.name.Named
 
-class Controller @Inject() (var state: GameState, @Named("plCount") plCount: Int, val med: Mediator)
-    extends Observable
+import de.htwg.se.skyjo.fileIoComponent.FileIOInterface
+import de.htwg.se.skyjo.fileIoComponent.fileIoJsonImpl.JsonImpl
+import de.htwg.se.skyjo.fileIoComponent.fileIoXmlImpl.XmlImpl
+
+class Controller @Inject() (
+    var state: GameState,
+    @Named("plCount") plCount: Int,
+    val med: Mediator
+) extends Observable
     with ControllerInterface:
 
   var mem: Memento = _
@@ -45,7 +57,7 @@ class Controller @Inject() (var state: GameState, @Named("plCount") plCount: Int
     this.state = this.state.copy(
       deck = Deck(this),
       disc = DiscardPile()
-      )
+    )
     var currentDeck = getGameState.deck
 
     for (i <- 0 until getBrds.size) {
@@ -112,7 +124,6 @@ class Controller @Inject() (var state: GameState, @Named("plCount") plCount: Int
     }
     notifyObservers
 
-
   // GAMESTATE MECHANICS //
   def getGameState: GameState = state
   def assertGameState(newState: GameState): Unit =
@@ -143,7 +154,7 @@ class Controller @Inject() (var state: GameState, @Named("plCount") plCount: Int
   ): (BoardInterface, DeckInterface) = {
 
     if (d.getDeckCards.isEmpty) {
-      val newFullDeck = Deck(this) 
+      val newFullDeck = Deck(this)
       return fillBoard(xSize, ySize, newFullDeck)
     }
 
@@ -209,7 +220,10 @@ class Controller @Inject() (var state: GameState, @Named("plCount") plCount: Int
     val r = reducedBoards.map(_._2).exists(_ == true)
     val endBoard: (BoardInterface, Int, Int) = if r == true then
       val allUpdatedBrds =
-        reducedBoards.filter((brds, bools, row, col) => bools == true).map((brd, bool,row, col) => (brd, row, col)).toArray
+        reducedBoards
+          .filter((brds, bools, row, col) => bools == true)
+          .map((brd, bool, row, col) => (brd, row, col))
+          .toArray
       allUpdatedBrds(0)
     else (updatedBoard, -1, -1)
     // println(s"Board after reduced:\n$endBoard")
@@ -269,7 +283,6 @@ class Controller @Inject() (var state: GameState, @Named("plCount") plCount: Int
     newState
   }
 
-
   // DISCARDPILE //
   def putToDiscardPile(from: Any): (
       DiscardPileInterface,
@@ -311,14 +324,25 @@ class Controller @Inject() (var state: GameState, @Named("plCount") plCount: Int
     }
   }
 
-  def switchDeckDisc(gs: GameState, b:BoardInterface, tmpDeck: DeckInterface, idx: Int): GameState =
-      val (oldCard, tmpBrd) = b.switch(b.getBoardCard(idx), idx)
-      val newBrd = getReducedBrd(tmpBrd)._1
-      val gottenMem = getMementos(getPlIdx).undoStack(0)
-      val uptMem = gottenMem.copy(takenCard = Card(Integer.parseInt(tmpDeck.toString())), replacedCard = oldCard)
-      save(uptMem)
-      val newGameState = gs.copy(boards = getBrds.updated(getPlIdx, newBrd), currentState = currState.reset())
-      newGameState
+  def switchDeckDisc(
+      gs: GameState,
+      b: BoardInterface,
+      tmpDeck: DeckInterface,
+      idx: Int
+  ): GameState =
+    val (oldCard, tmpBrd) = b.switch(b.getBoardCard(idx), idx)
+    val newBrd = getReducedBrd(tmpBrd)._1
+    val gottenMem = getMementos(getPlIdx).undoStack(0)
+    val uptMem = gottenMem.copy(
+      takenCard = Card(Integer.parseInt(tmpDeck.toString())),
+      replacedCard = oldCard
+    )
+    save(uptMem)
+    val newGameState = gs.copy(
+      boards = getBrds.updated(getPlIdx, newBrd),
+      currentState = currState.reset()
+    )
+    newGameState
 
   // PLAYER //
   def getPlIdx: Int = state.plIdx
@@ -326,6 +350,33 @@ class Controller @Inject() (var state: GameState, @Named("plCount") plCount: Int
 
   // STATE //
   def currState: State = state.currentState
+
+  // FILEIO //
+  val injector = Guice.createInjector(SkyjoModule(getBrds.size))
+  val xmlFileName = "game_state_data.xml"
+  val jsonFileName = "game_state_data.json"
+
+  def xml_save: Unit = {
+    val xml_IO = XmlImpl(this)
+    xml_IO.save(getGameState, xmlFileName)
+  }
+  def json_save: Unit = {
+    val json_IO = JsonImpl(this)
+    json_IO.save(getGameState, jsonFileName)
+  }
+
+  def xml_load: Unit = {
+    val xml_IO = XmlImpl(this)
+    val tmpState = state
+    state = xml_IO.load(xmlFileName)
+    notifyObservers
+  }
+  def json_load: Unit = {
+    val json_IO = JsonImpl(this)
+    val tmpState = state
+    state = json_IO.load(jsonFileName)
+    notifyObservers
+  }
 
   // OUTSIDE FUNCTIONS //
 
@@ -336,21 +387,21 @@ class Controller @Inject() (var state: GameState, @Named("plCount") plCount: Int
       case c: CardInterface => c
 
       case a: Int =>
-        if (valRange.contains(a)) Card(a, true) 
-        else Card(0, false) 
+        if (valRange.contains(a)) Card(a, true)
+        else Card(0, false)
 
       case b: String =>
         val tryInt = scala.util.Try(b.toInt)
         if (tryInt.isSuccess) {
-          Card(tryInt.get, true) 
+          Card(tryInt.get, true)
         } else {
-          Card(0, false) 
+          Card(0, false)
         }
       case scala.util.Success(value) => toCard(value)
-      case scala.util.Failure(_)     => Card(0, false) 
+      case scala.util.Failure(_)     => Card(0, false)
 
       case Some(value) => toCard(value)
-      case None        => Card(0, false) 
+      case None        => Card(0, false)
 
       case d: DeckInterface =>
         d.getCard.map(toCard).getOrElse(Card(0, false))
@@ -358,7 +409,7 @@ class Controller @Inject() (var state: GameState, @Named("plCount") plCount: Int
       case disc: DiscardPileInterface =>
         disc.getDiscCard(this).map(toCard).getOrElse(Card(0, false))
 
-      case _ => Card(0, false) 
+      case _ => Card(0, false)
     }
   }
 
@@ -386,3 +437,53 @@ class Controller @Inject() (var state: GameState, @Named("plCount") plCount: Int
       currentState = anotherState
     )
   }
+
+  // GUI //
+  def guiUndo(
+      resBoard: BoardInterface,
+      resDeck: DeckInterface,
+      resDisc: DiscardPileInterface,
+      b: BoardView
+  ): Unit =
+    // println("UNDO")
+    b.termBoard = resBoard
+    b.aDeck = resDeck
+    b.aDisc = resDisc
+    // val oldUndo = currMemento.undoStack(0)
+    assertGameState(
+      getGameState.copy(
+        boards = getBrds.updated(getPlIdx, resBoard),
+        deck = resDeck,
+        disc = resDisc
+      )
+    )
+
+    b.manyCards = b.BOARD_INIT(false)
+    b.vDeck.cCard = toCard(b.aDeck.turnUpperCard)
+    b.vDiscard.cCard = getDiscCard().get
+
+    b.syncController
+
+  def guiRedo(
+      resBoard: BoardInterface,
+      resDeck: DeckInterface,
+      resDisc: DiscardPileInterface,
+      b: BoardView
+  ): Unit =
+    // val lDisc = currMemento.undoStack(0).lastDisc
+
+    b.termBoard = resBoard
+    b.aDeck = resDeck
+    // b.aDisc = lDisc
+    b.aDisc = resDisc
+    assertGameState(
+      getGameState.copy(
+        boards = getBrds.updated(getPlIdx, resBoard),
+        deck = resDeck,
+        // disc = lDisc
+        disc = resDisc
+      )
+    )
+    b.manyCards = b.BOARD_INIT(false)
+    b.vDeck.cCard = toCard(b.aDeck.turnUpperCard)
+    b.vDiscard.cCard = getDiscCard().get
