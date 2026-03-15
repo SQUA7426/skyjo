@@ -22,4 +22,4 @@ trait DeckInterface:
   def toJson: JsObject
 
   def toXml: Node
-  def fromXml(d: Node): DeckInterface
+  def fromXml(ctr: ControllerInterface, dn: Node): DeckInterface

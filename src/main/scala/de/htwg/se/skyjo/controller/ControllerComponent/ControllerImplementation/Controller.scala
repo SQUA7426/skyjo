@@ -1,7 +1,6 @@
 package de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation
 
-import de.htwg.se.skyjo.model.{
-  BoardInterface,
+import de.htwg.se.skyjo.model.{ BoardInterface,
   CardInterface,
   DiscardPileInterface,
   DeckInterface,
@@ -365,16 +364,31 @@ class Controller @Inject() (
     json_IO.save(getGameState, jsonFileName)
   }
 
-  def xml_load: Unit = {
+  def xml_load(b: BoardView): Unit = {
+    // println("pre XmlImpl")
     val xml_IO = XmlImpl(this)
+    // println("after XmlImpl")
     val tmpState = state
+    // println("pre Xml LOAD")
+
     state = xml_IO.load(xmlFileName)
-    notifyObservers
+
+    // view
+    b.termBoard = getGameState.boards(getPlIdx)
+    b.aDeck = getDeck
+    b.aDisc = getDisc
+
+    b.manyCards = b.BOARD_INIT(false)
+    b.vDeck.cCard = toCard(b.aDeck.turnUpperCard)
+    b.vDiscard.cCard = getDiscCard().get
+
+    b.syncController
   }
   def json_load: Unit = {
     val json_IO = JsonImpl(this)
     val tmpState = state
     state = json_IO.load(jsonFileName)
+    println(f"new gs: $state")
     notifyObservers
   }
 

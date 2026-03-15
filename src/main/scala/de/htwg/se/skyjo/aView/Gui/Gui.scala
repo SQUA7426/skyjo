@@ -282,10 +282,10 @@ object Gui extends JFXApp3 with Observer {
       res match {
         case Some(ButtonTypeJson) => {
           ctr.json_load
-          update("")
+          // update("")
         }
         case Some(ButtonTypeXml)  => {
-          ctr.xml_load
+          ctr.xml_load(b)
           update("")
         }
         case _                 => { println("Canceled Loading."); }

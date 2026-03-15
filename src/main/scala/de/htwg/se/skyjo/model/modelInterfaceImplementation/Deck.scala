@@ -24,7 +24,7 @@ case class Deck(
 ) extends DeckInterface:
 
   override def toString(): String = upperCard
-    // if upperCard.compareTo("Deck") == 0 then "Deck" else upperCard
+  // if upperCard.compareTo("Deck") == 0 then "Deck" else upperCard
 
   // CTRL //
   override def getDeck: DeckInterface = this
@@ -50,7 +50,9 @@ case class Deck(
     val nDeck = deck.dropRight(amount)
     nDeck
 
-  override def draw(ctr: ControllerInterface): (CardInterface, DeckInterface) = {
+  override def draw(
+      ctr: ControllerInterface
+  ): (CardInterface, DeckInterface) = {
     if (upperCard != "Deck") {
       val card = ctr.toCard(upperCard)
       (card, new Deck(this.remove(1), "Deck"))
@@ -66,24 +68,31 @@ case class Deck(
   // FILEIO //
 
   def toJson: JsObject = Json.obj(
-    "deck"      -> deck.map(_.toJson),
+    "deck" -> deck.map(_.toJson),
     "uppercard" -> upperCard
-    )
+  )
 
   def toXml: Node =
     <deck>
+        <size>{deck.size}</size>
         <deckcards>
           {deck.map(card => card.toXml)}
         </deckcards>
         <uppercard>{upperCard}</uppercard>
       </deck>
 
-  def fromXml(dn: Node): DeckInterface =
+  def fromXml(ctr: ControllerInterface, dn: Node): DeckInterface =
+    val size = { dn \\ "size" }.text.toInt
     val upper = { dn \ "uppercard" }
     val deckXml = { dn \ "deckcards" }
-    val cardXml = deckXml.map(c => c \ "card")
+    val cardXml = deckXml \\ "card"
+    val cards: Vector[CardInterface] = cardXml.map { c =>
+      ctr.toCard(
+        ctr.toCard(0).fromXml(c.head)
+      )
+    }.toVector
     Deck(
-      cardXml.map(cXml => this.deck(0).fromXml(cXml.head)).toVector,
+      cards,
       upper.text.toString
     )
 

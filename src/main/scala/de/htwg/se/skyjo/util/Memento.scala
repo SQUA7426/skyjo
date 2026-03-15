@@ -167,34 +167,47 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
       </redostack>
     else <redostack></redostack>
 
-  private def xmlToMem(stackXml: NodeSeq): Memento = {
-    val fromD: Boolean = Node2Bool(stackXml \ "fromDeck")
-    val taken: CardInterface = ctrl.toCard((stackXml \ "takenCard" \ "value"), (stackXml \ "takenCard" \ "turned"))
-    val idx = Node2Int(stackXml \ "boardIndex")
-    val replaced: CardInterface = ctrl.toCard((stackXml \ "replacedCard" \ "value"), (stackXml \ "replacedCard" \ "turned"))
-    val ldisc = {stackXml \ "lastDisc"}
-    val discP = {ldisc \ "discpile"}.text
-    val discT = {ldisc \ "turned"}.text.toBoolean
-    val disc = DiscardPile(discP, discT)
-    val replacedT: Boolean = Node2Bool(stackXml \ "replacedCardTurned")
-    Memento(fromD, taken, idx, replaced, disc, replacedT)
+  private def xmlToMem(stackXml: NodeSeq): Option[Memento] = {
+    val exists:Boolean = (stackXml \ "fromDeck").nonEmpty
+    // println(f"exists: $exists")
+    if exists then
+      val fromD: Boolean = Node2Bool(stackXml \ "fromDeck")
+      val taken: CardInterface = ctrl.toCard((stackXml \ "takenCard" \ "value"), (stackXml \ "takenCard" \ "turned"))
+      val idx =(stackXml \ "boardIndex").text.toInt
+      val replaced: CardInterface = ctrl.toCard((stackXml \ "replacedCard" \ "value"), (stackXml \ "replacedCard" \ "turned"))
+      val ldisc = {stackXml \ "lastDisc"}
+      val discP = {ldisc \ "discpile"}.text
+      val discT = {ldisc \ "turned"}.text.toBoolean
+      val disc = DiscardPile(discP, discT)
+      val replacedT: Boolean = Node2Bool(stackXml \ "replacedCardTurned")
+      Some(Memento(fromD, taken, idx, replaced, disc, replacedT))
+    else
+      None
   }
 
   def toXml: Node =
     <movecaretaker>
-      undoToXml
-      redoToXml
+      {undoToXml}
+      {redoToXml}
     </movecaretaker>
-  def fromXml(d: Node): MoveCaretaker =
-    val mcXml = {d \ "movecaretaker"}
-    val undoXml = {mcXml \ "undostack"}
-    val redoXml = {mcXml \ "redostack"}
 
-    val u = xmlToMem(undoXml)
-    val r = xmlToMem(redoXml)
+  def fromXml(d: Node): MoveCaretaker =
+    val mcXml = {d \ "movecaretaker"}.head
+    // println(f"mc: ${mcXml}")
+    val undoXml = {mcXml \ "undostack"}.head
+    // println(f"undo: ${undoXml}")
+    val redoXml = {mcXml \ "redostack"}.head
+    // println(f"redo: ${redoXml}")
+
+    val tmpMem: Memento = Memento(false, ctrl.toCard(0),0, ctrl.toCard(0),DiscardPile("Disc",false),false)
+    val u: Memento = xmlToMem(undoXml).getOrElse(tmpMem)
+    // println("converted xml to undo Memeto")
+    // println(f"u:\n${u.toString()}")
+    val r: Memento = xmlToMem(redoXml).getOrElse(tmpMem)
+    // println("converted xml to redo Memeto")
+    // println(f"r:\n${r.toString()}")
     val tempMC = this
-    tempMC.save(u)
-    tempMC.redoStack.push(r)
+    tempMC.save(if u == tmpMem then r else u)
+    if r != tmpMem then tempMC.redoStack.push(r)
     tempMC
-    
 }

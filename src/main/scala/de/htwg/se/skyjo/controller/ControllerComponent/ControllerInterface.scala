@@ -80,7 +80,7 @@ trait ControllerInterface extends Observable:
   def xml_save: Unit
   def json_save: Unit
 
-  def xml_load: Unit
+  def xml_load(b:BoardView): Unit
   def json_load: Unit
 
   // OUTSIDE FUNCTIONS //
