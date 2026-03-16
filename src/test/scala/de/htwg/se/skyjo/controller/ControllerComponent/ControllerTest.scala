@@ -13,6 +13,9 @@ import java.io.ByteArrayInputStream
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
+import scalafx.scene.layout.Pane
+import de.htwg.se.skyjo.aView.Gui.{BoardView, fontname}
+
 import com.google.inject.{Guice, Inject, Injector}
 import de.htwg.se.skyjo.SkyjoModule
 import net.codingwell.scalaguice.InjectorExtensions.*
@@ -61,6 +64,16 @@ class ControllerTest extends AnyWordSpec with Matchers {
       "execute a fullDeck()" in:
         val fullDeck = ctr.fullDeck()
         fullDeck.length shouldBe 150
+
+      //---------------------------- FILEIO -------------------------------//
+      val boardPane = new Pane()
+      val bv = new BoardView(ctr, boardPane)
+      "can load and save Json" in:
+        ctr.json_load(bv)
+        ctr.json_save
+      "can load and save Xml" in:
+        ctr.xml_load(bv)
+        ctr.xml_save
     }
 
     "A GAMESTATE" should:

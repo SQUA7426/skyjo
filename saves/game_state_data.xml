@@ -1,24 +1,24 @@
 <gamestate>
       <mementos>
         <movecaretaker>
-      <undostack></undostack>
-      <redostack>
+      <undostack>
         <fromdeck>false</fromdeck>
         <takenCard><card>
-      <value>1</value>
+      <value>0</value>
       <turned>true</turned>
     </card></takenCard>
-        <boardIndex>3</boardIndex>
+        <boardIndex>0</boardIndex>
         <replacedCard><card>
-      <value>4</value>
-      <turned>false</turned>
+      <value>0</value>
+      <turned>true</turned>
     </card></replacedCard>
         <lastDisc><discardpile>
-      <discpile>4</discpile>
+      <discpile>Disc</discpile>
       <turned>false</turned>
     </discardpile></lastDisc>
         <replacedCardTurned>false</replacedCardTurned>
-      </redostack>
+      </undostack>
+      <redostack></redostack>
     </movecaretaker>
       </mementos>
       <boards>
@@ -36,8 +36,8 @@
       <value>11</value>
       <turned>false</turned>
     </card><card>
-      <value>4</value>
-      <turned>false</turned>
+      <value>0</value>
+      <turned>true</turned>
     </card></row><row><card>
       <value>-1</value>
       <turned>false</turned>
@@ -48,7 +48,7 @@
       <value>9</value>
       <turned>true</turned>
     </card><card>
-      <value>6</value>
+      <value>4</value>
       <turned>false</turned>
     </card></row><row><card>
       <value>7</value>
@@ -60,7 +60,7 @@
       <value>0</value>
       <turned>false</turned>
     </card><card>
-      <value>-2</value>
+      <value>6</value>
       <turned>false</turned>
     </card></row>
       </brd>
