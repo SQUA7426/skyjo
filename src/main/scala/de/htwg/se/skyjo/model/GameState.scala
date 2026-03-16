@@ -95,17 +95,17 @@ case class GameState(
     val boardsXml = { gsXml \ "boards" \\ "board" }
     val brdsXml: Vector[BoardInterface] =
       boardsXml.map(b => tmp_board.fromXml(ctr, b)).toVector
-    println(brdsXml.foreach(_.toString))
+    // println(brdsXml.foreach(_.toString))
 
     val dd = tmp_deck.fromXml(ctr, (gsXml \ "deck" \ "deck").head)
-    println(f"deck: ${dd.getDeckCards}")
+    // println(f"deck: ${dd.getDeckCards}")
     // val deckXml = tmp_deck
     val deckXml = dd
 
-    println(f"deckXml: ${deckXml.getDeckCards}")
+    // println(f"deckXml: ${deckXml.getDeckCards}")
 
     val discXml = tmp_disc.fromXml((gsXml \ "disc").head)
-    println(f"discXml: ${discXml}")
+    // println(f"discXml: ${discXml}")
 
     val stateXml = currentState.fromXml((gsXml \ "currentState").head)
     // println(f"stateXml: ${stateXml}")

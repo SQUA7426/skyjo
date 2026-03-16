@@ -355,6 +355,18 @@ class Controller @Inject() (
   val xmlFileName = "game_state_data.xml"
   val jsonFileName = "game_state_data.json"
 
+  def syncControllerGui(b: BoardView): Unit =
+    b.termBoard = getGameState.boards(getPlIdx)
+    b.aDeck = getDeck
+    b.aDisc = getDisc
+
+    b.manyCards = b.BOARD_INIT(false)
+    b.vDeck.cCard = toCard(b.aDeck.turnUpperCard)
+    b.vDiscard.cCard = getDiscCard().get
+
+    // b.syncController
+
+
   def xml_save: Unit = {
     val xml_IO = XmlImpl(this)
     xml_IO.save(getGameState, xmlFileName)
@@ -365,31 +377,19 @@ class Controller @Inject() (
   }
 
   def xml_load(b: BoardView): Unit = {
-    // println("pre XmlImpl")
     val xml_IO = XmlImpl(this)
-    // println("after XmlImpl")
-    val tmpState = state
-    // println("pre Xml LOAD")
 
     state = xml_IO.load(xmlFileName)
 
     // view
-    b.termBoard = getGameState.boards(getPlIdx)
-    b.aDeck = getDeck
-    b.aDisc = getDisc
-
-    b.manyCards = b.BOARD_INIT(false)
-    b.vDeck.cCard = toCard(b.aDeck.turnUpperCard)
-    b.vDiscard.cCard = getDiscCard().get
-
-    b.syncController
+    syncControllerGui(b)
   }
-  def json_load: Unit = {
+  def json_load(b:BoardView): Unit = {
     val json_IO = JsonImpl(this)
     val tmpState = state
     state = json_IO.load(jsonFileName)
-    println(f"new gs: $state")
-    notifyObservers
+
+    syncControllerGui(b)
   }
 
   // OUTSIDE FUNCTIONS //

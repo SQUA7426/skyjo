@@ -77,11 +77,13 @@ trait ControllerInterface extends Observable:
   def guiRedo(resBoard: BoardInterface, resDeck: DeckInterface, resDisc: DiscardPileInterface, b: BoardView): Unit
 
   // FILEIO //
+  def syncControllerGui(b: BoardView): Unit
+
   def xml_save: Unit
   def json_save: Unit
 
   def xml_load(b:BoardView): Unit
-  def json_load: Unit
+  def json_load(b:BoardView): Unit
 
   // OUTSIDE FUNCTIONS //
   def toCard(x: Any): CardInterface

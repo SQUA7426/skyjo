@@ -16,8 +16,8 @@ class XmlImpl(ctrl: ControllerInterface) extends FileIOInterface {
     // println(f"loaded:\n$loaded")
     val gs = tempState.fromXml(loaded)
 
-    println("GS loaded from xml:")
-    println(gs)
+    // println("GS loaded from xml:")
+    // println(gs)
     if gs==tempState then println("game_state_data not converted!") else println("game_state_data converted!")
     gs
 

@@ -92,7 +92,8 @@ object Gui extends JFXApp3 with Observer {
       try {
         println("In GUI update")
         b.syncController
-        b.termBoard = ctr.getReducedBrd(b.termBoard)._1
+        val reducedBoard = ctr.getReducedBrd(b.termBoard)._1
+        b.termBoard = reducedBoard
         b.manyCards = b.BOARD_INIT(false)
         val newUI: Seq[Node] = b.viewBoard() :+ guiButtons(stage)
         boardLayer.children_=(newUI)
@@ -109,7 +110,9 @@ object Gui extends JFXApp3 with Observer {
         )
         b.uptBoardPane
       } catch {
-        case e: Exception => println(s"Update error: ${e.getMessage}")
+        case e: Exception =>
+          e.printStackTrace()
+          println(s"Update error: ${e.getMessage}")
       }
     }
     true
@@ -281,8 +284,8 @@ object Gui extends JFXApp3 with Observer {
 
       res match {
         case Some(ButtonTypeJson) => {
-          ctr.json_load
-          // update("")
+          ctr.json_load(b)
+          update("")
         }
         case Some(ButtonTypeXml)  => {
           ctr.xml_load(b)
