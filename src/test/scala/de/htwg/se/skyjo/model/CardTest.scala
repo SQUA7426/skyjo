@@ -42,8 +42,9 @@ class CardTest extends AnyWordSpec with Matchers {
     val betweenCard = ctr.toCard(5)
     "has the value 11" should:
       val num: Int = 11
-      val card11 = ctr.toCard(num)
+      val card11 = ctr.toCard(num).falseCopy
       "as string" in:
+        card11.turn
         card11.toString() shouldBe (f"${num}")
     "A Card with value 9" should:
       val num9: Int = 9
@@ -52,6 +53,7 @@ class CardTest extends AnyWordSpec with Matchers {
       // --------------------------- CONVERTING ----------------------------//
 
       "as string 9 be converted correctly" in:
+        card9.getValue shouldBe num9
         val n9 = "9"
         ctr.toCard(n9) shouldBe card9
       "as int 9 be converted correctly" in:
@@ -65,6 +67,16 @@ class CardTest extends AnyWordSpec with Matchers {
         card9.falseCopy.toString() should be("#")
       "return the number if a True Copy of it is created" in:
         card9.trueCopy shouldBe ctr.toCard(9)
+
+
+      // -------------------------- FileIO ------------------------------------//
+
+      "convert a Card into and from Json" in:
+        val json_c9 = card9.toJson
+        val newCard = betweenCard.fromJson(json_c9)
+      "convert a Card into and from Xml" in:
+        val xml_c9 = card9.toXml
+        val newCard = betweenCard.fromXml(xml_c9)
 
       // ------------------------- OPERATORS ---------------------------//
 

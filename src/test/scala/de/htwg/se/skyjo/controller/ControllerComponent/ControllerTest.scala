@@ -63,4 +63,21 @@ class ControllerTest extends AnyWordSpec with Matchers {
     "A GAMESTATE" should:
       "be parsed state toString()" in:
         gs.toString() shouldBe a[String]
+      "convert into and from Xml" in:
+        val xml_gs = gs.toXml
+        val new_gs = gs.fromXml(xml_gs)
+
+    "A State " should:
+      val cs = gs.currentState
+      "be parsed into String" in:
+        cs.getStr shouldBe a[String]
+      "iterate trough States" in:
+        val mid_state = cs.nextState()
+        val end_state = mid_state.nextState()
+      "reset()" in:
+        val r = cs.reset()
+      "convert into (xml, json) and from (xml)" in:
+        val xml_cs = cs.toXml
+        val json_cs = cs.toJson
+        val new_cs = cs.fromXml(xml_cs)
 }

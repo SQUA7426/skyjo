@@ -28,17 +28,6 @@ case class GameState(
 
   // FILEIO //
 
-  // XML //
-  // def toJson: JsObject =
-  //   Json.obj(
-  //     "mementos" -> mementos.map(_.toJson),
-  //     "boards" -> boards.map(_.toJson),
-  //     "deck" -> deck.toJson,
-  //     "disc" -> disc.toJson,
-  //     "plIdx" -> plIdx,
-  //     "currentState" -> currentState.toJson
-  //   )
-
   def toXml: Node = {
     <gamestate>
       <mementos>
