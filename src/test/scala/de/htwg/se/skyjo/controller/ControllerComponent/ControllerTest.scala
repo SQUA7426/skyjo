@@ -27,7 +27,6 @@ class ControllerTest extends AnyWordSpec with Matchers {
     val injector = Guice.createInjector(SkyjoModule(plCount))
 
     val ctr = injector.getInstance(classOf[ControllerInterface])
-    val gs_cp = ctr.copy()
 
     ctr.setup()
 
@@ -41,6 +40,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
         val convDisc = ctr.toCard(ctr.getDisc)
         val convNone = ctr.toCard(None)
       "get Mediator, GameState, Deck and Discard-Card" in:
+        val gs_cp = ctr.copy(ctr.getMementos,ctr.getBrds, ctr.getDeck,ctr.getDisc, 0,ctr.currState)
         ctr.getMediator shouldBe a[Mediator]
         ctr.getGameState shouldBe a[GameState]
         ctr.getDeck shouldBe a[DeckInterface]

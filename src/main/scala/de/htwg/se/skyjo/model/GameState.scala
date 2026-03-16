@@ -47,20 +47,6 @@ case class GameState(
     </gamestate>
   }
 
-  private def stateFromXML(n: NodeSeq): State =
-    val stateXml = { n \ "state" }
-    val strXml = { stateXml \ "str" }.text.toString
-    val preXml = { stateXml \ "pre" }.text.toString
-    State.ASSERT(strXml, preXml)
-  private def discFromXml(n: NodeSeq): DiscardPileInterface =
-    val discXml = { n \ "discardpile" }
-    val discPXml = { discXml \ "discpile" }.text
-    val discTXml = { discXml \ "turned" }.text.toBoolean
-    DiscardPile(discPXml, discTXml)
-
-  private def Node2Int(ns: NodeSeq): Int =
-    ns.head.text.replace(" ", "").toInt
-
   def fromXml(gsXml: Node): GameState = {
 
     // println(f"gs: ${gsXml}")
