@@ -119,6 +119,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
         ctr.xml_load(bv)
         ctr.xml_save
         val tmp_ctr = injector.getInstance(classOf[ControllerInterface])
+        tmp_ctr.setup()
         tmp_ctr.xml_save
         tmp_ctr.xml_load(bv)
         ctr.xml_save
