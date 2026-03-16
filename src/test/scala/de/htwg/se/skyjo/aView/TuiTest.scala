@@ -31,7 +31,13 @@ class TuiTest extends AnyWordSpec with Matchers {
 
     val tui = new Tui(ctr)
     "an Input Request is done, it" should:
-      "process an Input" in:
+      "process an 0-Input" in:
+        val simulatedInput = "0\n1\n0\n1\nquit\n"
+        val in = new ByteArrayInputStream(simulatedInput.getBytes())
+        Console.withIn(in) {
+          tui.startGame
+        }
+      "process an Switch-Input" in:
         val simulatedInput = "s\n1\nquit\n"
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
         Console.withIn(in) {

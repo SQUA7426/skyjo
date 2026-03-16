@@ -22,6 +22,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
     val injector = Guice.createInjector(SkyjoModule(plCount))
 
     val ctr = injector.getInstance(classOf[ControllerInterface])
+    val gs_cp = ctr.copy(disc = ctr.putToDiscardPile(ctr.toCard(11))._1)
 
     ctr.setup()
 
