@@ -12,16 +12,16 @@ class ConcreteMediator extends Mediator {
 
   def add(c: Colleague): Unit = thresholdingColleague =
     thresholdingColleague :+ c
-
-  def remove(c: Colleague): Unit = thresholdingColleague =
-    thresholdingColleague.filterNot(o => o == c)
-
+  //
+  // def remove(c: Colleague): Unit = thresholdingColleague =
+  //   thresholdingColleague.filterNot(o => o == c)
+  //
   override def send(fromColleague: Colleague, msg: String): Unit = {
     thresholdingColleague.find{c =>
         c != fromColleague && c.receive(msg)
         }
   }
-
+  //
   def requestRmUpperCard(fromColleague: Colleague): Unit =
     send(fromColleague, "REQUEST REMOVE UPPERCARD")
   def requestPutToDisc(fromColleague:Colleague): Unit =

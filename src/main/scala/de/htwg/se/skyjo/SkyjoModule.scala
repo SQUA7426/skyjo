@@ -25,8 +25,12 @@ class SkyjoModule(count: Int) extends AbstractModule with ScalaModule:
   }
 
   @Provides
-  def provideFileIO(ctrl: ControllerInterface): FileIOInterface = {
+  def provideJsonIO(ctrl: ControllerInterface): JsonImpl = {
     new JsonImpl(ctrl)
+  }
+  @Provides
+  def provideXmlIO(ctrl: ControllerInterface): XmlImpl = {
+    new XmlImpl(ctrl)
   }
 
   @Provides

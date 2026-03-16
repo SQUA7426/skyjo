@@ -364,20 +364,18 @@ class Controller @Inject() (
     b.vDeck.cCard = toCard(b.aDeck.turnUpperCard)
     b.vDiscard.cCard = getDiscCard().get
 
-    // b.syncController
-
 
   def xml_save: Unit = {
-    val xml_IO = XmlImpl(this)
+    val xml_IO = injector.instance[XmlImpl]
     xml_IO.save(getGameState, xmlFileName)
   }
   def json_save: Unit = {
-    val json_IO = JsonImpl(this)
+    val json_IO = injector.instance[JsonImpl]
     json_IO.save(getGameState, jsonFileName)
   }
 
   def xml_load(b: BoardView): Unit = {
-    val xml_IO = XmlImpl(this)
+    val xml_IO = injector.instance[XmlImpl]
 
     state = xml_IO.load(xmlFileName)
 
@@ -385,8 +383,7 @@ class Controller @Inject() (
     syncControllerGui(b)
   }
   def json_load(b:BoardView): Unit = {
-    val json_IO = JsonImpl(this)
-    val tmpState = state
+    val json_IO = injector.instance[JsonImpl]
     state = json_IO.load(jsonFileName)
 
     syncControllerGui(b)

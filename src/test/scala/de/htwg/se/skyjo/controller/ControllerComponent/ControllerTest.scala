@@ -4,6 +4,8 @@ import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.
 import de.htwg.se.skyjo.model.modelInterfaceImplementation.{Deck, DiscardPile, Board, Card}
 import de.htwg.se.skyjo.util.{Mediator, Memento, MoveCaretaker}
 import de.htwg.se.skyjo.model.{GameState, DeckInterface, CardInterface, BoardInterface, DiscardPileInterface}
+import de.htwg.se.skyjo.fileIoComponent.fileIoJsonImpl.JsonImpl
+import de.htwg.se.skyjo.fileIoComponent.fileIoXmlImpl.XmlImpl
 
 import scala.io.StdIn.{readInt, readLine}
 import scala.util.Random
@@ -22,7 +24,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
     val injector = Guice.createInjector(SkyjoModule(plCount))
 
     val ctr = injector.getInstance(classOf[ControllerInterface])
-    val gs_cp = ctr.copy(disc = ctr.putToDiscardPile(ctr.toCard(11))._1)
+    val gs_cp = ctr.copy()
 
     ctr.setup()
 
@@ -67,6 +69,9 @@ class ControllerTest extends AnyWordSpec with Matchers {
       "convert into and from Xml" in:
         val xml_gs = gs.toXml
         val new_gs = gs.fromXml(xml_gs)
+      "can Inject FileIO" in:
+        val jsonIO = injector.instance[JsonImpl]
+        val xmlIO = injector.instance[XmlImpl]
 
     "A State " should:
       val cs = gs.currentState
