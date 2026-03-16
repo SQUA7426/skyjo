@@ -35,4 +35,7 @@ class DiscardPileTest extends AnyWordSpec with Matchers {
         d3 shouldBe a[DeckInterface]
       "be unable to put an unrecognized Type onto DiscardPile" in:
         val d4 = the [MatchError] thrownBy(discard.putToDiscardPile(ctr.getGameState, ctr))
+      "convert toJson and fromJson" in:
+        val json_disc = discard.toJson
+        val dd = discard.fromJson(json_disc)
 }

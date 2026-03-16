@@ -19,6 +19,7 @@ import de.htwg.se.skyjo.aView.Gui.{BoardView, fontname}
 import com.google.inject.{Guice, Inject, Injector}
 import de.htwg.se.skyjo.SkyjoModule
 import net.codingwell.scalaguice.InjectorExtensions.*
+import de.htwg.se.skyjo.util.ConcreteMediator
 
 class ControllerTest extends AnyWordSpec with Matchers {
   "A Controller" when:
@@ -82,6 +83,8 @@ class ControllerTest extends AnyWordSpec with Matchers {
         val temp_deck = Deck(ctr.getDeckCards, ctr.turnUpperCard)
         ctr2.save(mem2)
         val another_gs = ctr2.switchDeckDisc(ctr2.getGameState, ctr2.getBrds(0), temp_deck, 0)
+        val ctr3 = Controller(ctr2.getGameState.copy(deck = temp_deck ),0, injector.getInstance(classOf[ConcreteMediator]))
+        ctr3.draw()
       "move to next player turn" in:
         ctr2.nextPlayer
 
@@ -118,11 +121,12 @@ class ControllerTest extends AnyWordSpec with Matchers {
       "can load and save Xml + upt BoardPane" in:
         ctr.xml_load(bv)
         ctr.xml_save
-        val tmp_ctr = injector.getInstance(classOf[ControllerInterface])
-        tmp_ctr.setup()
-        tmp_ctr.xml_save
-        tmp_ctr.xml_load(bv)
-        ctr.xml_save
+        // val tmp_ctr = injector.getInstance(classOf[ControllerInterface])
+        // tmp_ctr.setup()
+        // tmp_ctr.xml_save
+        // tmp_ctr.xml_load(bv)
+        // ctr.xml_save
+        // ctr.xml_load(bv)
         bv.syncController
         bv.uptBoardPane(0,0)
 

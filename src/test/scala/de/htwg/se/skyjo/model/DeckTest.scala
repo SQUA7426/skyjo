@@ -26,6 +26,7 @@ class DeckTest extends AnyWordSpec with Matchers {
 
       //------------------------- WHEN INIT ----------------------------------//
       "be able to be init by alt. way" in:
+        d.getDeck shouldBe a[DeckInterface]
         Deck(ctr) shouldBe a[DeckInterface]
 
       // "have the size of 150" in:
@@ -50,5 +51,9 @@ class DeckTest extends AnyWordSpec with Matchers {
 
       // "when get upperCard throw an IllegalArgumentException" in:
       //   val throwError = the [Exception] thrownBy(d.getUpperCard())
+
+      // ----------------------- FILEIO ------------------------------- //
+      "parse to Json" in:
+        d.toJson
   }
 }

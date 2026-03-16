@@ -27,162 +27,60 @@
       <ySize>3</ySize>
       <brd>
         <row><card>
-      <value>8</value>
-      <turned>false</turned>
-    </card><card>
-      <value>-1</value>
+      <value>3</value>
       <turned>false</turned>
     </card><card>
       <value>11</value>
       <turned>false</turned>
     </card><card>
-      <value>0</value>
-      <turned>true</turned>
-    </card></row><row><card>
-      <value>-1</value>
-      <turned>false</turned>
-    </card><card>
-      <value>8</value>
-      <turned>true</turned>
-    </card><card>
-      <value>9</value>
-      <turned>true</turned>
-    </card><card>
-      <value>0</value>
-      <turned>true</turned>
-    </card></row><row><card>
-      <value>7</value>
-      <turned>false</turned>
-    </card><card>
       <value>12</value>
+      <turned>false</turned>
+    </card><card>
+      <value>0</value>
+      <turned>true</turned>
+    </card></row><row><card>
+      <value>2</value>
+      <turned>true</turned>
+    </card><card>
+      <value>0</value>
+      <turned>true</turned>
+    </card><card>
+      <value>-1</value>
+      <turned>true</turned>
+    </card><card>
+      <value>0</value>
+      <turned>true</turned>
+    </card></row><row><card>
+      <value>2</value>
+      <turned>false</turned>
+    </card><card>
+      <value>10</value>
       <turned>true</turned>
     </card><card>
       <value>0</value>
       <turned>false</turned>
     </card><card>
-      <value>0</value>
-      <turned>true</turned>
+      <value>4</value>
+      <turned>false</turned>
     </card></row>
       </brd>
     </board>
       </boards>
       <deck>
         <deck>
-        <size>136</size>
+        <size>133</size>
         <deckcards>
           <card>
-      <value>2</value>
-      <turned>true</turned>
-    </card><card>
-      <value>3</value>
-      <turned>true</turned>
-    </card><card>
-      <value>-1</value>
-      <turned>true</turned>
-    </card><card>
-      <value>3</value>
+      <value>1</value>
       <turned>true</turned>
     </card><card>
       <value>4</value>
       <turned>true</turned>
     </card><card>
-      <value>0</value>
-      <turned>true</turned>
-    </card><card>
-      <value>-1</value>
-      <turned>true</turned>
-    </card><card>
-      <value>1</value>
-      <turned>true</turned>
-    </card><card>
       <value>7</value>
       <turned>true</turned>
     </card><card>
-      <value>0</value>
-      <turned>true</turned>
-    </card><card>
-      <value>0</value>
-      <turned>true</turned>
-    </card><card>
-      <value>2</value>
-      <turned>true</turned>
-    </card><card>
-      <value>1</value>
-      <turned>true</turned>
-    </card><card>
-      <value>0</value>
-      <turned>true</turned>
-    </card><card>
-      <value>11</value>
-      <turned>true</turned>
-    </card><card>
-      <value>8</value>
-      <turned>true</turned>
-    </card><card>
-      <value>1</value>
-      <turned>true</turned>
-    </card><card>
-      <value>12</value>
-      <turned>true</turned>
-    </card><card>
       <value>7</value>
-      <turned>true</turned>
-    </card><card>
-      <value>0</value>
-      <turned>true</turned>
-    </card><card>
-      <value>0</value>
-      <turned>true</turned>
-    </card><card>
-      <value>6</value>
-      <turned>true</turned>
-    </card><card>
-      <value>3</value>
-      <turned>true</turned>
-    </card><card>
-      <value>6</value>
-      <turned>true</turned>
-    </card><card>
-      <value>5</value>
-      <turned>true</turned>
-    </card><card>
-      <value>2</value>
-      <turned>true</turned>
-    </card><card>
-      <value>1</value>
-      <turned>true</turned>
-    </card><card>
-      <value>8</value>
-      <turned>true</turned>
-    </card><card>
-      <value>10</value>
-      <turned>true</turned>
-    </card><card>
-      <value>6</value>
-      <turned>true</turned>
-    </card><card>
-      <value>0</value>
-      <turned>true</turned>
-    </card><card>
-      <value>5</value>
-      <turned>true</turned>
-    </card><card>
-      <value>3</value>
-      <turned>true</turned>
-    </card><card>
-      <value>0</value>
-      <turned>true</turned>
-    </card><card>
-      <value>9</value>
-      <turned>true</turned>
-    </card><card>
-      <value>6</value>
-      <turned>true</turned>
-    </card><card>
-      <value>11</value>
-      <turned>true</turned>
-    </card><card>
-      <value>4</value>
       <turned>true</turned>
     </card><card>
       <value>9</value>
@@ -191,25 +89,25 @@
       <value>-1</value>
       <turned>true</turned>
     </card><card>
-      <value>0</value>
+      <value>11</value>
       <turned>true</turned>
     </card><card>
       <value>2</value>
       <turned>true</turned>
     </card><card>
-      <value>6</value>
+      <value>11</value>
       <turned>true</turned>
     </card><card>
-      <value>7</value>
+      <value>4</value>
       <turned>true</turned>
     </card><card>
-      <value>5</value>
+      <value>8</value>
       <turned>true</turned>
     </card><card>
-      <value>6</value>
+      <value>8</value>
       <turned>true</turned>
     </card><card>
-      <value>7</value>
+      <value>0</value>
       <turned>true</turned>
     </card><card>
       <value>-2</value>
@@ -218,31 +116,229 @@
       <value>10</value>
       <turned>true</turned>
     </card><card>
-      <value>9</value>
+      <value>7</value>
       <turned>true</turned>
     </card><card>
-      <value>9</value>
+      <value>0</value>
       <turned>true</turned>
     </card><card>
-      <value>9</value>
-      <turned>true</turned>
-    </card><card>
-      <value>9</value>
+      <value>7</value>
       <turned>true</turned>
     </card><card>
       <value>10</value>
-      <turned>true</turned>
-    </card><card>
-      <value>5</value>
-      <turned>true</turned>
-    </card><card>
-      <value>10</value>
-      <turned>true</turned>
-    </card><card>
-      <value>5</value>
       <turned>true</turned>
     </card><card>
       <value>4</value>
+      <turned>true</turned>
+    </card><card>
+      <value>2</value>
+      <turned>true</turned>
+    </card><card>
+      <value>1</value>
+      <turned>true</turned>
+    </card><card>
+      <value>8</value>
+      <turned>true</turned>
+    </card><card>
+      <value>5</value>
+      <turned>true</turned>
+    </card><card>
+      <value>6</value>
+      <turned>true</turned>
+    </card><card>
+      <value>6</value>
+      <turned>true</turned>
+    </card><card>
+      <value>-1</value>
+      <turned>true</turned>
+    </card><card>
+      <value>6</value>
+      <turned>true</turned>
+    </card><card>
+      <value>3</value>
+      <turned>true</turned>
+    </card><card>
+      <value>0</value>
+      <turned>true</turned>
+    </card><card>
+      <value>1</value>
+      <turned>true</turned>
+    </card><card>
+      <value>4</value>
+      <turned>true</turned>
+    </card><card>
+      <value>3</value>
+      <turned>true</turned>
+    </card><card>
+      <value>1</value>
+      <turned>true</turned>
+    </card><card>
+      <value>9</value>
+      <turned>true</turned>
+    </card><card>
+      <value>7</value>
+      <turned>true</turned>
+    </card><card>
+      <value>4</value>
+      <turned>true</turned>
+    </card><card>
+      <value>7</value>
+      <turned>true</turned>
+    </card><card>
+      <value>5</value>
+      <turned>true</turned>
+    </card><card>
+      <value>0</value>
+      <turned>true</turned>
+    </card><card>
+      <value>0</value>
+      <turned>true</turned>
+    </card><card>
+      <value>-2</value>
+      <turned>true</turned>
+    </card><card>
+      <value>2</value>
+      <turned>true</turned>
+    </card><card>
+      <value>-2</value>
+      <turned>true</turned>
+    </card><card>
+      <value>-1</value>
+      <turned>true</turned>
+    </card><card>
+      <value>1</value>
+      <turned>true</turned>
+    </card><card>
+      <value>10</value>
+      <turned>true</turned>
+    </card><card>
+      <value>10</value>
+      <turned>true</turned>
+    </card><card>
+      <value>-1</value>
+      <turned>true</turned>
+    </card><card>
+      <value>3</value>
+      <turned>true</turned>
+    </card><card>
+      <value>10</value>
+      <turned>true</turned>
+    </card><card>
+      <value>10</value>
+      <turned>true</turned>
+    </card><card>
+      <value>11</value>
+      <turned>true</turned>
+    </card><card>
+      <value>3</value>
+      <turned>true</turned>
+    </card><card>
+      <value>6</value>
+      <turned>true</turned>
+    </card><card>
+      <value>12</value>
+      <turned>true</turned>
+    </card><card>
+      <value>6</value>
+      <turned>true</turned>
+    </card><card>
+      <value>2</value>
+      <turned>true</turned>
+    </card><card>
+      <value>7</value>
+      <turned>true</turned>
+    </card><card>
+      <value>1</value>
+      <turned>true</turned>
+    </card><card>
+      <value>0</value>
+      <turned>true</turned>
+    </card><card>
+      <value>0</value>
+      <turned>true</turned>
+    </card><card>
+      <value>9</value>
+      <turned>true</turned>
+    </card><card>
+      <value>1</value>
+      <turned>true</turned>
+    </card><card>
+      <value>2</value>
+      <turned>true</turned>
+    </card><card>
+      <value>9</value>
+      <turned>true</turned>
+    </card><card>
+      <value>5</value>
+      <turned>true</turned>
+    </card><card>
+      <value>6</value>
+      <turned>true</turned>
+    </card><card>
+      <value>9</value>
+      <turned>true</turned>
+    </card><card>
+      <value>5</value>
+      <turned>true</turned>
+    </card><card>
+      <value>11</value>
+      <turned>true</turned>
+    </card><card>
+      <value>11</value>
+      <turned>true</turned>
+    </card><card>
+      <value>11</value>
+      <turned>true</turned>
+    </card><card>
+      <value>11</value>
+      <turned>true</turned>
+    </card><card>
+      <value>8</value>
+      <turned>true</turned>
+    </card><card>
+      <value>-2</value>
+      <turned>true</turned>
+    </card><card>
+      <value>9</value>
+      <turned>true</turned>
+    </card><card>
+      <value>8</value>
+      <turned>true</turned>
+    </card><card>
+      <value>10</value>
+      <turned>true</turned>
+    </card><card>
+      <value>7</value>
+      <turned>true</turned>
+    </card><card>
+      <value>12</value>
+      <turned>true</turned>
+    </card><card>
+      <value>0</value>
+      <turned>true</turned>
+    </card><card>
+      <value>5</value>
+      <turned>true</turned>
+    </card><card>
+      <value>2</value>
+      <turned>true</turned>
+    </card><card>
+      <value>6</value>
+      <turned>true</turned>
+    </card><card>
+      <value>5</value>
+      <turned>true</turned>
+    </card><card>
+      <value>5</value>
+      <turned>true</turned>
+    </card><card>
+      <value>9</value>
+      <turned>true</turned>
+    </card><card>
+      <value>6</value>
+      <turned>true</turned>
+    </card><card>
+      <value>0</value>
       <turned>true</turned>
     </card><card>
       <value>6</value>
@@ -251,25 +347,25 @@
       <value>7</value>
       <turned>true</turned>
     </card><card>
-      <value>2</value>
-      <turned>true</turned>
-    </card><card>
-      <value>12</value>
-      <turned>true</turned>
-    </card><card>
-      <value>11</value>
-      <turned>true</turned>
-    </card><card>
-      <value>10</value>
-      <turned>true</turned>
-    </card><card>
-      <value>7</value>
+      <value>1</value>
       <turned>true</turned>
     </card><card>
       <value>2</value>
       <turned>true</turned>
     </card><card>
+      <value>8</value>
+      <turned>true</turned>
+    </card><card>
       <value>11</value>
+      <turned>true</turned>
+    </card><card>
+      <value>4</value>
+      <turned>true</turned>
+    </card><card>
+      <value>-1</value>
+      <turned>true</turned>
+    </card><card>
+      <value>0</value>
       <turned>true</turned>
     </card><card>
       <value>4</value>
@@ -278,214 +374,109 @@
       <value>0</value>
       <turned>true</turned>
     </card><card>
-      <value>5</value>
+      <value>8</value>
       <turned>true</turned>
     </card><card>
-      <value>9</value>
+      <value>10</value>
       <turned>true</turned>
     </card><card>
-      <value>4</value>
+      <value>3</value>
+      <turned>true</turned>
+    </card><card>
+      <value>8</value>
+      <turned>true</turned>
+    </card><card>
+      <value>3</value>
+      <turned>true</turned>
+    </card><card>
+      <value>2</value>
+      <turned>true</turned>
+    </card><card>
+      <value>0</value>
+      <turned>true</turned>
+    </card><card>
+      <value>12</value>
       <turned>true</turned>
     </card><card>
       <value>6</value>
       <turned>true</turned>
     </card><card>
-      <value>10</value>
+      <value>12</value>
       <turned>true</turned>
     </card><card>
-      <value>0</value>
+      <value>-1</value>
+      <turned>true</turned>
+    </card><card>
+      <value>11</value>
+      <turned>true</turned>
+    </card><card>
+      <value>12</value>
+      <turned>true</turned>
+    </card><card>
+      <value>4</value>
       <turned>true</turned>
     </card><card>
       <value>5</value>
       <turned>true</turned>
     </card><card>
+      <value>-1</value>
+      <turned>true</turned>
+    </card><card>
+      <value>-1</value>
+      <turned>true</turned>
+    </card><card>
       <value>12</value>
+      <turned>true</turned>
+    </card><card>
+      <value>7</value>
+      <turned>true</turned>
+    </card><card>
+      <value>1</value>
+      <turned>true</turned>
+    </card><card>
+      <value>8</value>
+      <turned>true</turned>
+    </card><card>
+      <value>5</value>
+      <turned>true</turned>
+    </card><card>
+      <value>10</value>
+      <turned>true</turned>
+    </card><card>
+      <value>8</value>
       <turned>true</turned>
     </card><card>
       <value>9</value>
       <turned>true</turned>
     </card><card>
-      <value>5</value>
-      <turned>true</turned>
-    </card><card>
-      <value>5</value>
-      <turned>true</turned>
-    </card><card>
-      <value>-1</value>
-      <turned>true</turned>
-    </card><card>
-      <value>8</value>
-      <turned>true</turned>
-    </card><card>
       <value>12</value>
-      <turned>true</turned>
-    </card><card>
-      <value>1</value>
-      <turned>true</turned>
-    </card><card>
-      <value>4</value>
-      <turned>true</turned>
-    </card><card>
-      <value>-1</value>
-      <turned>true</turned>
-    </card><card>
-      <value>3</value>
-      <turned>true</turned>
-    </card><card>
-      <value>10</value>
-      <turned>true</turned>
-    </card><card>
-      <value>7</value>
-      <turned>true</turned>
-    </card><card>
-      <value>3</value>
-      <turned>true</turned>
-    </card><card>
-      <value>7</value>
-      <turned>true</turned>
-    </card><card>
-      <value>10</value>
-      <turned>true</turned>
-    </card><card>
-      <value>1</value>
-      <turned>true</turned>
-    </card><card>
-      <value>1</value>
-      <turned>true</turned>
-    </card><card>
-      <value>6</value>
-      <turned>true</turned>
-    </card><card>
-      <value>5</value>
       <turned>true</turned>
     </card><card>
       <value>-2</value>
       <turned>true</turned>
     </card><card>
-      <value>4</value>
-      <turned>true</turned>
-    </card><card>
-      <value>8</value>
-      <turned>true</turned>
-    </card><card>
       <value>0</value>
       <turned>true</turned>
     </card><card>
-      <value>9</value>
-      <turned>true</turned>
-    </card><card>
-      <value>2</value>
-      <turned>true</turned>
-    </card><card>
-      <value>3</value>
-      <turned>true</turned>
-    </card><card>
-      <value>2</value>
-      <turned>true</turned>
-    </card><card>
-      <value>3</value>
-      <turned>true</turned>
-    </card><card>
-      <value>1</value>
+      <value>5</value>
       <turned>true</turned>
     </card><card>
       <value>12</value>
-      <turned>true</turned>
-    </card><card>
-      <value>0</value>
-      <turned>true</turned>
-    </card><card>
-      <value>12</value>
-      <turned>true</turned>
-    </card><card>
-      <value>10</value>
       <turned>true</turned>
     </card><card>
       <value>4</value>
       <turned>true</turned>
     </card><card>
-      <value>8</value>
-      <turned>true</turned>
-    </card><card>
-      <value>8</value>
-      <turned>true</turned>
-    </card><card>
       <value>-1</value>
-      <turned>true</turned>
-    </card><card>
-      <value>-1</value>
-      <turned>true</turned>
-    </card><card>
-      <value>8</value>
-      <turned>true</turned>
-    </card><card>
-      <value>12</value>
-      <turned>true</turned>
-    </card><card>
-      <value>-1</value>
-      <turned>true</turned>
-    </card><card>
-      <value>11</value>
-      <turned>true</turned>
-    </card><card>
-      <value>4</value>
-      <turned>true</turned>
-    </card><card>
-      <value>7</value>
-      <turned>true</turned>
-    </card><card>
-      <value>8</value>
-      <turned>true</turned>
-    </card><card>
-      <value>11</value>
-      <turned>true</turned>
-    </card><card>
-      <value>3</value>
-      <turned>true</turned>
-    </card><card>
-      <value>1</value>
-      <turned>true</turned>
-    </card><card>
-      <value>11</value>
-      <turned>true</turned>
-    </card><card>
-      <value>12</value>
-      <turned>true</turned>
-    </card><card>
-      <value>3</value>
-      <turned>true</turned>
-    </card><card>
-      <value>11</value>
-      <turned>true</turned>
-    </card><card>
-      <value>-2</value>
-      <turned>true</turned>
-    </card><card>
-      <value>11</value>
-      <turned>true</turned>
-    </card><card>
-      <value>-2</value>
-      <turned>true</turned>
-    </card><card>
-      <value>10</value>
-      <turned>true</turned>
-    </card><card>
-      <value>0</value>
-      <turned>true</turned>
-    </card><card>
-      <value>12</value>
-      <turned>true</turned>
-    </card><card>
-      <value>2</value>
       <turned>true</turned>
     </card>
         </deckcards>
-        <uppercard>1</uppercard>
+        <uppercard>3</uppercard>
       </deck>
       </deck>
       <disc>
         <discardpile>
-      <discpile>1</discpile>
+      <discpile>#</discpile>
       <turned>false</turned>
     </discardpile>
       </disc>
