@@ -4,7 +4,7 @@ on:
   push:
     branches: [ '**' ]
   pull_request:
-    branches: [ "main", "dev", "pattern", "Gui", "components"]
+    branches: [ "main", "dev", "pattern", "Gui", "components", "fileIO", "docker"]
   workflow_dispatch:
 permissions:
   contents: read

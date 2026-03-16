@@ -1,7 +1,7 @@
 package de.htwg.se.skyjo.model
 
-import de.htwg.se.skyjo.aView.Tui
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.*
+import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
 import de.htwg.se.skyjo.util.*
 import de.htwg.se.skyjo.model.modelInterfaceImplementation.{Card, Deck, DiscardPile, Board}
 import de.htwg.se.skyjo.model.GameState
@@ -14,27 +14,21 @@ import scala.collection.immutable.Seq
 import java.io.ByteArrayInputStream
 import scala.Console
 
+import com.google.inject.{Guice, Inject, Injector}
+import de.htwg.se.skyjo.SkyjoModule
+import net.codingwell.scalaguice.InjectorExtensions.*
+
 class BoardTest extends AnyWordSpec with Matchers {
   "A Board" should {
     val plCount = 1
-    val med = new ConcreteMediator()
 
-    val tempState = new GameState(med, Vector.empty, null, null, 0, None)
-    val ctr = new Controller(tempState)
+    val injector = Guice.createInjector(SkyjoModule(plCount))
 
-    val deck = new Deck(ctr.fullDeck(), ctr)
-    val disc = new DiscardPile(ctr)
+    val ctr = injector.getInstance(classOf[ControllerInterface])
 
-    val plBoards = Vector.fill(plCount)(new Board(med, 4, 3, Vector.empty))
-
-    ctr.state = new GameState(med, plBoards, deck, disc, 0, None)
     ctr.setup()
 
-    val board = ctr.getGameState.boards(ctr.getGameState.playerIdx)
-    val tui = new Tui(ctr)
-
-    "before filled" in:
-      plBoards(0).brd shouldBe (Vector.empty)
+    val board = ctr.getGameState.boards(ctr.getPlIdx)
 
     "be alternatively initialized" in:
       Board(ctr)._1 shouldBe a[BoardInterface]
@@ -48,7 +42,7 @@ class BoardTest extends AnyWordSpec with Matchers {
     "reduce nothing normally" in:
       ctr.reduce(0,0)._2 shouldBe a[Boolean]
 
-    val twoTimesTwoBoard = new Board(med, 2, 2, Vector(Vector(Card(1,ctr), Card(1, ctr)), Vector(Card(1,ctr), Card(1, ctr).falseCopy)))
+    val twoTimesTwoBoard = new Board(2, 2, Vector(Vector(Card(1), Card(1)), Vector(Card(1), Card(1).falseCopy)))
 
     "reduce a row" in:
       twoTimesTwoBoard.reduce(1, -1)._2 shouldBe a[Boolean]

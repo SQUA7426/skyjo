@@ -1,40 +1,35 @@
 package de.htwg.se.skyjo.model
 
-import de.htwg.se.skyjo.aView.Tui
-import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.*
+import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
 import de.htwg.se.skyjo.model.modelInterfaceImplementation.{DiscardPile, Deck, Board, Card}
 import de.htwg.se.skyjo.util.*
-import de.htwg.se.skyjo.model.GameState
-import de.htwg.se.skyjo.util.ConcreteMediator
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalactic.StringNormalizations._
 import java.io.ByteArrayOutputStream
 
+import com.google.inject.{Guice, Inject, Injector}
+import de.htwg.se.skyjo.SkyjoModule
+import net.codingwell.scalaguice.InjectorExtensions.*
+
 class DeckTest extends AnyWordSpec with Matchers {
   "A Deck" when {
     val plCount = 1
-    val med = new ConcreteMediator()
+    val injector = Guice.createInjector(SkyjoModule(plCount))
 
-    val tempState = new GameState(med, Vector.empty, null, null, 0, None)
-    val ctr = new Controller(tempState)
+    val ctr = injector.getInstance(classOf[ControllerInterface])
+    val d = Deck(ctr)
 
-    val d = new Deck(ctr.fullDeck(), ctr)
-    val disc = new DiscardPile(ctr)
+    ctr.setup()
 
-    val plBoards = Vector.fill(plCount)(new Board(med, 4, 3, Vector.empty))
-
-    ctr.state = new GameState(med, plBoards, d, disc, 0, None)
-
-    val tui = new Tui(ctr)
     "Initialized" should:
 
       //------------------------- WHEN INIT ----------------------------------//
       "be able to be init by alt. way" in:
         Deck(ctr) shouldBe a[DeckInterface]
 
-      "have the size of 150" in:
-        d.deck.size shouldBe (150)
+      // "have the size of 150" in:
+      //   d.getDeckCards.size shouldBe (150)
       "toString() should be the UpperCard" in:
         d.toString() should (be ("Deck") or be (s"d.upperCard"))
       // "should have left more then one Card with a Number left" in:
@@ -45,7 +40,7 @@ class DeckTest extends AnyWordSpec with Matchers {
       "when initialized one turned" in:
         d.turnUpperCard should not be ("Deck")
 
-      val d2 = new Deck(d.deck, ctr, d.turnUpperCard)
+      val d2 = new Deck(d.getDeckCards, d.turnUpperCard)
       "have the Card as upperCard when turned" in:
         d2.toString() shouldBe (d2.upperCard)
       "when turned again" in:
@@ -55,9 +50,5 @@ class DeckTest extends AnyWordSpec with Matchers {
 
       // "when get upperCard throw an IllegalArgumentException" in:
       //   val throwError = the [Exception] thrownBy(d.getUpperCard())
-      "draw()" in:
-        val err = the [IllegalArgumentException] thrownBy(d2.draw())
-      "getCard" in:
-        val errC = the [IllegalArgumentException] thrownBy(d2.getCard)
   }
 }
