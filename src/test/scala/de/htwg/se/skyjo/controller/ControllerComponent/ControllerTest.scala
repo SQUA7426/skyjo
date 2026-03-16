@@ -32,30 +32,65 @@ class ControllerTest extends AnyWordSpec with Matchers {
     ctr.setup()
 
     val gs:GameState = ctr.getGameState
-    val card8 = ctr.toCard(9)
+    val card8 = ctr.toCard(8)
     "it is working, it" should {
+      "covert toCard" in:
+        ctr.isCard(gs) shouldBe false
+        val invCard = ctr.toCard(100)
+        val convDeck = ctr.toCard(ctr.getDeck)
+        val convDisc = ctr.toCard(ctr.getDisc)
+        val convNone = ctr.toCard(None)
       "get Mediator, GameState, Deck and Discard-Card" in:
         ctr.getMediator shouldBe a[Mediator]
         ctr.getGameState shouldBe a[GameState]
         ctr.getDeck shouldBe a[DeckInterface]
         ctr.getDisc shouldBe a[DiscardPileInterface]
         ctr.getDiscCard()
+      "assert a new GameState" in:
+        ctr.assertGameState(gs)
       "be able to fill a Board" in:
         val (afterBoard, afterDeck) = ctr.fillBoard(4, 3, ctr.getDeck)
         afterBoard shouldBe a[BoardInterface]
         afterDeck shouldBe a[DeckInterface]
+
+      val reducibleBoard = Board(2,2, Vector(Vector(ctr.toCard(1).falseCopy, ctr.toCard(2)), Vector(ctr.toCard(3).falseCopy, ctr.toCard(2))))
+      "get a reduced Board" in:
+        ctr.getReducedBrd(reducibleBoard) shouldBe a[(BoardInterface,Int,Int)]
+
+      val mem: Memento = Memento(true,card8,0,card8,ctr.getDisc,false)
       "execute save" in:
-        val mem: Memento = Memento(true,card8,0,card8,ctr.getDisc,false)
+        mem.toString() shouldBe a[String]
+        val json_mem = mem.toJson
         ctr.save(mem)
-        // "execute undo and redo" in:
-        // val d = Deck(ctr.getDeck.remove(1), "Deck")
-        // val di = DiscardPile(d.getCard.get.toString(), true)
-        // ctr.undo()
-        // ctr.redo()
+      // "execute undo" in:
+      //   ctr.undo()
+      "execute redo" in:
+        ctr.redo()
+      val mem2 = mem.copy(fromDeck = false)
+      val ctr2 = ctr
+      "execute undo2" in:
+        ctr2.currMemento.undoStack.push(mem)
+        ctr2.undo()
+        ctr2.currMemento.undoStack.push(mem2)
+        ctr2.undo()
+      "execute redo2" in:
+        ctr2.currMemento.redoStack.push(mem)
+        ctr2.redo()
+        ctr2.currMemento.undoStack.push(mem2)
+        ctr2.undo()
+      "switch Deck and disc" in:
+        val temp_deck = Deck(ctr.getDeckCards, ctr.turnUpperCard)
+        ctr2.save(mem2)
+        val another_gs = ctr2.switchDeckDisc(ctr2.getGameState, ctr2.getBrds(0), temp_deck, 0)
+      "move to next player turn" in:
+        ctr2.nextPlayer
+
       "draw from Deck and DiscardPile" in:
         ctr.draw()
       "remove a Card From Disc" in:
         ctr.remove()
+      "draw fromDisc" in:
+        ctr.drawFromDisc(0) shouldBe a[GameState]
       "remove a Card From Deck" in:
         ctr.remove(1)
       "be able to turn Deck UpperCard" in:
@@ -68,12 +103,26 @@ class ControllerTest extends AnyWordSpec with Matchers {
       //---------------------------- FILEIO -------------------------------//
       val boardPane = new Pane()
       val bv = new BoardView(ctr, boardPane)
-      "can load and save Json" in:
+      "can load and save Json + update" in:
         ctr.json_load(bv)
         ctr.json_save
-      "can load and save Xml" in:
+        bv.syncBoard(reducibleBoard)
+        bv.update("") shouldBe true
+
+        // ----------------------CardView---------------------------//
+        bv.manyCards.toString() shouldBe a[String]
+        bv.manyCards.map(cv => cv.uptCardView)
+        bv.BOARD_INIT()
+
+      "can load and save Xml + upt BoardPane" in:
         ctr.xml_load(bv)
         ctr.xml_save
+        bv.syncController
+        bv.uptBoardPane(0,0)
+
+      "can gui undo and redo" in:
+        ctr.guiUndo(reducibleBoard, ctr.getDeck, ctr.getDisc, bv)
+        ctr.guiRedo(reducibleBoard, ctr.getDeck, ctr.getDisc, bv)
     }
 
     "A GAMESTATE" should:

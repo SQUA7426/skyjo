@@ -48,8 +48,8 @@
       <value>9</value>
       <turned>true</turned>
     </card><card>
-      <value>4</value>
-      <turned>false</turned>
+      <value>0</value>
+      <turned>true</turned>
     </card></row><row><card>
       <value>7</value>
       <turned>false</turned>
@@ -60,8 +60,8 @@
       <value>0</value>
       <turned>false</turned>
     </card><card>
-      <value>6</value>
-      <turned>false</turned>
+      <value>0</value>
+      <turned>true</turned>
     </card></row>
       </brd>
     </board>

@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream
 import com.google.inject.{Guice, Inject, Injector}
 import de.htwg.se.skyjo.SkyjoModule
 import net.codingwell.scalaguice.InjectorExtensions.*
+import de.htwg.se.skyjo.util.utilComponent.{SupportCommand}
 
 class TuiTest extends AnyWordSpec with Matchers {
   "A Tui " when {
@@ -31,8 +32,11 @@ class TuiTest extends AnyWordSpec with Matchers {
 
     val tui = new Tui(ctr)
     "an Input Request is done, it" should:
-      "process an x-1-0-Input" in:
-        val simulatedInput = "x\n1\n0\n0\n0\nquit\n"
+      "handle an unsigned input" in:
+        val cmd = new SupportCommand(ctr, ctr.getBrds(0), ctr.getDeck, ctr.getDisc)
+        cmd.execute("last")
+      "process an 1-0-Input" in:
+        val simulatedInput = "1\n0\n0\n0\nquit\n"
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
         Console.withIn(in) {
           tui.startGame

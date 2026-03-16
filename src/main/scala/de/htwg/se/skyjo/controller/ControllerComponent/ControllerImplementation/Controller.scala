@@ -80,6 +80,7 @@ class Controller @Inject() (
 
   def save(mementoSave: Memento): Unit =
     getMementos(getPlIdx).save(mementoSave)
+    mem = mementoSave
 
   def undo(): Unit =
     getMementos(getPlIdx).undo(
