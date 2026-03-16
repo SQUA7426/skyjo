@@ -138,10 +138,6 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
   //   )
 
   // XML //
-  private def Node2Bool(ns: NodeSeq): Boolean =
-    ns.head.text.replace(" ", "").toBoolean
-  private def Node2Int(ns: NodeSeq): Int =
-    ns.head.text.replace(" ", "").toInt
 
   private def undoToXml: Node =
     if !undoStack.isEmpty then
@@ -171,7 +167,7 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
     val exists:Boolean = (stackXml \ "fromDeck").nonEmpty
     // println(f"exists: $exists")
     if exists then
-      val fromD: Boolean = Node2Bool(stackXml \ "fromDeck")
+      val fromD: Boolean = (stackXml \ "fromDeck").text.toBoolean
       val taken: CardInterface = ctrl.toCard((stackXml \ "takenCard" \ "value"), (stackXml \ "takenCard" \ "turned"))
       val idx =(stackXml \ "boardIndex").text.toInt
       val replaced: CardInterface = ctrl.toCard((stackXml \ "replacedCard" \ "value"), (stackXml \ "replacedCard" \ "turned"))
@@ -179,7 +175,7 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
       val discP = {ldisc \ "discpile"}.text
       val discT = {ldisc \ "turned"}.text.toBoolean
       val disc = DiscardPile(discP, discT)
-      val replacedT: Boolean = Node2Bool(stackXml \ "replacedCardTurned")
+      val replacedT: Boolean = (stackXml \ "replacedCardTurned").text.toBoolean
       Some(Memento(fromD, taken, idx, replaced, disc, replacedT))
     else
       None
