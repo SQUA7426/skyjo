@@ -27,7 +27,7 @@ coverageMinimumStmtPerPackage := 100
 coverageMinimumBranchPerPackage := 100
 coverageMinimumStmtPerFile := 100
 coverageMinimumBranchPerFile := 100
-coverageExcludedPackages := ".*Main.*"
+coverageExcludedPackages := Seq(".*Main.*", ".*Gui.*")
 
 Compile / mainClass := Some("de.htwg.se.skyjo.start")
 

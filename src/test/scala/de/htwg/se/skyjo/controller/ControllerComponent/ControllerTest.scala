@@ -103,12 +103,13 @@ class ControllerTest extends AnyWordSpec with Matchers {
       //---------------------------- FILEIO -------------------------------//
       val boardPane = new Pane()
       val bv = new BoardView(ctr, boardPane)
-      "can load and save Json + update" in:
+      "can load and save Json" in:
         ctr.json_load(bv)
         ctr.json_save
         bv.syncBoard(reducibleBoard)
         bv.update("") shouldBe true
 
+      "can update a BoardView" in:
         // ----------------------CardView---------------------------//
         bv.manyCards.toString() shouldBe a[String]
         bv.manyCards.map(cv => cv.uptCardView)

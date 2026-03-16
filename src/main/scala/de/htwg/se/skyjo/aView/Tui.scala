@@ -84,7 +84,7 @@ class Tui(ctr: ControllerInterface) extends Observer {
         s"SUM:  ${ctr.getBoard.flatten.map(c => c.getValue).fold(0)((x, y) => x + y).toString()}"
       )
     }
-    System.exit(0)
+    if finished then System.exit(0)
 
   override def update(choose: String): Boolean =
     turnOfPlayer(ctr.getPlIdx)

@@ -36,7 +36,7 @@ class TuiTest extends AnyWordSpec with Matchers {
         val cmd = new SupportCommand(ctr, ctr.getBrds(0), ctr.getDeck, ctr.getDisc)
         cmd.execute("last")
       "process an 1-0-Input" in:
-        val simulatedInput = "1\n0\n0\n0\nquit\n"
+        val simulatedInput = "x\n1\n0\n0\n0\nquit\n"
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
         Console.withIn(in) {
           tui.startGame
@@ -54,5 +54,7 @@ class TuiTest extends AnyWordSpec with Matchers {
         Console.withIn(in) {
           tui.startGame
         }
+      "execute the ending" in:
+        tui.ending
   }
 }
