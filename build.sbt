@@ -5,6 +5,15 @@ ThisBuild / scalaVersion := scala3Version
 ThisBuild / javacOptions += "--release=21"
 ThisBuild / scalacOptions ++= Seq("-release:21")
 
+ThisBuild / assemblyMergeStrategy := {
+  case PathList("META-INF", "substrate", "config", _*) => MergeStrategy.concat
+  case PathList("META-INF", "versions", "9", "module-info.class") => MergeStrategy.first
+  case "module-info.class" => MergeStrategy.discard
+  case x =>
+    val oldStrategy = (ThisBuild / assemblyMergeStrategy).value
+    oldStrategy(x)
+}
+
 libraryDependencies ++= Seq(
   "org.scalafx" %% "scalafx" % "21.0.0-R32",
   "org.scalactic" %% "scalactic" % "3.2.14",
@@ -17,7 +26,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-json" % "2.10.0"
 )
 
-coverageEnabled := true
+coverageEnabled := false
 coverageHighlighting := true
 coverageFailOnMinimum := false
 

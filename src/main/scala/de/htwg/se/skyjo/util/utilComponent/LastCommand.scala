@@ -8,7 +8,7 @@ class LastCommand extends CommandInterface:
 
   // override def execute(command: String): Option[(Board, Deck, DiscardPile)] = {
   override def execute(command: String): Boolean = {
-    println(s"The command: '${command}' arrived at the LastCommand")
+    // println(s"The command: '${command}' arrived at the LastCommand")
     // None
     false
   }

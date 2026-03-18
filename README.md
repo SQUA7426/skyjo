@@ -28,3 +28,8 @@ yay -S coursier sbt
 compiling code:     `sbt compile` \
 running code:       `sbt run` \
 runnung test:       `sbt test`
+
+### DOCKER
+
+build from docker:  `DOCKER_BUILDKIT=0 docker build --no-cache --network=host -t skyjo .` \
+running docker: `./docker-run.sh`
