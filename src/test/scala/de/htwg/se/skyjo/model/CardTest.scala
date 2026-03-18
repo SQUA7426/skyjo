@@ -3,60 +3,84 @@ package de.htwg.se.skyjo.model
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalactic.StringNormalizations._
-import de.htwg.se.skyjo.model.{Card, isCard, len, toCard}
-import de.htwg.se.skyjo.util.ConcreteMediator
+import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
+import de.htwg.se.skyjo.model.GameState
+import de.htwg.se.skyjo.model.modelInterfaceImplementation.{
+  Card,
+  Deck,
+  DiscardPile,
+  Board
+}
+import de.htwg.se.skyjo.util.*
+
+import com.google.inject.{Guice, Inject, Injector}
+import de.htwg.se.skyjo.SkyjoModule
+import net.codingwell.scalaguice.InjectorExtensions.*
 
 class CardTest extends AnyWordSpec with Matchers {
   "A Card" when {
-    val med = new ConcreteMediator()
+    val plCount = 1
+    val injector = Guice.createInjector(SkyjoModule(plCount))
 
-    //------------------------- INACCEPTABLE CARDS --------------------------//
+    val ctr = injector.getInstance(classOf[ControllerInterface])
+
+    ctr.setup()
+
+    // ------------------------- INACCEPTABLE CARDS --------------------------//
 
     "has the value -3" should:
       "not be acceptable as Card" in:
-        val lowerCardErr = the [IllegalArgumentException] thrownBy(Card(med,-3))
+        val lowerCardErr =
+          the[IllegalArgumentException] thrownBy (Card(-3))
     "has the value 20" should:
       "not be acceptable as Card" in:
-        val highCardErr = the [IllegalArgumentException] thrownBy(Card(med,20))
+        val highCardErr =
+          the[IllegalArgumentException] thrownBy (Card(20))
 
-    //--------------------------- ACCEPTABLE CARDS ----------------------------//
+    // --------------------------- ACCEPTABLE CARDS ----------------------------//
 
-    val betweenCard = Card(med,5)
+    val betweenCard = ctr.toCard(5)
     "has the value 11" should:
       val num: Int = 11
-      val card11: Card = Card(med,num)
+      val card11 = ctr.toCard(num).falseCopy
       "as string" in:
+        card11.turn
         card11.toString() shouldBe (f"${num}")
     "A Card with value 9" should:
       val num9: Int = 9
-      val card9: Card = Card(med,num9)
+      val card9 = Card(num9)
 
-      //--------------------------- CONVERTING ----------------------------//
+      // --------------------------- CONVERTING ----------------------------//
 
       "as string 9 be converted correctly" in:
+        card9.getValue shouldBe num9
         val n9 = "9"
-        toCard(med,n9) shouldBe Card(med,9)
+        ctr.toCard(n9) shouldBe card9
       "as int 9 be converted correctly" in:
-        toCard(med,num9) shouldBe Card(med,9)
+        ctr.toCard(num9) shouldBe card9
       "not be acceptable from boolean" in:
-        val highCardErr = the [IllegalArgumentException] thrownBy(toCard(med,true))
+        val highCardErr = the[IllegalArgumentException] thrownBy (Card(99))
 
-      //--------------------------- CARDCOPY ----------------------------------//
+      // --------------------------- CARDCOPY ----------------------------------//
 
       "return # if a False Copy of it is created" in:
-        card9.falseCopy().toString() should be ("#")
+        card9.falseCopy.toString() should be("#")
       "return the number if a True Copy of it is created" in:
-        card9.trueCopy() shouldBe Card(med,9, true)
+        card9.trueCopy shouldBe ctr.toCard(9)
 
-      //------------------------- OPERATORS ---------------------------//
 
-      "it's digit length" in:
-        len(card9.value) should (be (1) or be (2))
+      // -------------------------- FileIO ------------------------------------//
+
+      "convert a Card into and from Json" in:
+        val json_c9 = card9.toJson
+        val newCard = betweenCard.fromJson(json_c9)
+      "convert a Card into and from Xml" in:
+        val xml_c9 = card9.toXml
+        val newCard = betweenCard.fromXml(xml_c9)
+
+      // ------------------------- OPERATORS ---------------------------//
+
       "is from type: Card" in:
-        isCard(card9) shouldBe true
-    // "A Type T" should:
-    //   val liste = List(23)
-    //   "is not from type: Card" in:
-    //     isCard(liste) shouldBe false
+        ctr.isCard(card9) shouldBe true
   }
 }

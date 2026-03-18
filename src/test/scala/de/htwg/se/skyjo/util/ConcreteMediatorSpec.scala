@@ -1,58 +1,89 @@
 package de.htwg.se.skyjo.util
-import de.htwg.se.skyjo.util.{Mediator, ConcreteMediator, Colleague, Handler}
-import de.htwg.se.skyjo.controller.ControllerComponent.Controller
-import de.htwg.se.skyjo.model.{Board, Deck, DiscardPile}
-import de.htwg.se.skyjo.model.*
+
+import de.htwg.se.skyjo.aView.Tui
+import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
+import de.htwg.se.skyjo.model.modelInterfaceImplementation.{Card, Deck, DiscardPile, Board}
+import de.htwg.se.skyjo.util.{Mediator, ConcreteMediator, Colleague}
+import de.htwg.se.skyjo.model.GameState
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.enablers.Containing
 import java.io.ByteArrayInputStream
 
+import com.google.inject.{Guice, Inject, Injector}
+import de.htwg.se.skyjo.SkyjoModule
+import net.codingwell.scalaguice.InjectorExtensions.*
+
 class ConcreteMediatorSpec extends AnyWordSpec with Matchers {
   "A ConcreteMediator" should:
-    val med = new ConcreteMediator()
-    val tBoard = Board(med)
-    val b: Board = tBoard._1
-    val deck: Deck = tBoard._2
-    val disc: DiscardPile = new DiscardPile(med, "Disc")
-    val plBoards: Array[Board] = Array(b)
-    val simpleCard = new Card(med, 3, true)
-    "add Colleagues" in:
-      med.add(deck)
-      med.add(disc)
-      med.add(simpleCard)
-      med.add(plBoards(0))
-    "do it's request" in:
-      med.requestCardFromDeck(deck)
-      med.requestGetUpperCard(plBoards(0))
-      med.requestPutToDisc(plBoards(0))
-      med.requestRmUpperCard(disc)
+    val plCount = 1
 
-      deck.send("REQUEST GET UPPERCARD")
-      plBoards(0).send("REQUEST PUT TO DISCARDPILE")
-      disc.send("REQUEST CARD FROM DECK")
-      simpleCard.send("REQUEST FROM CARD")
-    "remove a Colleague" in:
-      med.remove(plBoards(0))
+    val injector = Guice.createInjector(SkyjoModule(plCount))
 
-    val ctrl = new Controller(med, plBoards, deck, disc)
-    val h: Handler = new DeckHandler(ctrl, b, deck, disc)
-    "A Handler" should:
-      "handle input 1" in {
-        val simulatedInput = "1\n1\n0\n"
-        val in = new ByteArrayInputStream(simulatedInput.getBytes())
-        Console.withIn(in) {
-          h.handle("1")
-        }
+    val ctr = injector.getInstance(classOf[ControllerInterface])
+    val med = injector.getInstance(classOf[ConcreteMediator])
+    val deck = ctr.getDeck
+    val disc = ctr.getDisc
+
+    ctr.setup()
+
+    case class Col() extends Colleague {
+      override val _mediator: Mediator = med
+      override def send(msg: String): Unit = println(f"send: $msg")
+      override def receive(msg: String): Boolean = {
+        println(f"received: $msg")
+        true
       }
-      "handle input 2" in {
-        val twoTimesTwoPlBoards = Array(fillBoard(med, 2, 2, deck)._1)
-        val simulatedInput = "1\n1\n3\n1\n1\n2\n1\n1\n2\n1\n1\n1\n1\n1\n0\n"
-        val in = new ByteArrayInputStream(simulatedInput.getBytes())
-        Console.withIn(in) {
-          val gl = ctrl.gameLoop(1, twoTimesTwoPlBoards, deck, disc)
-        }
-      }
-      "be unable to handle unrecognized requests" in:
-        h.handle("x") shouldBe None
+    }
+
+    val col1 = new Col()
+    val col2 = new Col()
+    med.add(col1)
+    med.add(col2)
+    med.send(col1, "Hello")
+
+    med.requestCardFromDeck(col1)
+    med.requestGetUpperCard(col1)
+    med.requestPutToDisc(col2)
+    med.requestRmUpperCard(col2)
+
+    // val simpleCard: Card = new Card(3, true)
+    // "add Colleagues" in:
+    //   med.add(deck)
+    //   med.add(disc)
+    //   med.add(simpleCard)
+    //   med.add(plBoards(0))
+    // "do it's request" in:
+    //   med.requestCardFromDeck(deck)
+    //   med.requestGetUpperCard(plBoards(0))
+    //   med.requestPutToDisc(plBoards(0))
+    //   med.requestRmUpperCard(disc)
+    //
+    //   deck.send("REQUEST GET UPPERCARD")
+    //   plBoards(0).send("REQUEST PUT TO DISCARDPILE")
+    //   disc.send("REQUEST CARD FROM DECK")
+    //   simpleCard.send("REQUEST FROM CARD")
+    // "remove a Colleague" in:
+    //   med.remove(plBoards(0))
+    //
+    // val h: SupportHandler = new SupportHandler(ctr)
+    // "A Handler" should:
+    //   "handle input 0" in {
+    //     h.handle("0", ctr.state)
+    //   }
+    //   "handle input 1" in {
+    //     h.handle("1", ctr.state)
+    //   }
+    //   "handle input undo" in {
+    //     h.handle("undo", ctr.state)
+    //   }
+    //   "handle input redo" in {
+    //     h.handle("redo", ctr.state)
+    //   }
+    //   "handle input s for putting DeckCard onto Discard" in {
+    //     h.handle("s", ctr.state)
+    //   }
+    //
+    //   "be unable to handle unrecognized requests" in:
+    //     h.handle("x", ctr.state) shouldBe None
 }

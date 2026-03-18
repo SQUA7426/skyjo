@@ -1,6 +1,6 @@
 package de.htwg.se.skyjo.util
 
-import de.htwg.se.skyjo.util.Mediator
+import de.htwg.se.skyjo.util.*
 
 trait Colleague {
   val _mediator: Mediator

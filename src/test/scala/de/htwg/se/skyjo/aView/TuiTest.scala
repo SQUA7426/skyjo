@@ -1,33 +1,63 @@
 package de.htwg.se.skyjo.aView
 
 import de.htwg.se.skyjo.aView.Tui
-import de.htwg.se.skyjo.model.{Board, Deck, DiscardPile, Card,fillBoard}
-import de.htwg.se.skyjo.controller.ControllerComponent.Controller
-import de.htwg.se.skyjo.model.fillBoard
-import de.htwg.se.skyjo.util.ConcreteMediator
+import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
+import de.htwg.se.skyjo.util.*
+import de.htwg.se.skyjo.model.{GameState}
+import de.htwg.se.skyjo.model.modelInterfaceImplementation.{
+  Deck,
+  Board,
+  Card,
+  DiscardPile
+}
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalactic.StringNormalizations._
 import java.io.ByteArrayInputStream
 
+import com.google.inject.{Guice, Inject, Injector}
+import de.htwg.se.skyjo.SkyjoModule
+import net.codingwell.scalaguice.InjectorExtensions.*
+import de.htwg.se.skyjo.util.utilComponent.{SupportCommand, LastHandler}
+
 class TuiTest extends AnyWordSpec with Matchers {
-  "A Tui " when:
-    val med = new ConcreteMediator
-    val bTemp = Board(med)
-    val b = bTemp._1
-    val brdArr = Array(b)
-    val d = bTemp._2
-    val disc = DiscardPile(med,"-1")
-    val ctrl = new Controller(med,brdArr,d,disc)
-    val tui = Tui(ctrl)
+  "A Tui " when {
+    val plCount = 1
+    val injector = Guice.createInjector(SkyjoModule(plCount))
+
+    val ctr = injector.getInstance(classOf[ControllerInterface])
+
+    ctr.setup()
+
+    val tui = new Tui(ctr)
     "an Input Request is done, it" should:
-      "do an Input Request to the Board" in:
-        tui.inputRequest(b, disc.toString())
-      "do an Input Request to the Deck" in:
-        tui.inputRequestDeck(d.turnUpperCard().toString())
-      "do print a Player when a turn begins" in:
-        tui.turnOfPlayer(3)
-      "announce if someone finished" in:
-        tui.finishedConf()
+      "execute an unsigned input" in:
+        val cmd = new SupportCommand(ctr, ctr.getBrds(0), ctr.getDeck, ctr.getDisc)
+        cmd.execute("last")
+      "handle an unsigned input" in:
+        val lh = new LastHandler(ctr).handle("last",0)
+
+      "process an 1-0-Input" in:
+        val simulatedInput = "x\n1\n0\n0\n0\nquit\n"
+        val in = new ByteArrayInputStream(simulatedInput.getBytes())
+        Console.withIn(in) {
+          tui.startGame
+        }
+        
+      "process an undo-redo-help-Input" in:
+        val simulatedInput = "1\n1\n0\n0\nundo\nredo\nhelp\nquit\n"
+        val in = new ByteArrayInputStream(simulatedInput.getBytes())
+        Console.withIn(in) {
+          tui.startGame
+        }
+      "process an Switch-Input" in:
+        val simulatedInput = "s\n1\nquit\n"
+        val in = new ByteArrayInputStream(simulatedInput.getBytes())
+        Console.withIn(in) {
+          tui.startGame
+        }
+      "execute the ending" in:
+        tui.ending
+  }
 }

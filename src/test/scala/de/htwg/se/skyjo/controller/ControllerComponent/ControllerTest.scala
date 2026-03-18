@@ -1,149 +1,161 @@
 package de.htwg.se.skyjo.controller.ControllerComponent
 
-import de.htwg.se.skyjo.model.{
-  Board,
-  Card,
-  Deck,
-  DiscardPile,
-  fillBoard,
-  fullDeck,
-  getBoardCard
-}
-import de.htwg.se.skyjo.aView.Tui
+import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.*
+import de.htwg.se.skyjo.model.modelInterfaceImplementation.{Deck, DiscardPile, Board, Card}
+import de.htwg.se.skyjo.util.{Mediator, Memento, MoveCaretaker}
+import de.htwg.se.skyjo.model.{GameState, DeckInterface, CardInterface, BoardInterface, DiscardPileInterface}
+import de.htwg.se.skyjo.fileIoComponent.fileIoJsonImpl.JsonImpl
+import de.htwg.se.skyjo.fileIoComponent.fileIoXmlImpl.XmlImpl
 
 import scala.io.StdIn.{readInt, readLine}
 import scala.util.Random
 import java.io.ByteArrayInputStream
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+
+import scalafx.scene.layout.Pane
+import de.htwg.se.skyjo.aView.Gui.{BoardView, fontname}
+
+import com.google.inject.{Guice, Inject, Injector}
+import de.htwg.se.skyjo.SkyjoModule
+import net.codingwell.scalaguice.InjectorExtensions.*
 import de.htwg.se.skyjo.util.ConcreteMediator
 
 class ControllerTest extends AnyWordSpec with Matchers {
   "A Controller" when:
-    val med = new ConcreteMediator
-    val d = Deck(med)
-    val b: Board = new Board(med,2,2,fillBoard(med,2,2,d)._1.brd)
-    val disc = DiscardPile(med, "Disc")
-    val brdArr = Array(b)
-    val ctrl = Controller(med, brdArr, d, disc)
-    "it is working, it" should:
+    val plCount = 1
 
-      //--------------------------- REDUCE BOARD ----------------------------//
+    val injector = Guice.createInjector(SkyjoModule(plCount))
 
-      "reduce a Board Column right" in:
-        val updatedBoard = Board(
-          med,
-          3,
-          2,
-          Vector(
-            Vector(Card(med, 3), Card(med, 1), Card(med, 2).trueCopy()),
-            Vector(Card(med, 4), Card(med, 6), Card(med, 2).trueCopy())
-          )
-        )
-        ctrl.getReducedBrd(updatedBoard) shouldBe a[Board]
-      "reduce a Board Row right" in:
-        val updatedBoard = Board(
-          med,
-          3,
-          2,
-          Vector(
-            Vector(Card(med, 3), Card(med, 1), Card(med, 5)),
-            Vector(
-              Card(med, 2).trueCopy(),
-              Card(med, 2).trueCopy(),
-              Card(med, 2).trueCopy()
-            )
-          )
-        )
-        ctrl.getReducedBrd(updatedBoard) shouldBe a[Board]
-        ctrl.getReducedBrd(updatedBoard) shouldBe a[Board]
+    val ctr = injector.getInstance(classOf[ControllerInterface])
 
-      //--------------------------- TAKE FROM DISC ----------------------------//
+    ctr.setup()
 
-      "be unable to take a Card from the DiscardPile, when there's no Card" in:
-        val simulatedInput = "4\n0\n1\n1\n1\n1\n1\n"
-        val in = new ByteArrayInputStream(simulatedInput.getBytes())
-        Console.withIn(in) {
-          val (bTakeDisc, dTakeDisc, discTakeDisc, end) =
-            ctrl.firstRound(1, brdArr, d, disc)
-          dTakeDisc shouldBe a[Deck]
-          discTakeDisc shouldBe a[DiscardPile]
-        }
-      val bTemp: Board = fillBoard(med,2, 1, d)._1
-      val disc2 = DiscardPile(med,"4")
-      "be unable to take a Card from the DiscardPile" in:
-        val simulatedInput = "40\n0\n"
-        val in = new ByteArrayInputStream(simulatedInput.getBytes())
+    val gs:GameState = ctr.getGameState
+    val card8 = ctr.toCard(8)
+    "it is working, it" should {
+      "covert toCard" in:
+        ctr.isCard(gs) shouldBe false
+        val invCard = ctr.toCard(100)
+        val convDeck = ctr.toCard(ctr.getDeck)
+        val convDisc = ctr.toCard(ctr.getDisc)
+        val convNone = ctr.toCard(None)
+      "get Mediator, GameState, Deck and Discard-Card" in:
+        val gs_cp = ctr.copy(ctr.getMementos,ctr.getBrds, ctr.getDeck,ctr.getDisc, 0,ctr.currState)
+        ctr.getMediator shouldBe a[Mediator]
+        ctr.getGameState shouldBe a[GameState]
+        ctr.getDeck shouldBe a[DeckInterface]
+        ctr.getDisc shouldBe a[DiscardPileInterface]
+        ctr.getDiscCard()
+      "assert a new GameState" in:
+        ctr.assertGameState(gs)
+      "be able to fill a Board" in:
+        val (afterBoard, afterDeck) = ctr.fillBoard(4, 3, ctr.getDeck)
+        afterBoard shouldBe a[BoardInterface]
+        afterDeck shouldBe a[DeckInterface]
 
-        Console.withIn(in) {
-          val (bTakeDisc, dTakeDisc, discTakeDisc) =
-            ctrl.takeFromDisc(bTemp, d, disc2).getOrElse((bTemp, d, disc2))
-          dTakeDisc shouldBe a[Deck]
-          discTakeDisc shouldBe a[DiscardPile]
-        }
+      val reducibleBoard = Board(2,2, Vector(Vector(ctr.toCard(1).falseCopy, ctr.toCard(2)), Vector(ctr.toCard(3).falseCopy, ctr.toCard(2))))
+      "get a reduced Board" in:
+        ctr.getReducedBrd(reducibleBoard) shouldBe a[(BoardInterface,Int,Int)]
 
-      "be able to take a Card from the DiscardPile" in:
-        val simulatedInput = "3\n0\n"
-        val in = new ByteArrayInputStream(simulatedInput.getBytes())
+      val mem: Memento = Memento(true,card8,0,card8,ctr.getDisc,false)
+      "execute save" in:
+        mem.toString() shouldBe a[String]
+        val json_mem = mem.toJson
+        ctr.save(mem)
+      // "execute undo" in:
+      //   ctr.undo()
+      "execute redo" in:
+        ctr.redo()
+      val mem2 = mem.copy(fromDeck = false)
+      val ctr2 = ctr
+      "execute undo2" in:
+        ctr2.currMemento.undoStack.push(mem)
+        ctr2.undo()
+        ctr2.currMemento.undoStack.push(mem2)
+        ctr2.undo()
+      "execute redo2" in:
+        ctr2.currMemento.redoStack.push(mem)
+        ctr2.redo()
+        ctr2.currMemento.undoStack.push(mem2)
+        ctr2.undo()
+      "switch Deck and disc" in:
+        val temp_deck = Deck(ctr.getDeckCards, ctr.turnUpperCard)
+        ctr2.save(mem2)
+        val another_gs = ctr2.switchDeckDisc(ctr2.getGameState, ctr2.getBrds(0), temp_deck, 0)
+        val ctr3 = Controller(ctr2.getGameState.copy(deck = temp_deck ),0, injector.getInstance(classOf[ConcreteMediator]))
+        ctr3.draw()
+      "move to next player turn" in:
+        ctr2.nextPlayer
 
-        Console.withIn(in) {
-          val (bTakeDisc, dTakeDisc, discTakeDisc) =
-            ctrl.takeFromDisc(bTemp, d, disc2).getOrElse((bTemp, d, disc2))
-          // bTakeDisc shouldBe a[Board]
-          // dTakeDisc shouldBe a[Deck]
-          // discTakeDisc shouldBe a[DiscardPile]
-        }
+      "draw from Deck and DiscardPile" in:
+        ctr.draw()
+      "remove a Card From Disc" in:
+        ctr.remove()
+      "draw fromDisc" in:
+        ctr.drawFromDisc(0) shouldBe a[GameState]
+      "remove a Card From Deck" in:
+        ctr.remove(1)
+      "be able to turn Deck UpperCard" in:
+        ctr.turnUpperCard shouldBe a[String]
 
-      //--------------------------- TAKE FROM DECK ----------------------------//
+      "execute a fullDeck()" in:
+        val fullDeck = ctr.fullDeck()
+        fullDeck.length shouldBe 150
 
-      "be able to take a Card from the Deck Option 1" in:
-        val simulatedInput = "1\n0\n"
-        val in = new ByteArrayInputStream(simulatedInput.getBytes())
-        Console.withIn(in) {
-          ctrl.takeFromDeck(b, d, disc).getOrElse(b,d,disc)
-        }
-      "be able to take a Card from the Deck Option 2" in:
-        val anotherSimulatedInput = "2\n0\n"
-        val in2 = new ByteArrayInputStream(anotherSimulatedInput.getBytes())
-        Console.withIn(in2) {
-          ctrl.takeFromDeck(b, d, disc).getOrElse(b,d,disc)
-        }
+      //---------------------------- FILEIO -------------------------------//
+      val boardPane = new Pane()
+      val bv = new BoardView(ctr, boardPane)
+      "can load and save Json" in:
+        ctr.json_load(bv)
+        ctr.json_save
+        bv.syncBoard(reducibleBoard)
+        bv.update("") shouldBe true
 
-      //--------------------------- ROUNDS -----------------------------------//
+      "can update a BoardView" in:
+        // ----------------------CardView---------------------------//
+        bv.manyCards.toString() shouldBe a[String]
+        bv.manyCards.map(cv => cv.uptCardView)
+        bv.BOARD_INIT()
 
-      val b2 = fillBoard(med, 2, 1, d)._1
-      val plBoards: Array[Board] = Array(b2)
-      "manage the first round" in:
-        val simulatedInput = "1\n1\n0\n"
-        val in = new ByteArrayInputStream(simulatedInput.getBytes())
+      "can load and save Xml + upt BoardPane" in:
+        ctr.xml_load(bv)
+        ctr.xml_save
+        // val tmp_ctr = injector.getInstance(classOf[ControllerInterface])
+        // tmp_ctr.setup()
+        // tmp_ctr.xml_save
+        // tmp_ctr.xml_load(bv)
+        // ctr.xml_save
+        // ctr.xml_load(bv)
+        bv.syncController
+        bv.uptBoardPane(0,0)
 
-        Console.withIn(in) {
-          val (brdAfterFirst, deckAfterFirst, discAfterFist, firstTurnBool) =
-            ctrl.firstRound(1, plBoards, d, disc)
-          firstTurnBool shouldBe false
-        }
-      "manage next rounds" in:
-        val simulatedInput = "2\n1\n1\n0\n"
-        val in = new ByteArrayInputStream(simulatedInput.getBytes())
-        Console.withIn(in) {
-          ctrl.nextRounds(1, plBoards, d, disc)._4 shouldBe false
-        }
+      "can gui undo and redo" in:
+        ctr.guiUndo(reducibleBoard, ctr.getDeck, ctr.getDisc, bv)
+        ctr.guiRedo(reducibleBoard, ctr.getDeck, ctr.getDisc, bv)
+    }
 
-      //--------------------------- GAME LOOPS ----------------------------//
+    "A GAMESTATE" should:
+      "be parsed state toString()" in:
+        gs.toString() shouldBe a[String]
+      "convert into and from Xml" in:
+        val xml_gs = gs.toXml
+        val new_gs = gs.fromXml(xml_gs)
+      "can Inject FileIO" in:
+        val jsonIO = injector.instance[JsonImpl]
+        val xmlIO = injector.instance[XmlImpl]
 
-      "manage a gameLoop" in:
-        val simulatedInput = "1\n1\n0\nquit\n"
-        val in = new ByteArrayInputStream(simulatedInput.getBytes())
-        Console.withIn(in) {
-          val gl = ctrl.gameLoop(1, plBoards, d, disc)
-          gl._3 shouldBe a[DiscardPile]
-        }
-      "manage some gameLoop" in:
-        val twoTimesTwoPlBoards = Array(fillBoard(med,2,2,d)._1)
-        val simulatedInput = "1\n1\n3\n1\n1\n2\n1\n1\n1\n1\n1\n0\n"
-        val in = new ByteArrayInputStream(simulatedInput.getBytes())
-        Console.withIn(in) {
-          val gl = ctrl.gameLoop(1, twoTimesTwoPlBoards, d, disc)
-          gl._3 shouldBe a[DiscardPile]
-        }
+    "A State " should:
+      val cs = gs.currentState
+      "be parsed into String" in:
+        cs.getStr shouldBe a[String]
+      "iterate trough States" in:
+        val mid_state = cs.nextState()
+        val end_state = mid_state.nextState()
+      "reset()" in:
+        val r = cs.reset()
+      "convert into (xml, json) and from (xml)" in:
+        val xml_cs = cs.toXml
+        val json_cs = cs.toJson
+        val new_cs = cs.fromXml(xml_cs)
 }

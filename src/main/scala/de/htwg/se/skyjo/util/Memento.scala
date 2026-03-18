@@ -1,96 +1,102 @@
 package de.htwg.se.skyjo.util
 
-import de.htwg.se.skyjo.model.{Board, Card, Deck, DiscardPile, fullDeck}
-import scala.collection.mutable.Stack
+import de.htwg.se.skyjo.model.{BoardInterface, CardInterface, DiscardPileInterface, DeckInterface, GameState}
+import de.htwg.se.skyjo.model.modelInterfaceImplementation.{DiscardPile, Deck}
 import scala.collection.mutable.Stack
 import de.htwg.se.skyjo.util.Mediator
+import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
+import scala.xml.{Node, NodeSeq}
+
+import play.api.libs.json.Format.GenericFormat
+import play.api.libs.json.OFormat.*
+
+import play.api.libs.json.{Json, JsObject, Reads}
+import play.api.libs.json.Json.JsValueWrapper
 
 case class Memento(
-    fromDeck: Boolean, // true = Deck, false = DiscardPile
-    takenCard: Card,
+    fromDeck: Boolean,
+    takenCard: CardInterface,
     boardIndex: Int,
-    replacedCard: Card,
-    var lastDisc: DiscardPile,
+    replacedCard: CardInterface,
+    var lastDisc: DiscardPileInterface,
     replacedCardTurned: Boolean
 ) {
   override def toString(): String = {
     val s = (s"Card is Taken From Deck: ${fromDeck}\n")
     val s1 =
-      s + (s"Taken Deck Card: ${takenCard}; turned: ${takenCard.isTurned()}\n")
+      s + (s"Taken Deck Card: ${takenCard.trueCopy}; turned: ${takenCard.isTurned}\n")
     val s2 = s1 + (s"last Board Idx: ${boardIndex}\n")
     val s3 =
-      s2 + (s"replacedCard: ${replacedCard.toString()}; turned: ${replacedCard.isTurned()}\n")
+      s2 + (s"replacedCard: ${replacedCard.getValue.toString()}; turned: ${replacedCard.isTurned}\n")
     val s4 = s3 + (s"lastDisc: ${lastDisc}")
     s4
   }
+
+  def toJson: JsObject = Json.obj(
+    "fromDeck" -> fromDeck,
+    "takenCard" -> takenCard.toJson,
+    "boardIndex" -> boardIndex,
+    "replacedCard" -> replacedCard.toJson,
+    "lastDisc" -> lastDisc.toJson,
+    "replacedCardTurned" -> replacedCardTurned
+    )
 }
 
-class MoveCaretaker(val med: Mediator) {
+class MoveCaretaker(val ctrl: ControllerInterface) {
   val undoStack = Stack[Memento]()
   val redoStack = Stack[Memento]()
-  var updtDeck: Deck = Deck(med)
-  var memAct: Boolean = false
 
   def save(m: Memento): Unit = {
-    println("clearing undoStack...")
-    undoStack.clear()
-    println("saving...")
+    // println("clearing undoStack...")
+    // undoStack.clear()
+    if !undoStack.isEmpty then undoStack.pop()
+    // println("saving...")
     undoStack.push(m)
-    println(undoStack)
+    // println(undoStack)
   }
 
   def undo(
       memento: Memento,
-      deck: Deck,
-      board: Board,
-      disc: DiscardPile
-  ): Option[(Board, Deck, DiscardPile)] = {
-    val newBoard: Board =
+      deck: DeckInterface,
+      board: BoardInterface,
+      disc: DiscardPileInterface
+  ): Option[(BoardInterface, DeckInterface, DiscardPileInterface)] = {
+    val newBoard: BoardInterface =
       board.swapFromMem(memento.replacedCard, memento.boardIndex)
     if (memento.fromDeck) {
-      val tempV: Vector[Card] = memento.takenCard +: deck.deck
-      updtDeck = new Deck(med, tempV, memento.takenCard.toString())
-      // val tmpDisc = new DiscardPile(med, memento.replacedCard.toString())
-      // val tmpMem = Memento(memento.fromDeck, memento.replacedCard, memento)
-      redoStack.push(memento)
-      setTrue()
-      undoStack.clear()
-      undoStack.push(memento)
+      val tempV: Vector[CardInterface] = memento.takenCard +: deck.getDeckCards
+      val updtDeck = new Deck(tempV, memento.takenCard.toString())
 
-      // println("undoStack")
-      // println(undoStack)
-      // println("redoStack")
-      // println(redoStack)
-      Some(newBoard, deck, memento.lastDisc)
-    } else { // DiscardPile
-      val disc2: DiscardPile =
-        disc.putToDiscardPile(memento.takenCard.toString())._1
-      updtDeck = disc.putToDiscardPile(memento.takenCard.toString())._2
       redoStack.push(memento)
-      setTrue()
-      undoStack.clear()
+      if !undoStack.isEmpty then undoStack.pop()
+      // println(redoStack)
+
+      Some(newBoard, deck, memento.lastDisc)
+    } else {
+      val disc2: DiscardPileInterface =
+        disc.putToDiscardPile(memento.takenCard.toString(),ctrl)._1
+      val updtDeck = disc.putToDiscardPile(memento.takenCard.toString(),ctrl)._2
+      redoStack.push(memento)
+      if !undoStack.isEmpty then undoStack.pop()
       undoStack.push(memento)
-      // println("undoStack")
-      // println(undoStack)
-      // println("redoStack")
       // println(redoStack)
       Some(newBoard, updtDeck, disc2)
     }
   }
   def redo(
       memento: Memento,
-      deck: Deck,
-      board: Board,
-      disc: DiscardPile
-  ): Option[(Board, Deck, DiscardPile)] = {
-    val newBoard: Board = board.swapFromMem(
+      deck: DeckInterface,
+      board: BoardInterface,
+      disc: DiscardPileInterface
+  ): Option[(BoardInterface, DeckInterface, DiscardPileInterface)] = {
+    val newBoard: BoardInterface = board.swapFromMem(
       if memento.fromDeck then memento.takenCard else memento.replacedCard,
       memento.boardIndex
     )
     if (memento.fromDeck) {
-      updtDeck = deck
+      val updtDeck = deck
       val (uptTaken, uptReplaced) = (memento.replacedCard, memento.takenCard)
-      val tmpDisc = new DiscardPile(med, memento.replacedCard.toString())
+      val tmpDisc = new DiscardPile(memento.replacedCard.toString())
       val tmpMemento = Memento(
         true,
         uptTaken,
@@ -100,13 +106,14 @@ class MoveCaretaker(val med: Mediator) {
         memento.lastDisc.isTurned
       )
       undoStack.push(tmpMemento)
-      setTrue()
-      redoStack.clear()
+      if !redoStack.isEmpty then redoStack.pop()
+      redoStack.push(tmpMemento)
+      // println(undoStack)
       Some((newBoard, updtDeck, tmpDisc))
-    } else { // FROM DISCARDPILE
-      val disc2: DiscardPile =
-        disc.putToDiscardPile(memento.replacedCard.toString())._1
-      updtDeck = deck
+    } else {
+      val disc2: DiscardPileInterface =
+        disc.putToDiscardPile(memento.replacedCard.toString(),ctrl)._1
+      val updtDeck = deck
       val (uptTaken, uptReplaced) = (memento.replacedCard, memento.takenCard)
       val tmpMemento = Memento(
         false,
@@ -117,13 +124,86 @@ class MoveCaretaker(val med: Mediator) {
         memento.lastDisc.isTurned
       )
       undoStack.push(tmpMemento)
-      setTrue()
-      redoStack.clear()
+      if !redoStack.isEmpty then redoStack.pop()
+      redoStack.push(tmpMemento)
+      // println(undoStack)
       Some((newBoard, updtDeck, disc2))
     }
   }
-  def setTrue(): Unit = memAct = true
-  def setFalse(): Unit = memAct = false
-  def checkMemAct(): Boolean = memAct
-  def getNewDeck(): Deck = updtDeck
+
+  // FILEIO //
+  // def toJson: JsObject = Json.obj(
+  //   "undoStack" -> Json.toJson(undoStack.toSeq.map(_.toJson)),
+  //   "redoStack" -> Json.toJson(redoStack.toSeq.map(_.toJson))
+  //   )
+
+  // XML //
+
+  private def undoToXml: Node =
+    if !undoStack.isEmpty then
+      <undostack>
+        <fromdeck>{undoStack(0).fromDeck}</fromdeck>
+        <takenCard>{undoStack(0).takenCard.toXml}</takenCard>
+        <boardIndex>{undoStack(0).boardIndex}</boardIndex>
+        <replacedCard>{undoStack(0).replacedCard.toXml}</replacedCard>
+        <lastDisc>{undoStack(0).lastDisc.toXml}</lastDisc>
+        <replacedCardTurned>{undoStack(0).replacedCardTurned}</replacedCardTurned>
+      </undostack>
+    else <undostack></undostack>
+
+  private def redoToXml: Node =
+    if !redoStack.isEmpty then
+      <redostack>
+        <fromdeck>{redoStack(0).fromDeck}</fromdeck>
+        <takenCard>{redoStack(0).takenCard.toXml}</takenCard>
+        <boardIndex>{redoStack(0).boardIndex}</boardIndex>
+        <replacedCard>{redoStack(0).replacedCard.toXml}</replacedCard>
+        <lastDisc>{redoStack(0).lastDisc.toXml}</lastDisc>
+        <replacedCardTurned>{redoStack(0).replacedCardTurned}</replacedCardTurned>
+      </redostack>
+    else <redostack></redostack>
+
+  private def xmlToMem(stackXml: NodeSeq): Option[Memento] = {
+    val exists:Boolean = (stackXml \ "fromDeck").nonEmpty
+    // println(f"exists: $exists")
+    if exists then
+      val fromD: Boolean = (stackXml \ "fromDeck").text.toBoolean
+      val taken: CardInterface = ctrl.toCard((stackXml \ "takenCard" \ "value"), (stackXml \ "takenCard" \ "turned"))
+      val idx =(stackXml \ "boardIndex").text.toInt
+      val replaced: CardInterface = ctrl.toCard((stackXml \ "replacedCard" \ "value"), (stackXml \ "replacedCard" \ "turned"))
+      val ldisc = {stackXml \ "lastDisc"}
+      val discP = {ldisc \ "discpile"}.text
+      val discT = {ldisc \ "turned"}.text.toBoolean
+      val disc = DiscardPile(discP, discT)
+      val replacedT: Boolean = (stackXml \ "replacedCardTurned").text.toBoolean
+      Some(Memento(fromD, taken, idx, replaced, disc, replacedT))
+    else
+      None
+  }
+
+  def toXml: Node =
+    <movecaretaker>
+      {undoToXml}
+      {redoToXml}
+    </movecaretaker>
+
+  def fromXml(d: Node): MoveCaretaker =
+    val mcXml = {d \ "movecaretaker"}.head
+    // println(f"mc: ${mcXml}")
+    val undoXml = {mcXml \ "undostack"}.head
+    // println(f"undo: ${undoXml}")
+    val redoXml = {mcXml \ "redostack"}.head
+    // println(f"redo: ${redoXml}")
+
+    val tmpMem: Memento = Memento(false, ctrl.toCard(0),0, ctrl.toCard(0),DiscardPile("Disc",false),false)
+    val u: Memento = xmlToMem(undoXml).getOrElse(tmpMem)
+    // println("converted xml to undo Memeto")
+    // println(f"u:\n${u.toString()}")
+    val r: Memento = xmlToMem(redoXml).getOrElse(tmpMem)
+    // println("converted xml to redo Memeto")
+    // println(f"r:\n${r.toString()}")
+    val tempMC = this
+    tempMC.save(if u == tmpMem then r else u)
+    if r != tmpMem then tempMC.redoStack.push(r)
+    tempMC
 }
