@@ -26,7 +26,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-json" % "2.10.0"
 )
 
-coverageEnabled := true
+coverageEnabled := false
 coverageHighlighting := true
 coverageFailOnMinimum := false
 
