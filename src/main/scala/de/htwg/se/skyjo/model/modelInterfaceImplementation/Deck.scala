@@ -43,7 +43,7 @@ case class Deck(
   override def turnUpperCard: String =
     upperCard.compareTo("Deck") match {
       case 0 => deck.last.toString()
-      case _ => "Deck"
+      case _ => upperCard
     }
 
   override def remove(amount: Int): Vector[CardInterface] =

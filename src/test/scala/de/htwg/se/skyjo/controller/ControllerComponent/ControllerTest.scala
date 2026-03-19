@@ -93,7 +93,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
       "remove a Card From Disc" in:
         ctr.remove()
       "draw fromDisc" in:
-        ctr.drawFromDisc(0) shouldBe a[GameState]
+        ctr.drawFromDisc(0)
       "remove a Card From Deck" in:
         ctr.remove(1)
       "be able to turn Deck UpperCard" in:
@@ -130,8 +130,13 @@ class ControllerTest extends AnyWordSpec with Matchers {
         bv.syncController
         bv.uptBoardPane(0,0)
 
-      "can gui undo and redo" in:
+      "can gui undo" in:
+        ctr.save(mem)
         ctr.guiUndo(reducibleBoard, ctr.getDeck, ctr.getDisc, bv)
+      "can gui redo" in:
+        ctr.save(mem)
+        ctr.undo()
+        ctr.redo()
         ctr.guiRedo(reducibleBoard, ctr.getDeck, ctr.getDisc, bv)
     }
 

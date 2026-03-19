@@ -50,13 +50,6 @@ import scalafx.geometry.Insets
 import sbt.testing.EventHandler
 import scalafx.scene.Node
 
-// object UIConstants {
-//   val cardWidth = 132
-//   val cardHeight = 198
-//   val padding = 30
-//   val fontname = "Arial"
-// }
-
 object Gui extends JFXApp3 with Observer {
   var ctr: ControllerInterface = _
   var boardLayer: Pane = _
@@ -222,9 +215,7 @@ object Gui extends JFXApp3 with Observer {
               val preUndoStack = ctr.currMemento.undoStack(0)
 
               ctr.save(preUndoStack)
-              // ctr.currMemento.redoStack.clear()
-              if !ctr.currMemento.redoStack.isEmpty then
-                ctr.currMemento.redoStack.pop()
+              if !ctr.currMemento.redoStack.isEmpty then ctr.currMemento.redoStack.pop()
               println(ctr.currMemento.undoStack(0))
               b.syncController
               println()

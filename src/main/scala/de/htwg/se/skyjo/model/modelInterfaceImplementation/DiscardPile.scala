@@ -43,7 +43,7 @@ case class DiscardPile (
         retDisc.preDisc = this.discPile
         (
           retDisc,
-          new Deck(ctrl.getDeck.remove(1), str)
+          new Deck(ctrl.remove(1), str)
         )
       }
       case _ => throw new  MatchError(s"Connot process this type: ${from.getClass}")

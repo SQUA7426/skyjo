@@ -15,6 +15,7 @@ class DiscHandler(ctrl: ControllerInterface, b: BoardInterface, d: DeckInterface
       Try {
         println("DRAW FROM DISC")
         ctrl.drawFromDisc(pos)
+        ctrl.getGameState
       }
     else next.handle(request, pos)
 class DeckHandler(ctrl: ControllerInterface, b: BoardInterface, d: DeckInterface, disc: DiscardPileInterface) extends HandlerInterface:
@@ -25,6 +26,7 @@ class DeckHandler(ctrl: ControllerInterface, b: BoardInterface, d: DeckInterface
       Try {
         println("DRAW FROM DECK")
         ctrl.drawFromDeck(pos)
+        ctrl.getGameState
       }
     else next.handle(request, pos)
 

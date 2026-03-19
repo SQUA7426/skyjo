@@ -45,7 +45,7 @@ class DeckTest extends AnyWordSpec with Matchers {
       "have the Card as upperCard when turned" in:
         d2.toString() shouldBe (d2.upperCard)
       "when turned again" in:
-        d2.turnUpperCard should be ("Deck")
+        d2.turnUpperCard should not be ("Deck")
 
       //------------------------- EXCEPTION --------------------------------//
 

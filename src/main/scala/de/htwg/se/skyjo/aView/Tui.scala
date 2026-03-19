@@ -1,6 +1,5 @@
 package de.htwg.se.skyjo.aView
 
-// import de.htwg.se.skyjo.model.{}
 import de.htwg.se.skyjo.util.{Memento, MoveCaretaker}
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
 
@@ -26,6 +25,7 @@ class Tui(ctr: ControllerInterface) extends Observer {
   private def clearTerm = print("\u001b[2J")
 
   def startGame: Unit =
+
     turnOfPlayer(ctr.getPlIdx)
     printfBoard
     discContent(ctr.getDisc)
@@ -41,7 +41,69 @@ class Tui(ctr: ControllerInterface) extends Observer {
     }
 
   def processInput(input: String): Unit = {
-    update(input)
+    val c =
+      SupportCommand(ctr, ctr.getBrds(ctr.getPlIdx), ctr.getDeck, ctr.getDisc)
+    input match {
+      case "undo" | "help" | "redo" | "load json" | "save json" | "load xml" |
+          "save xml" =>
+        c.execute(input)
+        turnOfPlayer(ctr.getPlIdx)
+        printfBoard
+        discContent(ctr.getDisc)
+        turnOptions
+
+      case "0" =>
+        inputRequest(ctr.getBrds(ctr.getPlIdx), ctr.getDisc.toString())
+        val (card, _) = ctr.draw()
+        printfBoard
+        print(">> Position: ")
+        var pos = readLine()
+        val idx = Try(Integer.parseInt(pos)).getOrElse(0)
+        ctr.drawFromDisc(idx)
+        // clearTerm
+        printfBoard
+        discContent(ctr.getDisc)
+        turnOptions
+      case "1" =>
+        inputRequestDeck(ctr.getDeck.turnUpperCard)
+        printfBoard
+        print(">> Position: ")
+        var pos = readLine()
+        if pos == "s" then {
+          val tmpDeck = new Deck(ctr.getDeckCards, ctr.getDeck.turnUpperCard)
+          val switch_handler =
+            SupportHandler(ctr, ctr.getBrds(ctr.getPlIdx), tmpDeck, ctr.getDisc)
+          switch_handler.handle(pos, 0) match {
+            case Success(gs) =>
+              printfBoard
+              cardTurnRq(ctr.getBrds(ctr.getPlIdx))
+
+              ctr.tuiSwitch(gs, tmpDeck)
+              // clearTerm
+              turnOfPlayer(ctr.getPlIdx)
+              printfBoard
+              discContent(ctr.getDisc)
+              turnOptions
+
+            case Failure(_) =>
+              println("Discarded Turn.")
+              // clearTerm
+              turnOfPlayer(ctr.getPlIdx)
+              printfBoard
+              discContent(ctr.getDisc)
+              turnOptions
+          }
+        } else {
+          val idx = Try(pos.toInt).getOrElse(0)
+          ctr.drawFromDeck(idx)
+          // clearTerm
+          turnOfPlayer(ctr.getPlIdx)
+          printfBoard
+          discContent(ctr.getDisc)
+          turnOptions
+        }
+      case _ => ctr.assertGameState(ctr.getGameState)
+    }
   }
 
   def inputRequest(b: BoardInterface, disc: String) =
@@ -87,56 +149,9 @@ class Tui(ctr: ControllerInterface) extends Observer {
     if finished then System.exit(0)
 
   override def update(choose: String): Boolean =
+    clearTerm
     turnOfPlayer(ctr.getPlIdx)
-    val b = ctr.getBrds(ctr.getPlIdx)
-    val d = ctr.getDeck
-    val disc = ctr.getDisc
-
-    var h = SupportHandler(ctr, b, d, disc)
-    val c = SupportCommand(ctr, b, d, disc)
-
-    val action: GameState =
-      choose match
-        case "0" | "1" | "s" | "undo" | "help" | "redo" | "quit" => {
-          if c.execute(choose) then ctr.getGameState
-          else
-            if choose == "0" then inputRequest(b, disc.toString())
-            else if choose == "1" then inputRequestDeck(d.turnUpperCard)
-
-            print(">> Position: ")
-            var pos = readLine()
-            clearTerm
-            if pos == "s" then
-              val tmpDeck = new Deck(ctr.getDeckCards, d.turnUpperCard)
-              // switch
-              h = SupportHandler(ctr, b, tmpDeck, disc)
-              h.handle(pos, 0) match
-                case Success(gs) => 
-                  printfBoard
-                  cardTurnRq(b)
-                  print(">> Position: ")
-                  pos = readLine()
-                  val idx = Integer.parseInt(pos)
-                  val newGameState = ctr.switchDeckDisc(gs,b,tmpDeck,idx)
-                  newGameState
-                case Failure(e)  => ctr.getGameState
-            else
-              if pos == "" then pos = "0"
-              val return_H = h.handle(choose, pos.toInt)
-              return_H match
-                case Success(gs:GameState) => {
-                  val newBrd: BoardInterface = ctr.getReducedBrd(gs.boards(ctr.getPlIdx))._1
-                  val copyGameState = gs.copy(
-                    boards = gs.boards.updated(ctr.getPlIdx, newBrd)
-                    )
-                  copyGameState
-                }
-                case Failure(e) => ctr.getGameState
-        }
-        case _ => ctr.getGameState
-    ctr.assertGameState(action)
-    turnOfPlayer(ctr.getPlIdx)
-    println(ctr.getBrds(ctr.getPlIdx))
+    printfBoard
     discContent(ctr.getDisc)
     turnOptions
     if finished then ending

@@ -51,18 +51,20 @@ trait ControllerInterface extends Observable:
   def remove(amount: Int): Vector[CardInterface]
   def draw(): (CardInterface, DeckInterface)
 
-  def drawFromDeck(pos: Int): GameState
+  def drawFromDeck(pos: Int): Unit
 
   // DISCARDPILE //
   def putToDiscardPile(from: Any): (DiscardPileInterface, DeckInterface)
   def remove(): DiscardPileInterface
 
-  def switchDeckDisc(gs: GameState, b:BoardInterface, tmpDeck: DeckInterface, idx: Int): GameState
+  def switchDeckDisc(gs: GameState, b:BoardInterface, tmpDeck: DeckInterface, idx: Int): Unit
+  def tuiSwitch(gs: GameState, tmpDeck: DeckInterface): Unit
+  def tuiNotSwitch(input: String, pos: String): Unit
 
   // CTR - DISCARDPILE //
   def getDisc: DiscardPileInterface
   def getDiscCard(): Option[CardInterface]
-  def drawFromDisc(pos: Int): GameState
+  def drawFromDisc(pos: Int): Unit
 
   // PLAYER //
   def getPlIdx: Int
@@ -82,8 +84,8 @@ trait ControllerInterface extends Observable:
   def xml_save: Unit
   def json_save: Unit
 
-  def xml_load(b:BoardView): Unit
-  def json_load(b:BoardView): Unit
+  def xml_load(b: Any): Unit
+  def json_load(b: Any): Unit
 
   // OUTSIDE FUNCTIONS //
   def toCard(x: Any): CardInterface

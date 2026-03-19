@@ -52,7 +52,7 @@ class TuiTest extends AnyWordSpec with Matchers {
           tui.startGame
         }
       "process an Switch-Input" in:
-        val simulatedInput = "s\n1\nquit\n"
+        val simulatedInput = "1\ns\n1\nquit\n"
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
         Console.withIn(in) {
           tui.startGame
