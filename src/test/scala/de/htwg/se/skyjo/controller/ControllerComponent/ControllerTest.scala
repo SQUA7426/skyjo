@@ -41,7 +41,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
         val convDisc = ctr.toCard(ctr.getDisc)
         val convNone = ctr.toCard(None)
       "get Mediator, GameState, Deck and Discard-Card" in:
-        val gs_cp = ctr.copy(ctr.getMementos,ctr.getBrds, ctr.getDeck,ctr.getDisc, 0,ctr.currState)
+        ctr.copy(ctr.getMementos,ctr.getBrds, ctr.getDeck,ctr.getDisc, 0,ctr.currState) shouldBe a[GameState]
         ctr.getMediator shouldBe a[Mediator]
         ctr.getGameState shouldBe a[GameState]
         ctr.getDeck shouldBe a[DeckInterface]
@@ -123,12 +123,6 @@ class ControllerTest extends AnyWordSpec with Matchers {
       "can load and save Xml + upt BoardPane" in:
         ctr.xml_load(bv)
         ctr.xml_save
-        // val tmp_ctr = injector.getInstance(classOf[ControllerInterface])
-        // tmp_ctr.setup()
-        // tmp_ctr.xml_save
-        // tmp_ctr.xml_load(bv)
-        // ctr.xml_save
-        // ctr.xml_load(bv)
         bv.syncController
         bv.uptBoardPane(0,0)
 

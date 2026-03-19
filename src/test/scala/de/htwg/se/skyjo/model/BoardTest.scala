@@ -53,6 +53,9 @@ class BoardTest extends AnyWordSpec with Matchers {
     "reduce a row and col" in:
       twoTimesTwoBoard.reduce(1, 1)._2 shouldBe a[Boolean]
 
+    "can be converted to Json" in:
+      val twoXtwoJson = twoTimesTwoBoard.toJson
+
     // ------------------ EXCEPTION ------------------------------- //
     "throw an EXCEPTION when accessing wrong boardIdx" in:
       val errBrd = the [IndexOutOfBoundsException] thrownBy(board.getBoardCard(30))

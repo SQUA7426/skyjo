@@ -165,9 +165,6 @@ case class Board(
     }
     Board(x, y, vvc)
 
-  private def Node2Int(ns: NodeSeq): Int =
-    ns.head.text.replace(" ", "").toInt
-
 object Board:
   def apply(ctr: ControllerInterface): (BoardInterface, DeckInterface) = {
     ctr.fillBoard(4, 3, Deck(ctr))
