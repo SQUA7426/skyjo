@@ -19,7 +19,7 @@ import java.io.ByteArrayInputStream
 import com.google.inject.{Guice, Inject, Injector}
 import de.htwg.se.skyjo.SkyjoModule
 import net.codingwell.scalaguice.InjectorExtensions.*
-import de.htwg.se.skyjo.util.utilComponent.{SupportCommand, LastHandler}
+import de.htwg.se.skyjo.util.utilComponent.{SupportCommand, LastHandler, LoadSaveCommand}
 
 class TuiTest extends AnyWordSpec with Matchers {
   "A Tui " when {
@@ -46,11 +46,19 @@ class TuiTest extends AnyWordSpec with Matchers {
         }
         
       "process an undo-redo-help-Input" in:
-        val simulatedInput = "1\n1\n0\n0\nundo\nredo\nhelp\nquit\n"
+        val simulatedInput = "undo\nredo\n1\n1\n0\n0\nundo\nredo\nhelp\nquit\n"
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
         Console.withIn(in) {
           tui.startGame
         }
+
+      "process an save-load-Input" in:
+        val simulatedInput = "1\n0\n0\n0\nsave xml\nsave json\nload xml\nload json\nquit\n"
+        val in = new ByteArrayInputStream(simulatedInput.getBytes())
+        Console.withIn(in) {
+          tui.startGame
+        }
+
       "process an Switch-Input" in:
         val simulatedInput = "1\ns\n1\nquit\n"
         val in = new ByteArrayInputStream(simulatedInput.getBytes())

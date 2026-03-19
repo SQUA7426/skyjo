@@ -57,6 +57,8 @@ class ControllerTest extends AnyWordSpec with Matchers {
       val reducibleBoard = Board(2,2, Vector(Vector(ctr.toCard(1).falseCopy, ctr.toCard(2)), Vector(ctr.toCard(3).falseCopy, ctr.toCard(2))))
       "get a reduced Board" in:
         ctr.getReducedBrd(reducibleBoard) shouldBe a[(BoardInterface,Int,Int)]
+      "hasdrawn is a Boolean" in:
+        ctr.hasDrawn shouldBe a[Boolean]
 
       val mem: Memento = Memento(true,card8,0,card8,ctr.getDisc,false)
       "execute save" in:
