@@ -38,6 +38,6 @@ import net.codingwell.scalaguice.InjectorExtensions.*
   tuiThread.setDaemon(true)
   tuiThread.start()
 
- Gui.ctr = ctr
+  Gui.ctr = ctr
   Gui.main(Array.empty)
 }

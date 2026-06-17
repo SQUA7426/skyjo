@@ -78,6 +78,14 @@ trait ControllerInterface extends Observable:
 
   def guiRedo(resBoard: BoardInterface, resDeck: DeckInterface, resDisc: DiscardPileInterface, b: BoardView): Unit
 
+  def guiPreviewDeckCard(): Unit
+  def guiConfirmDeckSwitch(pos: Int): Unit
+  def guiConfirmDeckToDiscAndTurn(pos: Int): Unit
+
+  def guiTurnBrdCard(pos: Int): Unit
+
+  def guiSelectDisc(): Unit
+
   // FILEIO //
   def syncControllerGui(b: BoardView): Unit
 

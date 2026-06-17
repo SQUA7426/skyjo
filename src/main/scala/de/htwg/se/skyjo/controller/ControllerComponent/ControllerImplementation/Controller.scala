@@ -248,8 +248,18 @@ class Controller @Inject() (
       allUpdatedBrds(0)
     else (updatedBoard, -1, -1)
     // println(s"Board after reduced:\n$endBoard")
-    notifyObservers
+    // notifyObservers
     endBoard
+
+  // Suggestion
+  def reduceCurrentBoard(): Unit = {
+    val board = getBrds(getPlIdx)
+    val (reduced, row, col) = getReducedBrd(board)
+    val newState = state.copy(
+      boards = getBrds.updated(getPlIdx, reduced)
+    )
+    assertGameState(newState)
+  }
 
   // DECK //
   def getDeck: DeckInterface = state.deck
@@ -278,10 +288,12 @@ class Controller @Inject() (
     val (card, newDeck) = state.deck.draw(this)
 
     mem = Memento(0, card, pos, card, getDisc, card.isTurned) // takenCard
+    println(s"drawFromDeck MEM:${mem}")
     save(mem)
 
     // BoardSWITCH //
     val (swCard, tmpBrd) = getBrds(getPlIdx).switch(getDrawn.get, pos)
+    val (reduced_brd, _, _) = getReducedBrd(tmpBrd)
 
     mem = mem.copy(replacedCard = swCard) // replaced Card
     save(mem)
@@ -293,7 +305,7 @@ class Controller @Inject() (
     val deckCard = newDeck.getCard.get
 
     val newState = state.copy(
-      boards = getBrds.updated(currPlayer, tmpBrd),
+      boards = getBrds.updated(currPlayer, reduced_brd),
       deck = newDeck,
       disc = newDisc,
       plIdx = (currPlayer + 1) % getBrds.size,
@@ -337,14 +349,16 @@ class Controller @Inject() (
         println(currMemento.undoStack(0).toString())
 
         val (newCard, newBrd) = getBrds(getPlIdx).switch(getDiscCard().get, pos)
+        val (reduced_brd, _, _) = getReducedBrd(newBrd)
         val newDisc = new DiscardPile(newCard.toString())
         val currPlayer = getPlIdx
 
         val newState = state.copy(
-          boards = getBrds.updated(currPlayer, newBrd),
+          boards = getBrds.updated(currPlayer, reduced_brd),
           mementos = getMementos.updated(currPlayer, getMementos(currPlayer)),
           disc = newDisc,
           plIdx = (currPlayer + 1) % getBrds.size,
+          currentState = currState.reset()
         )
 
         assertGameState(newState)
@@ -542,9 +556,8 @@ class Controller @Inject() (
 
     b.manyCards = b.BOARD_INIT(false)
     b.vDeck.cCard = toCard(b.aDeck.turnUpperCard)
-    b.vDiscard.cCard = toCard(state.disc, if state.disc.pre == "Disc" then true else false)
-
-    b.syncController
+    b.vDiscard.cCard =
+      toCard(state.disc, if state.disc.pre == "Disc" then true else false)
 
   def guiRedo(
       resBoard: BoardInterface,
@@ -557,15 +570,97 @@ class Controller @Inject() (
     b.termBoard = resBoard
     b.aDeck = resDeck
     b.aDisc = lDisc
-    // b.aDisc = resDisc
     assertGameState(
       getGameState.copy(
         boards = getBrds.updated(getPlIdx, resBoard),
         deck = resDeck,
-        disc = lDisc
-        // disc = resDisc
+        disc = resDisc
       )
     )
-    b.manyCards = b.BOARD_INIT(false)
-    b.vDeck.cCard = toCard(b.aDeck.turnUpperCard)
-    b.vDiscard.cCard = getDiscCard().getOrElse(Card(0))
+
+  def guiPreviewDeckCard(): Unit = {
+    println("Controller.guiPreviewDeckCard aufgerufen")
+    val (card, newDeck) = state.deck.draw(this)
+    val s = State.MID
+    s.pre = "DECK"
+    val newState = state.copy(
+      deck = newDeck,
+      previewDeckCard = Some(card),
+      currentState = s
+    )
+    assertGameState(newState)
+  }
+
+  def guiConfirmDeckSwitch(pos: Int): Unit = {
+    state.previewDeckCard match {
+      case Some(card) =>
+        val (swCard, tmpBrd) = getBrds(getPlIdx).switch(card, pos)
+        val (reduced_brd, _, _) = getReducedBrd(tmpBrd)
+        mem = Memento(0, card, pos, card, getDisc, card.isTurned)
+        save(mem)
+        mem = mem.copy(replacedCard = swCard)
+        save(mem)
+        val currPlayer = getPlIdx
+        val newDisc = putToDiscardPile(swCard)._1
+        val newState = state.copy(
+          boards = getBrds.updated(currPlayer, reduced_brd),
+          disc = newDisc,
+          previewDeckCard = None,
+          plIdx = (currPlayer + 1) % getBrds.size,
+          currentState = currState.reset()
+        )
+        assertGameState(newState)
+      case None =>
+        println("Keine Preview-Deckkarte vorhanden.")
+    }
+  }
+
+  def guiConfirmDeckToDiscAndTurn(pos: Int): Unit = {
+    state.previewDeckCard match {
+      case Some(card) =>
+        val currPlayer = getPlIdx
+
+        val newDisc = putToDiscardPile(card)._1
+
+        val board = getBrds(currPlayer)
+        val newBoard = board.turnBoardCard(pos)
+        val (reduced_brd, _, _) = getReducedBrd(newBoard)
+
+        val e = State.END
+        e.pre = "DISC"
+
+        val newState = state.copy(
+          boards = getBrds.updated(currPlayer, reduced_brd),
+          disc = newDisc,
+          previewDeckCard = None,
+          plIdx = (currPlayer + 1) % getBrds.size,
+          currentState = e
+        )
+        assertGameState(newState)
+
+      case None =>
+        println("Keine Preview-Deckkarte vorhanden.")
+    }
+  }
+
+  override def guiTurnBrdCard(pos: Int): Unit = {
+    val currPlayer = getPlIdx
+    val board = getBrds(currPlayer)
+    val newBoard = board.turnBoardCard(pos)
+    val (reduced_brd, _, _) = getReducedBrd(newBoard)
+
+    val newState = state.copy(
+      boards = getBrds.updated(currPlayer, reduced_brd),
+      plIdx = (currPlayer + 1) % getBrds.size,
+      currentState = currState.reset(),
+      previewDeckCard = None
+    )
+    assertGameState(newState)
+  }
+
+  def guiSelectDisc(): Unit = {
+    val s = State.MID
+    s.pre = "DISC"
+    val newState = state.copy(currentState = s)
+    assertGameState(newState)
+  }

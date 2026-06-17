@@ -149,7 +149,7 @@ class Tui(ctr: ControllerInterface) extends Observer {
     if finished then System.exit(0)
 
   override def update(choose: String): Boolean =
-    clearTerm
+    // clearTerm
     turnOfPlayer(ctr.getPlIdx)
     printfBoard
     discContent(ctr.getDisc)

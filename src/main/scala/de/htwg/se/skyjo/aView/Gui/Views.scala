@@ -60,13 +60,10 @@ import de.htwg.se.skyjo.util.Observer
 
 val fontname = "Parisienne"
 
-case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
-    extends Observer {
-  ctr.add(this)
+case class BoardView(ctr: ControllerInterface, var boardPane: Pane) {
 
   var currentState: State = ctr.currState
 
-  // val _med = ctr.getMediator
   val padding = 30
   var aDeck = ctr.getDeck
   var termBoard = ctr.getBrds(ctr.getPlIdx)
@@ -91,19 +88,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
     }
     Board(cols, rows, tmpEndVec)
 
-  def syncController =
-    val newGameState = ctr.getGameState.copy(
-      boards = ctr.getBrds.updated(ctr.getPlIdx, termBoard),
-      deck = aDeck,
-      disc = aDisc
-    )
-
-
-    ctr.assertGameState(newGameState)
-    // println(s"Player: ${ctr.getPlIdx}")
-
   def uptBoardPane(r: Int, c: Int) =
-
     manyCards = BOARD_INIT(false)
 
     val flattenTerm: Vector[CardInterface] = termBoard.getBoard.flatten
@@ -116,34 +101,10 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
     boardPane.children_=(newUI)
     vDiscard.uptCardView
     vDeck.uptCardView
-
     manyCards.map(_.uptCardView)
 
-    ctr.assertGameState(
-      ctr.getGameState.copy(
-        boards = ctr.getBrds.updated(ctr.getPlIdx, termBoard),
-        deck = aDeck,
-        disc = aDisc,
-        currentState = currentState
-      )
-    )
-
-  def update(choose: String): Boolean =
-    val (newTerm, row,col) = ctr.getReducedBrd(termBoard)
-    termBoard = newTerm
-    syncController
-
-    uptBoardPane(row,col)
-
-    // println(s"CURRENT STATE: ${ctr.currState.getStr}")
-    if currentState == State.BEGIN then ctr.assertGameState(ctr.getGameState.copy(plIdx = (ctr.getPlIdx + 1) % ctr.getBrds.size))
-    termBoard = ctr.getBrds(ctr.getPlIdx)
-    syncController
-    uptBoardPane(-1,-1)
-
-    true
-
   case class CardView(
+      idx: Int,
       x_pos: Int,
       y_pos: Int,
       h: Int = 198,
@@ -151,13 +112,11 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
       colour: Color = Color.DarkBlue,
       var cCard: CardInterface,
       var turned: Boolean = false,
-      // val med: Mediator = _med,
       val isDisc: Boolean = false,
       val isDeck: Boolean = false,
       switchDeckDisc: () => Unit,
       switchDiscB: () => Unit,
-      switchDeckB: () => Unit,
-      endTurn: () => Unit
+      switchDeckB: () => Unit
   ) {
     val arcH = 30
     val arcW = arcH
@@ -199,56 +158,28 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
 
     cardShape.onMouseClicked = (_: MouseEvent) => {
       currentState match {
-        case State.BEGIN => {
-          selected = !selected
+        case State.BEGIN =>
+          println(
+            s"CardView Klick BEGIN isDeck=$isDeck isDisc=$isDisc idx=$idx"
+          )
+          if isDeck then ctr.guiPreviewDeckCard()
+          else if isDisc then ctr.guiSelectDisc()
+          else ()
+        case State.MID =>
+          if !isDeck && !isDisc then
+            if currentState.pre == "DECK" then ctr.guiConfirmDeckSwitch(idx)
+            else if currentState.pre == "DISC" then ctr.drawFromDisc(idx)
+            else ()
+          else if isDisc && currentState.pre == "DECK" then
+            ctr.guiConfirmDeckToDiscAndTurn(idx)
+          else ()
 
-          if selected && (isDisc || isDeck) then
-            currentState = currentState.nextState()
-
-          if isDisc then currentState.pre = "DISC"
-          else if isDeck then
-            currentState.pre = "DECK"
-            aDeck = new Deck(aDeck.getDeckCards, aDeck.turnUpperCard)
-            turned = true
-          else
-            selected = !selected
-            currentState.pre = "BOARD"
-          uptCardView
-        }
-        case State.MID => {
-          selected = !selected
-
-          if currentState.pre.compareTo("DISC") == 0 then
-            if vDiscard.turned then
-              turned = true
-              switchDiscB()
-            else println("Cannot get from Empty DiscardPile")
-          else if currentState.pre.compareTo("DECK") == 0 then
-            turned = true
-            if isDisc then vDiscard.switchDeckDisc()
-            else if !isDisc && !isDeck then switchDeckB()
-
-          selected = !selected
-          vDiscard.turned =
-            if aDisc.toString().compareTo("Disc") == 0 then false else true
-          vDiscard.selected = false
-          vDiscard.uptCardView
-
-          vDeck.selected = false
-          vDeck.turned = false
-          vDeck.uptCardView
-
-          uptCardView
-          if currentState == State.MID then currentState = currentState.reset()
-        }
-        case State.END => {
-          endTurn()
-          uptCardView
-        }
+        case State.END =>
+          ctr.guiTurnBrdCard(idx)
       }
+
       if termBoard.getBoard.forall(row => row.forall(c => c.isTurned == true))
-      then
-        popup(ctr)
+      then popup(ctr)
     }
 
     def uptCardView: Unit = {
@@ -284,6 +215,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
       } yield {
         val index = row * cols + col
         new CardView(
+          idx = index,
           x_pos = (padding + ((padding + 132) * col)),
           y_pos = (padding + ((padding + 198) * row)),
           cCard = ctr.getBoard.flatten.apply(index),
@@ -295,90 +227,8 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
                 .isTurned
           ,
           switchDeckDisc = () => {},
-          switchDiscB = () => {
-            val preDisc = ctr.toCard(aDisc.toString())
-            val (tmpDisc, tmpBoard) = (termBoard
-              .switch(preDisc, index): @unchecked)
-            aDisc = DiscardPile(tmpDisc.toString())
-            vDiscard.cCard = ctr.getBoard.flatten.apply(index)
-            val preBoard = termBoard
-            termBoard = tmpBoard
-            manyCards.apply(index).cCard = preDisc
-
-            ctr.currMemento.save(
-              Memento(
-                1,
-                preDisc,
-                index,
-                preBoard.getBoard.flatten.apply(index),
-                DiscardPile(preDisc.toString()),
-                preBoard.getBoard.flatten.apply(index).isTurned
-              )
-            )
-            println("viewBoard -> switchDiscB MEM:")
-            println(ctr.currMemento.undoStack(0))
-            currentState = currentState.reset()
-
-            update("")
-          },
-          switchDeckB = () => {
-            val preDisc = aDisc
-            aDisc = DiscardPile(termBoard.getBoardCard(index).toString())
-            val turnedDeck: DeckInterface =
-              new Deck(aDeck.getDeckCards, aDeck.getCard.get.toString())
-            val (tmpDeckCard, tmpBoard: BoardInterface) = (termBoard.switch(
-              ctr.toCard(turnedDeck.toString()),
-              index
-            ): @unchecked)
-            val tmpDeck =
-              Deck(turnedDeck.getDeckCards, tmpDeckCard.toString())
-            vDiscard.cCard = ctr.toCard(aDisc.toString())
-            val preBoard = termBoard
-            termBoard = tmpBoard
-            manyCards.apply(index).cCard = ctr.toCard(aDeck.toString())
-            aDeck = new Deck(tmpDeck.remove(1))
-            vDeck.cCard = ctr.toCard(aDeck.turnUpperCard)
-
-            ctr.drawFromDeck(index)
-
-            ctr.currMemento.save(
-              Memento(
-                0,
-                ctr.toCard(turnedDeck.toString()),
-                index,
-                preBoard.getBoard.flatten.apply(index),
-                preDisc,
-                preDisc.isTurned
-              )
-            )
-            println("viewBoard -> switchDeckB MEM:")
-
-            println(ctr.currMemento.undoStack)
-
-            currentState = currentState.reset()
-
-            // println("Asserting new GameSte to Ctr...");
-            // ctr.assertGameState(ctr.getGameState.copy(
-            //   // boards = ctr.getBrds(ctr.getPlIdx).(ctr.toCard(tmpDeck), index),
-            //
-            //    currentState = currentState
-            // ));
-            // println(ctr.getBrds(ctr.getPlIdx))
-            // println(ctr.getDeck)
-            // println(ctr.getDisc)
-
-            update("")
-          },
-          endTurn = () => {
-            termBoard = termBoard.turnBoardCard(index)
-            manyCards.apply(index).cCard =
-              termBoard.getBoard.flatten.apply(index)
-            manyCards.apply(index).turned = true
-            manyCards.map(_.uptCardView)
-            currentState = currentState.reset()
-
-            update("")
-          }
+          switchDiscB = () => {},
+          switchDeckB = () => {}
         )
       }
     }
@@ -392,42 +242,15 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
   // VIEW DISC
   val vDiscard: CardView =
     (CardView(
+      -1,
       100,
       720,
       colour = Color.SteelBlue,
       cCard = ctr.toCard(0).falseCopy,
-      // med = _med,
       isDisc = true,
-      switchDeckDisc = () => {
-        val turnedDeck =
-          new Deck(aDeck.getDeckCards, aDeck.turnUpperCard)
-        val toDisc = aDisc.putToDiscardPile(turnedDeck.getCard.get, ctr)
-        aDisc = toDisc._1
-        aDeck = toDisc._2
-
-        vDiscard.cCard = ctr.toCard(aDisc.toString())
-        vDeck.cCard = ctr.toCard(aDeck.turnUpperCard)
-
-        currentState = currentState.nextState()
-        currentState.pre = "BOARD"
-        val newMem = Memento(
-          fromDeck = 2,
-          takenCard = turnedDeck.getCard.get,
-          boardIndex = 0, // Standard
-          lastDisc = aDisc,
-          replacedCard = ctr.toCard(turnedDeck.toString()),
-          replacedCardTurned = turnedDeck.getCard.get.isTurned
-        )
-
-        println(s"ViewDisc -> switchDeckDisc MEM:\n{newMem}")
-
-        ctr.save(newMem)
-
-        update("")
-      },
+      switchDeckDisc = () => {},
       switchDiscB = () => {},
-      switchDeckB = () => {},
-      endTurn = () => {}
+      switchDeckB = () => {}
     ))
 
   def viewDisc(): StackPane = {
@@ -442,16 +265,15 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
 
   def vDECKINIT: CardView = {
     CardView(
+      -2,
       400,
       720,
       colour = Color.SteelBlue,
       cCard = ctr.toCard(aDeck.getCard.get).falseCopy,
-      // med = _med,
       isDeck = true,
       switchDeckDisc = () => {},
       switchDiscB = () => {},
-      switchDeckB = () => {},
-      endTurn = () => {}
+      switchDeckB = () => {}
     )
   }
 
@@ -470,11 +292,12 @@ def popup(ctr: ControllerInterface) = {
   }
   var arr = Seq.empty[String]
   for i <- 0 until ctr.getBrds.size do
-    arr = arr :++ Seq(s"Player $i: ${ctr.getBrds(i).getBoard.flatten.map(c => c.getValue).fold(0)((x, y) => x + y).toString()}\n")
+    arr = arr :++ Seq(
+      s"Player $i: ${ctr.getBrds(i).getBoard.flatten.map(c => c.getValue).fold(0)((x, y) => x + y).toString()}\n"
+    )
 
   var str = ""
-  for j <- 0 until arr.size do
-    str = str :++ arr(j)
+  for j <- 0 until arr.size do str = str :++ arr(j)
   println(str)
 
   finished.headerText = "FINISHED"

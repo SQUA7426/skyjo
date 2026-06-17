@@ -106,12 +106,12 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
 
       val newBoard = board.swapFromMem(ctrl.toCard(memento.replacedCard, !memento.replacedCard.isTurned),memento.boardIndex);
 
-      println(s"New Board:\n${newBoard}\n");
+      // println(s"New Board:\n${newBoard}\n");
 
       val deck2 = new Deck(deck.getDeckCards :+ memento.takenCard);
       val disc2 = memento.lastDisc;
 
-      println(s"deck2: ${deck2.getCard} ; disc: ${disc2}");
+      // println(s"deck2: ${deck2.getCard} ; disc: ${disc2}");
 
       val redo_disc = new DiscardPile(memento.replacedCard.toString(), true);
 
@@ -123,8 +123,8 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
         redo_disc,
         ))
 
-      println(s"\nMemento switch redoStack:");
-      println(redoStack);
+      // println(s"\nMemento switch redoStack:");
+      // println(redoStack);
 
       Some(newBoard, deck2, disc2)
     }

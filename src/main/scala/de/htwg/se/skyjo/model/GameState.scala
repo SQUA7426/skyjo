@@ -23,7 +23,8 @@ case class GameState(
     deck: DeckInterface,
     disc: DiscardPileInterface,
     plIdx: Int,
-    currentState: State
+    currentState: State,
+    previewDeckCard: Option[CardInterface] = None
 ) {
 
   // FILEIO //
@@ -44,6 +45,12 @@ case class GameState(
       </disc>
       <plIdx>{plIdx}</plIdx>
       <currentState>{currentState.toXml}</currentState>
+      <previewDeckCard>{
+      previewDeckCard match
+        case Some(c) =>
+          c.getValue.toString
+        case None => ""
+    }</previewDeckCard>
     </gamestate>
   }
 
@@ -53,7 +60,7 @@ case class GameState(
     val idx = { gsXml \ "plIdx" }.text.toInt
     // println(f"gs_idx: ${idx}")
     val tempState =
-      new GameState(Vector.empty, Vector.empty, null, null, 0, State.BEGIN)
+      new GameState(Vector.empty, Vector.empty, null, null, 0, State.BEGIN, None)
     // println(f"gs_tempState: ${tempState}")
 
     val injector = Guice.createInjector(SkyjoModule(boards.size))
@@ -84,6 +91,11 @@ case class GameState(
 
     val stateXml = currentState.fromXml((gsXml \ "currentState").head)
     // println(f"stateXml: ${stateXml}")
-    GameState(mementosXml, brdsXml, deckXml, discXml, idx, stateXml)
+    
+    val previewStr = (gsXml \ "previewDeckCard").text.trim
+    val previewOpt: Option[CardInterface] =
+      if previewStr.isEmpty then None
+      else Some(ctr.toCard(previewStr))
+    GameState(mementosXml, brdsXml, deckXml, discXml, idx, stateXml, previewOpt)
   }
 }

@@ -83,25 +83,46 @@ object Gui extends JFXApp3 with Observer {
   override def update(choose: String): Boolean = {
     Platform.runLater {
       try {
-        println("In GUI update")
-        b.syncController
-        val reducedBoard = ctr.getReducedBrd(b.termBoard)._1
-        b.termBoard = reducedBoard
+        println("Gui.update aufgerufen")
+        val gs = ctr.getGameState
+
+        // BoardView an GameState anpassen
+        b.termBoard = gs.boards(gs.plIdx)
+        b.aDeck = gs.deck
+        b.aDisc = gs.disc
+        b.currentState = gs.currentState
+
         b.manyCards = b.BOARD_INIT(false)
-        val newUI: Seq[Node] = b.viewBoard() :+ guiButtons(stage)
-        boardLayer.children_=(newUI)
+        val boardUI: Seq[Node] = b.viewBoard()
+
+        // Deck-Preview/Deck-Top anpassen
+        gs.previewDeckCard match
+          case Some(card) =>
+            b.vDeck.cCard = card
+            b.vDeck.turned = true
+          case None =>
+            b.vDeck.cCard = ctr.toCard(b.aDeck.turnUpperCard)
+            b.vDeck.turned = false
+
+        val discOpt = ctr.getDiscCard()
+
+        discOpt match {
+          case Some(card) =>
+            b.vDiscard.cCard = card
+            b.vDiscard.turned = true
+          case None => {
+            b.vDiscard.cCard = ctr.toCard(0)
+            b.vDiscard.turned = false
+          }
+        }
+
         b.vDiscard.uptCardView
         b.vDeck.uptCardView
-        b.manyCards.map(_.uptCardView)
-        ctr.assertGameState(
-          ctr.getGameState.copy(
-            boards = ctr.getBrds.updated(ctr.getPlIdx, b.termBoard),
-            deck = b.aDeck,
-            disc = b.aDisc,
-            currentState = b.currentState
-          )
-        )
-        b.uptBoardPane
+        b.manyCards.foreach(_.uptCardView)
+
+        // Scenegraph neu setzen: Board + Buttons
+        val newUI: Seq[Node] = boardUI :+ guiButtons(stage)
+        boardLayer.children_=(newUI)
       } catch {
         case e: Exception =>
           e.printStackTrace()
@@ -110,6 +131,7 @@ object Gui extends JFXApp3 with Observer {
     }
     true
   }
+
   def guiButtons(stage: Stage): HBox = {
     val ht = 20
     val wt = 60
@@ -144,85 +166,18 @@ object Gui extends JFXApp3 with Observer {
     bt_undo.tooltip = "Undoing Turn"
     bt_undo.setPrefHeight(ht)
     bt_undo.setPrefWidth(wt)
+
     bt_undo.onMouseClicked = _ => {
-      if b.currentState == State.BEGIN && ctr.currMemento.undoStack.nonEmpty
-      then {
-        // println(s"MemStack.undoStack:\n${ctr.currMemento.undoStack.toString()}\n")
-        // val ctrl = new Controller(b._med, Array(b.termBoard), b.aDeck, b.aDisc)
-        val mem: Memento = ctr.currMemento.undoStack(0)
-        ctr.currMemento.undo(mem, b.aDeck, b.termBoard, b.aDisc) match {
-          case Some(resBoard, resDeck, resDisc) => {
-
-            // val tmpRedo = ctr.currMemento
-            //   .undoStack(0)
-            //   .copy(
-            //     // lastDisc = DiscardPile(oldUndo.replacedCard.trueCopy.toString())
-            //     lastDisc = DiscardPile(mem.replacedCard.trueCopy.toString())
-            //   )
-
-            ctr.guiUndo(resBoard, resDeck, resDisc, b)
-
-            // upt views
-            val newUI: Seq[Node] = b.viewBoard() :+ guiButtons(stage)
-            boardLayer.children_=(newUI)
-            b.vDiscard.uptCardView
-            b.vDeck.uptCardView
-            b.manyCards.map(_.uptCardView)
-
-            // println("\nREDOSTACK\n")
-
-            // ctr.save(tmpRedo)
-            // if !ctr.currMemento.undoStack.isEmpty then
-            //   ctr.currMemento.undoStack.pop()
-            // if !ctr.currMemento.redoStack.isEmpty then
-            //   ctr.currMemento.redoStack.pop()
-            // ctr.currMemento.redoStack.push(tmpRedo)
-            b.syncController
-            // println(ctr.currMemento.redoStack(0))
-
-            println()
-          }
-          case None => {}
-        }
-      }
+      if b.currentState == State.BEGIN then ctr.undo()
     }
 
     val bt_redo = new Button("redo")
     bt_redo.tooltip = "Redoing last Turn"
     bt_redo.setPrefHeight(ht)
     bt_redo.setPrefWidth(wt)
+
     bt_redo.onMouseClicked = _ => {
-      if b.currentState == State.BEGIN && ctr.currMemento.redoStack.nonEmpty
-      then {
-        if b.currentState == State.BEGIN then
-          val mem: Memento = ctr.currMemento.redoStack(0)
-          ctr.currMemento.redo(
-            mem,
-            ctr.getDeck,
-            ctr.getBrds(ctr.getPlIdx),
-            ctr.getDisc
-          ) match {
-            case Some(resBoard, resDeck, resDisc) => {
-              ctr.guiRedo(resBoard, resDeck, resDisc, b)
-              // upt views
-              val newUI: Seq[Node] = b.viewBoard() :+ guiButtons(stage)
-              boardLayer.children_=(newUI)
-              b.vDiscard.uptCardView
-              b.vDeck.uptCardView
-              b.manyCards.map(_.uptCardView)
-
-              println("\nUNDOSTACK\n")
-              val preUndoStack = ctr.currMemento.undoStack(0)
-
-              ctr.save(preUndoStack)
-              if !ctr.currMemento.redoStack.isEmpty then ctr.currMemento.redoStack.pop()
-              println(ctr.currMemento.undoStack(0))
-              b.syncController
-              println()
-            }
-            case None => {}
-          }
-      }
+      if b.currentState == State.BEGIN then ctr.redo()
     }
 
     val ButtonTypeJson = new ButtonType("Json")
@@ -248,9 +203,9 @@ object Gui extends JFXApp3 with Observer {
       val res = alert.showAndWait()
 
       res match {
-        case Some(ButtonTypeJson) => {ctr.json_save; }
-        case Some(ButtonTypeXml)  => {ctr.xml_save; }
-        case _                 => { println("Canceled Saving."); }
+        case Some(ButtonTypeJson) => { ctr.json_save; }
+        case Some(ButtonTypeXml)  => { ctr.xml_save; }
+        case _                    => { println("Canceled Saving."); }
       }
     }
 
@@ -278,11 +233,11 @@ object Gui extends JFXApp3 with Observer {
           ctr.json_load(b)
           update("")
         }
-        case Some(ButtonTypeXml)  => {
+        case Some(ButtonTypeXml) => {
           ctr.xml_load(b)
           update("")
         }
-        case _                 => { println("Canceled Loading."); }
+        case _ => { println("Canceled Loading."); }
       }
     }
 
