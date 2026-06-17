@@ -51,7 +51,14 @@ case class DiscardPile (
   }
 
   override def remove(): DiscardPileInterface =
-    new DiscardPile(this.preDisc)
+    new DiscardPile(this.preDisc, true)
+
+
+  override def last: DiscardPileInterface =
+    val last_turned = if (this.preDisc == "Disc") then false else true;
+    new DiscardPile(this.preDisc, last_turned)
+
+  override def pre = this.preDisc
 
   // FILEIO //
   def toJson: JsObject = Json.obj(

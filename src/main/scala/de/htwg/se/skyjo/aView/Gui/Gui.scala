@@ -153,12 +153,12 @@ object Gui extends JFXApp3 with Observer {
         ctr.currMemento.undo(mem, b.aDeck, b.termBoard, b.aDisc) match {
           case Some(resBoard, resDeck, resDisc) => {
 
-            val tmpRedo = ctr.currMemento
-              .undoStack(0)
-              .copy(
-                // lastDisc = DiscardPile(oldUndo.replacedCard.trueCopy.toString())
-                lastDisc = DiscardPile(mem.replacedCard.trueCopy.toString())
-              )
+            // val tmpRedo = ctr.currMemento
+            //   .undoStack(0)
+            //   .copy(
+            //     // lastDisc = DiscardPile(oldUndo.replacedCard.trueCopy.toString())
+            //     lastDisc = DiscardPile(mem.replacedCard.trueCopy.toString())
+            //   )
 
             ctr.guiUndo(resBoard, resDeck, resDisc, b)
 
@@ -171,12 +171,12 @@ object Gui extends JFXApp3 with Observer {
 
             // println("\nREDOSTACK\n")
 
-            ctr.save(tmpRedo)
-            if !ctr.currMemento.undoStack.isEmpty then
-              ctr.currMemento.undoStack.pop()
-            if !ctr.currMemento.redoStack.isEmpty then
-              ctr.currMemento.redoStack.pop()
-            ctr.currMemento.redoStack.push(tmpRedo)
+            // ctr.save(tmpRedo)
+            // if !ctr.currMemento.undoStack.isEmpty then
+            //   ctr.currMemento.undoStack.pop()
+            // if !ctr.currMemento.redoStack.isEmpty then
+            //   ctr.currMemento.redoStack.pop()
+            // ctr.currMemento.redoStack.push(tmpRedo)
             b.syncController
             // println(ctr.currMemento.redoStack(0))
 

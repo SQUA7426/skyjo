@@ -150,7 +150,7 @@ class JsonImpl(ctrl: ControllerInterface) extends FileIOInterface:
 
   implicit val mementoReads: Reads[Memento] = Reads { json =>
     for
-      fD <- (json \ "fromDeck").validate[Boolean]
+      fD <- (json \ "fromDeck").validate[Int]
       tC <- (json \ "takenCard").validate[CardInterface]
       idx <- (json \ "boardIndex").validate[Int]
       rC <- (json \ "replacedCard").validate[CardInterface]

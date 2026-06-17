@@ -107,8 +107,9 @@ class Controller @Inject() (
 
         if mv.undoStack.nonEmpty then
           state.currentState.pre =
-            if getMementos(getPlIdx).undoStack.last._1 then "DECK"
-            else "DISC"
+            if getMementos(getPlIdx).undoStack.last._1 == 0 then "DECK"
+            else if getMementos(getPlIdx).undoStack.last._1 == 1 then "DISC"
+            else "SWITCH"
         else state.currentState.pre = "BEGIN"
       }
       case None => { println("Couldn't UNDO") }
@@ -129,14 +130,16 @@ class Controller @Inject() (
       getDisc
     ) match {
       case Some(memBoard, memDeck, memDisc) => {
+        // println(s"Controller redo:\nmemBoard: ${memBoard}\n\nmemDeck: ${memDeck}\nmemDisc: ${memDisc}")
         state = state.copy(
           boards = getBrds.updated(getPlIdx, memBoard),
           deck = memDeck,
           disc = memDisc
         )
         state.currentState.pre =
-          if mv.redoStack.last._1 then "DECK"
-          else "DISC"
+          if mv.redoStack.last._1 == 0 then "DECK"
+          else if mv.redoStack.last._1 == 1 then "DISC"
+          else "SWITCh"
       }
       case None => { println("Couldn't REDO") }
     }
@@ -274,7 +277,7 @@ class Controller @Inject() (
   def drawFromDeck(pos: Int): Unit = {
     val (card, newDeck) = state.deck.draw(this)
 
-    mem = Memento(true, card, pos, card, getDisc, card.isTurned) // takenCard
+    mem = Memento(0, card, pos, card, getDisc, card.isTurned) // takenCard
     save(mem)
 
     // BoardSWITCH //
@@ -297,6 +300,8 @@ class Controller @Inject() (
       currentState = currState.reset()
     )
 
+    println(s"New State: ${newState}");
+
     // println(newState.disc)
     assertGameState(newState)
   }
@@ -318,13 +323,16 @@ class Controller @Inject() (
     getDiscCard() match {
       case Some(card) => {
         mem = new Memento(
-          false,
-          getDeck.getCard.get,
+          1,
+          getBrds(getPlIdx).getBoardCard(pos),
           pos,
           card,
           getDisc,
           card.isTurned
         )
+
+        // println(s"Controller: drawFromDisc MEM:\n${mem}\n");
+
         getMementos(getPlIdx).save(mem)
         println(currMemento.undoStack(0).toString())
 
@@ -355,6 +363,7 @@ class Controller @Inject() (
     val newBrd = getReducedBrd(tmpBrd)._1
     val gottenMem = getMementos(getPlIdx).undoStack(0)
     val uptMem = gottenMem.copy(
+      boardIndex = idx,
       takenCard = Card(Integer.parseInt(tmpDeck.toString())),
       replacedCard = oldCard
     )
@@ -364,12 +373,16 @@ class Controller @Inject() (
       boards = getBrds.updated(getPlIdx, newBrd),
       currentState = currState.reset()
     )
+
+    println(s"Controller switchDeckDisc: uptMem:\n${uptMem}\n");
+
     assertGameState(newGameState)
 
   def tuiSwitch(gs: GameState, tmpDeck: DeckInterface): Unit =
     printf(">> turn Position: ")
     val pos2 = readLine()
     val idx = Try(Integer.parseInt(pos2)).getOrElse(0)
+    println(s"Controller tuiSwitch: pos2: ${idx}");
     val newGS =
       switchDeckDisc(gs, getBrds(getPlIdx), tmpDeck, idx)
 
@@ -529,7 +542,7 @@ class Controller @Inject() (
 
     b.manyCards = b.BOARD_INIT(false)
     b.vDeck.cCard = toCard(b.aDeck.turnUpperCard)
-    b.vDiscard.cCard = getDiscCard().get
+    b.vDiscard.cCard = toCard(state.disc, if state.disc.pre == "Disc" then true else false)
 
     b.syncController
 

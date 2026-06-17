@@ -25,7 +25,7 @@ class MementoSpec extends AnyWordSpec with Matchers {
     val card8 = ctr.toCard(8)
     val mc = ctr.currMemento
     "save, undo and redo" in:
-      val mem = Memento(false,card8,0,card8,ctr.getDisc,false)
+      val mem = Memento(0,card8,0,card8,ctr.getDisc,false)
       mc.save(mem)
       mc.undo(mem, ctr.getDeck, ctr.getBrds(0), ctr.getDisc)
       mc.redo(mem, ctr.getDeck, ctr.getBrds(0), ctr.getDisc)

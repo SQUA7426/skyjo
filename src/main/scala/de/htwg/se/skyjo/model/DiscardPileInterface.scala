@@ -10,6 +10,9 @@ trait DiscardPileInterface:
   def getDiscCard(ctrl: ControllerInterface): Option[CardInterface]
   def isTurned: Boolean
 
+  def last: DiscardPileInterface
+  def pre: String
+
   def putToDiscardPile(from: Any, ctrl: ControllerInterface): (DiscardPileInterface, DeckInterface)
   def remove(): DiscardPileInterface
 

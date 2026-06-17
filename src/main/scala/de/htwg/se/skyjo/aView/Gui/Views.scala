@@ -307,7 +307,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
 
             ctr.currMemento.save(
               Memento(
-                false,
+                1,
                 preDisc,
                 index,
                 preBoard.getBoard.flatten.apply(index),
@@ -315,6 +315,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
                 preBoard.getBoard.flatten.apply(index).isTurned
               )
             )
+            println("viewBoard -> switchDiscB MEM:")
             println(ctr.currMemento.undoStack(0))
             currentState = currentState.reset()
 
@@ -338,18 +339,33 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
             aDeck = new Deck(tmpDeck.remove(1))
             vDeck.cCard = ctr.toCard(aDeck.turnUpperCard)
 
+            ctr.drawFromDeck(index)
+
             ctr.currMemento.save(
               Memento(
-                true,
+                0,
                 ctr.toCard(turnedDeck.toString()),
                 index,
                 preBoard.getBoard.flatten.apply(index),
                 preDisc,
-                preBoard.getBoard.flatten.apply(index).isTurned
+                preDisc.isTurned
               )
             )
-            println(ctr.currMemento.undoStack(0))
+            println("viewBoard -> switchDeckB MEM:")
+
+            println(ctr.currMemento.undoStack)
+
             currentState = currentState.reset()
+
+            // println("Asserting new GameSte to Ctr...");
+            // ctr.assertGameState(ctr.getGameState.copy(
+            //   // boards = ctr.getBrds(ctr.getPlIdx).(ctr.toCard(tmpDeck), index),
+            //
+            //    currentState = currentState
+            // ));
+            // println(ctr.getBrds(ctr.getPlIdx))
+            // println(ctr.getDeck)
+            // println(ctr.getDisc)
 
             update("")
           },
@@ -395,13 +411,16 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane)
         currentState = currentState.nextState()
         currentState.pre = "BOARD"
         val newMem = Memento(
-          fromDeck = false,
+          fromDeck = 2,
           takenCard = turnedDeck.getCard.get,
           boardIndex = 0, // Standard
           lastDisc = aDisc,
           replacedCard = ctr.toCard(turnedDeck.toString()),
           replacedCardTurned = turnedDeck.getCard.get.isTurned
         )
+
+        println(s"ViewDisc -> switchDeckDisc MEM:\n{newMem}")
+
         ctr.save(newMem)
 
         update("")

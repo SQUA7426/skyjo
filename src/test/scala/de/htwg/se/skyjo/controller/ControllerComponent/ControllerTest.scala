@@ -60,7 +60,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
       "hasdrawn is a Boolean" in:
         ctr.hasDrawn shouldBe a[Boolean]
 
-      val mem: Memento = Memento(true,card8,0,card8,ctr.getDisc,false)
+      val mem: Memento = Memento(0,card8,0,card8,ctr.getDisc,false)
       "execute save" in:
         mem.toString() shouldBe a[String]
         val json_mem = mem.toJson
@@ -69,7 +69,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
       //   ctr.undo()
       "execute redo" in:
         ctr.redo()
-      val mem2 = mem.copy(fromDeck = false)
+      val mem2 = mem.copy(fromDeck = 1)
       val ctr2 = ctr
       "execute undo2" in:
         ctr2.currMemento.undoStack.push(mem)

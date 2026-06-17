@@ -40,7 +40,9 @@ class SwitchHandler(ctrl: ControllerInterface, b: BoardInterface, d: DeckInterfa
         println("Switch")
         val (swDisc, swDeck) = ctrl.putToDiscardPile(d)
         // println(s"swDisc: ${swDisc}")
-        val tmpMem = Memento(fromDeck = true, takenCard = swDisc.getDiscCard(ctrl).get, boardIndex = 0, replacedCard = disc.getDiscCard(ctrl).get, disc, disc.isTurned)
+        val tmpMem = Memento(fromDeck = 2, takenCard = swDisc.getDiscCard(ctrl).get, boardIndex = pos, replacedCard = disc.getDiscCard(ctrl).get, disc, disc.isTurned)
+        
+        println(s"SwitchHandler: tmpMem:\n${tmpMem}\n");
 
         ctrl.save(tmpMem)
 
