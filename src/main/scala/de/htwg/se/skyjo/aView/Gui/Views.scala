@@ -171,11 +171,12 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane) {
             else if currentState.pre == "DISC" then ctr.drawFromDisc(idx)
             else ()
           else if isDisc && currentState.pre == "DECK" then
-            ctr.guiConfirmDeckToDiscAndTurn(idx)
+            ctr.guiDeckToDisc()
           else ()
 
         case State.END =>
-          ctr.guiTurnBrdCard(idx)
+          if idx >= 0 then
+            ctr.guiTurnBrdCard(idx)
       }
 
       if termBoard.getBoard.forall(row => row.forall(c => c.isTurned == true))

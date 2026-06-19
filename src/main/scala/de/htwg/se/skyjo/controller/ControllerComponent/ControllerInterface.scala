@@ -86,6 +86,8 @@ trait ControllerInterface extends Observable:
 
   def guiSelectDisc(): Unit
 
+  def guiDeckToDisc(): Unit
+
   // FILEIO //
   def syncControllerGui(b: BoardView): Unit
 
@@ -97,6 +99,10 @@ trait ControllerInterface extends Observable:
 
   // OUTSIDE FUNCTIONS //
   def toCard(x: Any): CardInterface
+  def toCard(x: Any, turned: Boolean): CardInterface =
+    val base = toCard(x)  // bestehende Logik wiederverwenden
+    if turned then base.trueCopy else base.falseCopy
+
 
   def isCard(c: Any): Boolean
 

@@ -28,7 +28,11 @@ case class Memento(
     replacedCardTurned: Boolean
 ) {
   override def toString(): String = {
-    val s = (s"Card is Taken From ${if fromDeck == 0 then "Deck" else if fromDeck == 1 then "Disc" else  "Switch"}\n")
+    val s = (s"Card is Taken From ${
+        if fromDeck == 0 then "Deck"
+        else if fromDeck == 1 then "Disc"
+        else "Switch"
+      }\n")
     val s1 =
       s + (s"Taken Card: ${takenCard.trueCopy}; turned: ${takenCard.isTurned}\n")
     val s2 = s1 + (s"last Board Idx: ${boardIndex}\n")
@@ -54,10 +58,10 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
 
   def save(m: Memento): Unit = {
     // println("clearing undoStack...")
-    // undoStack.clear()
-    if !undoStack.isEmpty then undoStack.pop()
+    // if !undoStack.isEmpty then undoStack.pop()
     // println("saving...")
     undoStack.push(m)
+    redoStack.clear()
     // println(undoStack)
   }
 
@@ -67,154 +71,69 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
       board: BoardInterface,
       disc: DiscardPileInterface
   ): Option[(BoardInterface, DeckInterface, DiscardPileInterface)] = {
-    if (memento.fromDeck == 0) {
-      println("Memento fromDeck");
+    if undoStack.isEmpty then return None
+    val memento = undoStack.pop()
+    redoStack.push(memento) // Original direkt rüber — kein copy, kein Tauschen
 
-      val newBoard: BoardInterface =
-        board.swapFromMem(memento.replacedCard, memento.boardIndex)
-      val tempV: Vector[CardInterface] = memento.takenCard +: deck.getDeckCards
-      val updtDeck = new Deck(tempV, memento.takenCard.toString())
+    memento.fromDeck match {
+      case 0 =>
+        val newBoard =
+          board.swapFromMem(memento.replacedCard, memento.boardIndex)
+        val updtDeck = new Deck(
+          deck.getDeckCards :+ memento.takenCard,
+          memento.takenCard.getValue.toString
+        )
+        Some(newBoard, updtDeck, memento.lastDisc)
 
-      redoStack.push(memento)
-      if !undoStack.isEmpty then undoStack.pop()
-      // println(redoStack)
+      case 1 =>
+        // Disc→Board Undo: Boardkarte zurück auf Board, disc-Karte zurück auf Disc
+        val newBoard =
+          board.swapFromMem(memento.replacedCard, memento.boardIndex)
+        val (disc2, updtDeck) =
+          disc.putToDiscardPile(memento.takenCard.getValue.toString, ctrl)
+        Some(newBoard, updtDeck, disc2)
 
-      Some(newBoard, deck, memento.lastDisc)
-    } else if (memento.fromDeck == 1) { // FromDisc
-      println("Memento fromDisc");
-
-      val newBoard: BoardInterface =
-        board.swapFromMem(memento.takenCard, memento.boardIndex)
-
-      // println(s"New Board:\n${newBoard}\n");
-
-      val (disc2, updtDeck) =
-        disc.putToDiscardPile(memento.replacedCard.toString(), ctrl)
-
-      val redo_disc = disc.putToDiscardPile(memento.takenCard.toString, ctrl)._1
-      // println(s"redo_disc:${redo_disc}");
-
-      redoStack.push(memento.copy(takenCard = memento.replacedCard, replacedCard = memento.takenCard, lastDisc = redo_disc))
-      if !undoStack.isEmpty then undoStack.pop()
-
-      // println(redoStack)
-      Some(newBoard, updtDeck, disc2)
-    } else {
-      println("Memento switch");
-
-      println(memento);
-
-      val newBoard = board.swapFromMem(ctrl.toCard(memento.replacedCard, !memento.replacedCard.isTurned),memento.boardIndex);
-
-      // println(s"New Board:\n${newBoard}\n");
-
-      val deck2 = new Deck(deck.getDeckCards :+ memento.takenCard);
-      val disc2 = memento.lastDisc;
-
-      // println(s"deck2: ${deck2.getCard} ; disc: ${disc2}");
-
-      val redo_disc = new DiscardPile(memento.replacedCard.toString(), true);
-
-      redoStack.push(memento.copy(
-        2,
-        memento.takenCard,
-        memento.boardIndex,
-        memento.replacedCard,
-        redo_disc,
-        ))
-
-      // println(s"\nMemento switch redoStack:");
-      // println(redoStack);
-
-      Some(newBoard, deck2, disc2)
+      case _ => // fromDeck == 2: Deck→Disc + BoardTurn
+        val cardToRestore =
+          ctrl.toCard(memento.replacedCard, memento.replacedCardTurned)
+        val newBoard = board.swapFromMem(cardToRestore, memento.boardIndex)
+        val deck2 = new Deck(deck.getDeckCards :+ memento.takenCard)
+        Some(newBoard, deck2, memento.lastDisc)
     }
   }
+
   def redo(
       memento: Memento,
       deck: DeckInterface,
       board: BoardInterface,
       disc: DiscardPileInterface
   ): Option[(BoardInterface, DeckInterface, DiscardPileInterface)] = {
+    if redoStack.isEmpty then return None
+    val memento = redoStack.pop()
+    undoStack.push(memento) // Original zurück — kein copy
 
-    if (memento.fromDeck == 0) {
-      val newBoard: BoardInterface =
-        board.swapFromMem(memento.takenCard, memento.boardIndex);
+    memento.fromDeck match {
+      case 0 =>
+        val newBoard = board.swapFromMem(memento.takenCard, memento.boardIndex)
+        val disc2 =
+          new DiscardPile(memento.replacedCard.getValue.toString, true)
+        Some(newBoard, deck, disc2)
 
-      val updtDeck = deck
-      val (uptTaken, uptReplaced) = (memento.replacedCard, memento.takenCard)
-      val tmpDisc = new DiscardPile(memento.replacedCard.toString())
-      val tmpMemento = Memento(
-        0,
-        uptTaken,
-        memento.boardIndex,
-        uptReplaced,
-        memento.lastDisc,
-        memento.lastDisc.isTurned
-      )
-      undoStack.push(tmpMemento)
-      // if !redoStack.isEmpty then redoStack.pop()
-      redoStack.push(tmpMemento)
-      // println(undoStack)
+      case 1 =>
+        // Disc→Board Redo: disc-Karte auf Board, Boardkarte auf Disc
+        val newBoard = board.swapFromMem(memento.takenCard, memento.boardIndex)
+        val disc2 =
+          disc.putToDiscardPile(memento.replacedCard.getValue.toString, ctrl)._1
+        Some(newBoard, deck, disc2)
 
-      Some((newBoard, updtDeck, tmpDisc))
-
-    } else if (memento.fromDeck == 1) {
-
-      val newBoard: BoardInterface = board.swapFromMem(
-        ctrl.toCard(memento.replacedCard),
-        memento.boardIndex
-      );
-
-      // println(s"New Board:\n${newBoard}\n");
-
-      val disc2: DiscardPileInterface =
-        disc.putToDiscardPile(memento.takenCard.toString(), ctrl)._1
-
-      // println(s"in redo fromDisc - takenCard: ${memento.takenCard}");
-
-      val updtDeck = deck
-      val tmpMemento = Memento(
-        1,
-        ctrl.toCard(disc),
-        memento.boardIndex,
-        memento.replacedCard,
-        memento.lastDisc,
-        memento.lastDisc.isTurned
-      )
-      undoStack.push(tmpMemento)
-
-      if !redoStack.isEmpty then redoStack.pop()
-      redoStack.push(tmpMemento)
-
-      // println(undoStack)
-      Some((newBoard, updtDeck, disc2))
-    } else {
-      println("Memento Redo:");
-      println(memento);
-
-      val newBoard = board.swapFromMem(memento.replacedCard, memento.boardIndex);
-      println(s"New Board:\n${newBoard}\n");
-
-      val (disc2, deck2) = memento.lastDisc.putToDiscardPile(memento.takenCard, ctrl);
-
-      println(s"deck2: ${deck2.getCard} ; disc: ${disc2}");
-
-      val tmpMemento = Memento(
-        2,
-        memento.replacedCard,
-        memento.boardIndex,
-        memento.takenCard,
-        memento.lastDisc,
-        memento.lastDisc.isTurned
-      )
-      undoStack.push(tmpMemento)
-      if !redoStack.isEmpty then redoStack.pop()
-      redoStack.push(tmpMemento)
-
-      Some((newBoard, deck2, disc2))
+      case _ => // fromDeck == 2
+        val newBoard =
+          board.swapFromMem(memento.replacedCard.trueCopy, memento.boardIndex)
+        val disc2 = new DiscardPile(memento.takenCard.getValue.toString, true)
+        val deck2 = new Deck(deck.getDeckCards.dropRight(1))
+        Some(newBoard, deck2, disc2)
     }
   }
-
   // FILEIO //
   // def toJson: JsObject = Json.obj(
   //   "undoStack" -> Json.toJson(undoStack.toSeq.map(_.toJson)),
@@ -258,12 +177,12 @@ class MoveCaretaker(val ctrl: ControllerInterface) {
       val fromD: Int = (stackXml \ "fromDeck").text.toInt
       val taken: CardInterface = ctrl.toCard(
         (stackXml \ "takenCard" \ "value"),
-        (stackXml \ "takenCard" \ "turned")
+        (stackXml \ "takenCard" \ "turned").text.toBoolean
       )
       val idx = (stackXml \ "boardIndex").text.toInt
       val replaced: CardInterface = ctrl.toCard(
         (stackXml \ "replacedCard" \ "value"),
-        (stackXml \ "replacedCard" \ "turned")
+        (stackXml \ "replacedCard" \ "turned").text.toBoolean
       )
       val ldisc = { stackXml \ "lastDisc" }
       val discP = { ldisc \ "discpile" }.text

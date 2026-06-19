@@ -34,7 +34,7 @@ case class Board(
       throw new IndexOutOfBoundsException(
         s"Idx: ${pos} is not a valid Board entry!"
       )
-    brd.flatten.apply(pos).trueCopy
+    brd.flatten.apply(pos)
 
   def getSize: (Int, Int) = (xSize, ySize)
 
@@ -162,6 +162,7 @@ case class Board(
         vvc = vvc.updated(row, vc)
       }
       vc = vc.updated(col, vec(idx))
+      if (col == x - 1) then vvc = vvc.updated(row, vc)
     }
     Board(x, y, vvc)
 

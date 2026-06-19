@@ -20,14 +20,14 @@ case class DiscardPile (
 
   // CTRL //
   override def getDiscCard(ctrl: ControllerInterface): Option[CardInterface] =
-    if discPile == "Disc" || discPile == "" then None else Some(ctrl.toCard(discPile))
+    if discPile == "Disc" || discPile == "" then None else Some(ctrl.toCard(discPile).trueCopy)
 
   def isTurned: Boolean = turned
 
   override def putToDiscardPile(from: Any, ctrl: ControllerInterface): (DiscardPile, DeckInterface) = {
     from match {
       case card: CardInterface =>
-        val retDisc = new DiscardPile(card.trueCopy.toString)
+        val retDisc = new DiscardPile(card.trueCopy.toString, card.isTurned)
         retDisc.preDisc = this.discPile
         (retDisc, new Deck(ctrl.getDeck.remove(1)))
       case deck: DeckInterface => {
