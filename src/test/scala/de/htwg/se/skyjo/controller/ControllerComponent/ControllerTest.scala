@@ -75,7 +75,8 @@ class ControllerTest extends AnyWordSpec with Matchers {
         ctr.redo()
       val mem2 = mem.copy(fromDeck = 1)
       val ctr2 = ctr
-      val gs = ctr.copy(Vector.empty, Vector.empty, Deck(ctr), DiscardPile("Disc"), 0, State.BEGIN)
+      // val gs = ctr.copy(Vector.empty, Vector.empty, Deck(ctr), DiscardPile("Disc"), 0, State.BEGIN)
+      val gs2 = ctr.copy(mems = Vector.empty, brds = Vector.empty, d = Deck(Vector.empty, "Deck"), disc = DiscardPile("Disc", false), idx = 0, currentState = State.BEGIN)
       "execute undo2" in:
         ctr2.currMemento.undoStack.push(mem)
         ctr2.undo()

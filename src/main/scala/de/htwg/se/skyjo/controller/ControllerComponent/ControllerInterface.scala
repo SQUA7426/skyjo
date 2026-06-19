@@ -101,7 +101,7 @@ trait ControllerInterface extends Observable:
   // OUTSIDE FUNCTIONS //
   def toCard(x: Any): CardInterface
   def toCard(x: Any, turned: Boolean): CardInterface =
-    val base = toCard(x)  // bestehende Logik wiederverwenden
+    val base = toCard(x)
     if turned then base.trueCopy else base.falseCopy
 
 
