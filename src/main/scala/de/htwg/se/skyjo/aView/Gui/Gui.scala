@@ -83,7 +83,6 @@ object Gui extends JFXApp3 with Observer {
   override def update(choose: String): Boolean = {
     Platform.runLater {
       try {
-        println("Gui.update aufgerufen")
         val gs = ctr.getGameState
 
         b.termBoard = gs.boards(gs.plIdx)
