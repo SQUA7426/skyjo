@@ -86,7 +86,6 @@ object Gui extends JFXApp3 with Observer {
         println("Gui.update aufgerufen")
         val gs = ctr.getGameState
 
-        // BoardView an GameState anpassen
         b.termBoard = gs.boards(gs.plIdx)
         b.aDeck = gs.deck
         b.aDisc = gs.disc
@@ -95,7 +94,6 @@ object Gui extends JFXApp3 with Observer {
         b.manyCards = b.BOARD_INIT(false)
         val boardUI: Seq[Node] = b.viewBoard()
 
-        // Deck-Preview/Deck-Top anpassen
         gs.previewDeckCard match
           case Some(card) =>
             b.vDeck.cCard = card
@@ -120,7 +118,6 @@ object Gui extends JFXApp3 with Observer {
         b.vDeck.uptCardView
         b.manyCards.foreach(_.uptCardView)
 
-        // Scenegraph neu setzen: Board + Buttons
         val newUI: Seq[Node] = boardUI :+ guiButtons(stage)
         boardLayer.children_=(newUI)
       } catch {
@@ -229,14 +226,10 @@ object Gui extends JFXApp3 with Observer {
       val res = alert.showAndWait()
 
       res match {
-        case Some(ButtonTypeJson) => {
+        case Some(ButtonTypeJson) =>
           ctr.json_load(b)
-          update("")
-        }
-        case Some(ButtonTypeXml) => {
+        case Some(ButtonTypeXml) =>
           ctr.xml_load(b)
-          update("")
-        }
         case _ => { println("Canceled Loading."); }
       }
     }

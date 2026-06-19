@@ -8,7 +8,6 @@ import scala.util.Try
 import scala.xml.XML
 
 class XmlImpl(ctrl: ControllerInterface) extends FileIOInterface {
-  // private val filename = "game_state_data.xml"
 
   def load(filename: String): GameState =
     val tempState = new GameState(Vector.empty, Vector.empty, null, null, 0, State.BEGIN)

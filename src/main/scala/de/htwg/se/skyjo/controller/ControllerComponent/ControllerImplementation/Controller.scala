@@ -409,7 +409,8 @@ class Controller @Inject() (
 
     b.manyCards = b.BOARD_INIT(false)
     b.vDeck.cCard = toCard(b.aDeck.turnUpperCard)
-    b.vDiscard.cCard = getDiscCard().get
+    b.vDiscard.cCard = getDiscCard().getOrElse(toCard(0).falseCopy)
+    b.vDiscard.turned = getDiscCard().isDefined
 
   def xml_save: Unit = {
     val xml_IO = injector.instance[XmlImpl]
@@ -425,7 +426,12 @@ class Controller @Inject() (
 
     val newState = xml_IO.load(xmlFileName)
 
-    assertGameState(newState)
+    require(newState.deck != null, "Loaded GameState has null deck!")
+    require(newState.disc != null, "Loaded GameState has null disc!")
+
+    val cleanState = newState.copy(currentState = State.BEGIN)
+
+    assertGameState(cleanState)
 
     // view
     b match {
@@ -437,7 +443,9 @@ class Controller @Inject() (
     val json_IO = injector.instance[JsonImpl]
     val newState = json_IO.load(jsonFileName)
 
-    assertGameState(newState)
+    val cleanState = newState.copy(currentState = State.BEGIN)
+
+    assertGameState(cleanState)
 
     b match {
       case bv: BoardView => syncControllerGui(bv)
@@ -512,11 +520,10 @@ class Controller @Inject() (
       resDisc: DiscardPileInterface,
       b: BoardView
   ): Unit =
-    // println("UNDO")
     b.termBoard = resBoard
     b.aDeck = resDeck
     b.aDisc = resDisc
-    // val oldUndo = currMemento.undoStack(0)
+
     assertGameState(
       getGameState.copy(
         boards = getBrds.updated(getPlIdx, resBoard),
@@ -572,10 +579,9 @@ class Controller @Inject() (
         println(s"swCard: ${swCard}; turned: ${swCard.isTurned}")
         val (reduced_brd, _, _) = getReducedBrd(tmpBrd)
         mem = Memento(0, card, pos, swCard, getDisc, swCard.isTurned)
-        // save(mem)
-        // mem = mem.copy(replacedCard = swCard)
-        // println(s"guiConfirmDeckSwitch MEM:\n${mem}\n")
+
         save(mem)
+
         val currPlayer = getPlIdx
         val newDisc = putToDiscardPile(swCard)._1
         val newState = state.copy(
@@ -597,22 +603,19 @@ class Controller @Inject() (
         val currPlayer = getPlIdx
         val board = getBrds(currPlayer)
 
-        // Boardkarte VOR dem Umdrehen merken
         val boardCardBefore = board.getBoardCard(pos)
 
         val newDisc = putToDiscardPile(card)._1
         val newBoard = board.turnBoardCard(pos)
         val (reduced_brd, _, _) = getReducedBrd(newBoard)
 
-        // Memento: fromDeck=2, takenCard=die Deck-Karte (geht auf Disc),
-        // replacedCard=Boardkarte vor dem Turn, lastDisc=Disc VOR diesem Zug
         mem = Memento(
           2,
-          card, // takenCard: Deck-Karte → geht auf Disc
-          pos, // boardIndex: Position der umgedrehten Karte
-          boardCardBefore, // replacedCard: Boardkarte vor dem Umdrehen
-          getDisc, // lastDisc: Disc-Zustand BEVOR wir putToDiscardPile aufrufen
-          boardCardBefore.isTurned // replacedCardTurned: war sie vorher turned?
+          card,
+          pos,
+          boardCardBefore,
+          getDisc,
+          boardCardBefore.isTurned
         )
         save(mem)
 
@@ -640,21 +643,20 @@ class Controller @Inject() (
     val newBoard = board.turnBoardCard(pos)
     val (reduced_brd, _, _) = getReducedBrd(newBoard)
 
-    // Memento nur wenn dieser Turn aus einem Deck→Disc-Zug stammt
     pendingDeckCard match {
       case Some(deckCard) =>
         mem = Memento(
           2,
-          deckCard, // takenCard: die Deck-Karte
-          pos, // boardIndex: jetzt bekannt
-          boardCardBefore, // replacedCard: Boardkarte vorher
-          pendingDiscBefore.getOrElse(getDisc), // lastDisc: vor dem Ablegen
+          deckCard,
+          pos,
+          boardCardBefore,
+          pendingDiscBefore.getOrElse(getDisc),
           boardCardBefore.isTurned
         )
         save(mem)
         pendingDeckCard = None
         pendingDiscBefore = None
-      case None => () // normaler guiTurnBrdCard ohne Deck-Vorgeschichte
+      case None => ()
     }
 
     val newState = state.copy(

@@ -29,7 +29,6 @@ import scala.io.Source
 import java.nio.file.{Files, Paths}
 
 class JsonImpl(ctrl: ControllerInterface) extends FileIOInterface:
-  // private val filename = "game_state_data.json"
 
   def load(filename: String): GameState =
     val input = Files.readString(Paths.get(f"${ctrl.path}$filename"))

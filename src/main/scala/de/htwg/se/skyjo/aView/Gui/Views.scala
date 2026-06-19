@@ -177,6 +177,7 @@ case class BoardView(ctr: ControllerInterface, var boardPane: Pane) {
         case State.END =>
           if idx >= 0 then
             ctr.guiTurnBrdCard(idx)
+        case _ => ()
       }
 
       if termBoard.getBoard.forall(row => row.forall(c => c.isTurned == true))
