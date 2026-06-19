@@ -3,7 +3,7 @@ package de.htwg.se.skyjo.controller.ControllerComponent
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.*
 import de.htwg.se.skyjo.model.modelInterfaceImplementation.{Deck, DiscardPile, Board, Card}
 import de.htwg.se.skyjo.util.{Mediator, Memento, MoveCaretaker}
-import de.htwg.se.skyjo.model.{GameState, DeckInterface, CardInterface, BoardInterface, DiscardPileInterface}
+import de.htwg.se.skyjo.model.{GameState, DeckInterface, CardInterface, BoardInterface, DiscardPileInterface, State}
 import de.htwg.se.skyjo.fileIoComponent.fileIoJsonImpl.JsonImpl
 import de.htwg.se.skyjo.fileIoComponent.fileIoXmlImpl.XmlImpl
 
@@ -75,7 +75,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
         ctr.redo()
       val mem2 = mem.copy(fromDeck = 1)
       val ctr2 = ctr
-      val gs = ctr.copy()
+      val gs = ctr.copy(Vector.empty, Vector.empty, Deck(ctr), DiscardPile("Disc"), 0, State.BEGIN)
       "execute undo2" in:
         ctr2.currMemento.undoStack.push(mem)
         ctr2.undo()
