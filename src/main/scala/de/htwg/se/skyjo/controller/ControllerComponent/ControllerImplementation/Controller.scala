@@ -387,7 +387,7 @@ class Controller @Inject() (
 
   // PLAYER //
   def getPlIdx: Int = state.plIdx
-  def nextPlayer: Unit = copy(idx = (getPlIdx + 1) % getBrds.size)
+  def nextPlayer: Unit = copy_state(idx = (getPlIdx + 1) % getBrds.size)
 
   // STATE //
   def currState: State = state.currentState
@@ -488,7 +488,7 @@ class Controller @Inject() (
     case _                => false
   }
 
-  def copy(
+  def copy_state(
       // med: Mediator = getMediator,
       mems: Vector[MoveCaretaker] = getMementos,
       brds: Vector[BoardInterface] = getBrds,
