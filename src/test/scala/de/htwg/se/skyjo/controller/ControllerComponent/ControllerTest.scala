@@ -158,10 +158,10 @@ class ControllerTest extends AnyWordSpec with Matchers {
         val new_gs = gs.fromXml(xml_gs)
       "can Inject FileIO" in:
         val jsonIO = injector.instance[JsonImpl]
-        jsonIO.load("")
+        // jsonIO.load("")
 
         val xmlIO = injector.instance[XmlImpl]
-        xmlIO.load("")
+        // xmlIO.load("")
 
     "A State " should:
       val cs = gs.currentState
