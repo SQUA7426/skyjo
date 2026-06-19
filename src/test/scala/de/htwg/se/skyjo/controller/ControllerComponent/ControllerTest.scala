@@ -150,6 +150,17 @@ class ControllerTest extends AnyWordSpec with Matchers {
         ctr.undo()
         ctr.redo()
         ctr.guiRedo(reducibleBoard, ctr.getDeck, ctr.getDisc, bv)
+
+      "others" in:
+        ctr.guiPreviewDeckCard()
+        ctr.guiConfirmDeckSwitch(0)
+        ctr.guiConfirmDeckToDiscAndTurn(0)
+
+        ctr.guiTurnBrdCard(0)
+
+        ctr.guiSelectDisc()
+
+        ctr.guiDeckToDisc()
     }
 
     "A GAMESTATE" should:
