@@ -40,6 +40,8 @@ class ControllerTest extends AnyWordSpec with Matchers {
         val convDeck = ctr.toCard(ctr.getDeck)
         val convDisc = ctr.toCard(ctr.getDisc)
         val convNone = ctr.toCard(None)
+        val true_toCard = ctr.toCard(1, turned = true)
+        val false_toCard = ctr.toCard(1, turned = false)
       "get Mediator, GameState, Deck and Discard-Card" in:
         ctr.copy(ctr.getMementos,ctr.getBrds, ctr.getDeck,ctr.getDisc, 0,ctr.currState) shouldBe a[GameState]
         ctr.getMediator shouldBe a[Mediator]
@@ -71,6 +73,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
         ctr.redo()
       val mem2 = mem.copy(fromDeck = 1)
       val ctr2 = ctr
+      val gs = ctr.copy()
       "execute undo2" in:
         ctr2.currMemento.undoStack.push(mem)
         ctr2.undo()
@@ -89,6 +92,17 @@ class ControllerTest extends AnyWordSpec with Matchers {
         ctr3.draw()
       "move to next player turn" in:
         ctr2.nextPlayer
+      val mem3 = mem.copy(fromDeck = 2)
+      "execute memento fromDeck == 2" in:
+        ctr2.currMemento.redoStack.push(mem)
+        ctr2.redo()
+        ctr2.currMemento.undoStack.push(mem3)
+        ctr2.undo()
+        ctr2.currMemento.redoStack.push(mem)
+        ctr2.redo()
+        ctr2.currMemento.undoStack.push(mem3)
+        ctr2.undo()
+
 
       "draw from Deck and DiscardPile" in:
         ctr.draw()
@@ -144,7 +158,10 @@ class ControllerTest extends AnyWordSpec with Matchers {
         val new_gs = gs.fromXml(xml_gs)
       "can Inject FileIO" in:
         val jsonIO = injector.instance[JsonImpl]
+        jsonIO.load("")
+
         val xmlIO = injector.instance[XmlImpl]
+        xmlIO.load("")
 
     "A State " should:
       val cs = gs.currentState
