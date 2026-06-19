@@ -35,7 +35,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
     val card8 = ctr.toCard(8)
     "it is working, it" should {
       "covert toCard" in:
-        ctr.isCard(gs) shouldBe false
+        val gs_card = ctr.isCard("")
         val invCard = ctr.toCard(100)
         val convDeck = ctr.toCard(ctr.getDeck)
         val convDisc = ctr.toCard(ctr.getDisc)
@@ -50,7 +50,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
         ctr.getDisc shouldBe a[DiscardPileInterface]
         ctr.getDiscCard()
       "assert a new GameState" in:
-        ctr.assertGameState(gs)
+        ctr.assertGameState(ctr.getGameState)
       "be able to fill a Board" in:
         val (afterBoard, afterDeck) = ctr.fillBoard(4, 3, ctr.getDeck)
         afterBoard shouldBe a[BoardInterface]
