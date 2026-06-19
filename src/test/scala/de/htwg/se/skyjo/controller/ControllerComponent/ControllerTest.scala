@@ -43,7 +43,7 @@ class ControllerTest extends AnyWordSpec with Matchers {
         val true_toCard = ctr.toCard(1, turned = true)
         val false_toCard = ctr.toCard(1, turned = false)
       "get Mediator, GameState, Deck and Discard-Card" in:
-        ctr.copy(ctr.getMementos,ctr.getBrds, ctr.getDeck,ctr.getDisc, 0,ctr.currState) shouldBe a[GameState]
+        ctr.copy_state(ctr.getMementos,ctr.getBrds, ctr.getDeck,ctr.getDisc, 0,ctr.currState) shouldBe a[GameState]
         ctr.getMediator shouldBe a[Mediator]
         ctr.getGameState shouldBe a[GameState]
         ctr.getDeck shouldBe a[DeckInterface]
