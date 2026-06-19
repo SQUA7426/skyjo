@@ -37,6 +37,7 @@ trait ControllerInterface extends Observable:
   def getSize: (Int, Int)
   def turnUpperCard: String
   def reduce(row: Int, col: Int): (BoardInterface, Boolean, Int, Int)
+  def reduceCurrentBoard(): Unit
   def swapFromMem(c: CardInterface, pos: Int): BoardInterface
 
   // CTRL - BOARD //

@@ -232,11 +232,8 @@ class Controller @Inject() (
           .toArray
       allUpdatedBrds(0)
     else (updatedBoard, -1, -1)
-    // println(s"Board after reduced:\n$endBoard")
-    // notifyObservers
     endBoard
 
-  // Suggestion
   def reduceCurrentBoard(): Unit = {
     val board = getBrds(getPlIdx)
     val (reduced, row, col) = getReducedBrd(board)
@@ -276,7 +273,6 @@ class Controller @Inject() (
     val currPlayer = getPlIdx
     val newDisc = putToDiscardPile(swCard)._1
 
-    // Erst JETZT das vollständige Memento bauen und einmal speichern:
     mem = Memento(0, card, pos, swCard, getDisc, swCard.isTurned)
     save(mem)
 
@@ -308,21 +304,20 @@ class Controller @Inject() (
       case Some(card) => {
         mem = Memento(
           1,
-          card, // takenCard: die Disc-Karte (wurde genommen)
-          pos, // boardIndex
+          card,
+          pos,
           getBrds(getPlIdx).getBoardCard(
             pos
-          ), // replacedCard: die Boardkarte (wurde ersetzt)
-          getDisc, // lastDisc: Disc vor dem Zug
+          ),
+          getDisc,
           getBrds(getPlIdx).getBoardCard(pos).isTurned
         )
-        save(mem) // ← save() statt getMementos(getPlIdx).save(mem) direkt
-        //   damit Controller.mem auch gesetzt wird
+        save(mem)
 
         val (newCard, newBrd) = getBrds(getPlIdx).switch(card, pos)
         val (reduced_brd, _, _) = getReducedBrd(newBrd)
         val newDisc = new DiscardPile(
-          newCard.getValue.toString, // ← getValue statt toString
+          newCard.getValue.toString,
           true
         )
         val currPlayer = getPlIdx
