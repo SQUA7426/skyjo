@@ -200,6 +200,7 @@ class Controller @Inject() (
   }
 
   def getSize: (Int, Int) = getBrds(getPlIdx).getSize
+  def peekUpperCard: String = state.deck.peekUpperCard
   def turnUpperCard: String = state.deck.turnUpperCard
   def reduce(row: Int, col: Int): (BoardInterface, Boolean, Int, Int) =
     getBrds(getPlIdx).reduce(row, col)

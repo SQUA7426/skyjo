@@ -2,7 +2,6 @@ package de.htwg.se.skyjo.controller.ControllerComponent
 
 import de.htwg.se.skyjo.model.{BoardInterface, CardInterface, DeckInterface, DiscardPileInterface, GameState, State}
 import de.htwg.se.skyjo.util.*
-
 import de.htwg.se.skyjo.aView.Gui.{BoardView, fontname}
 
 trait ControllerInterface extends Observable:
@@ -36,6 +35,7 @@ trait ControllerInterface extends Observable:
   ): (BoardInterface, DeckInterface)
   def getSize: (Int, Int)
   def turnUpperCard: String
+  def peekUpperCard: String
   def reduce(row: Int, col: Int): (BoardInterface, Boolean, Int, Int)
   def reduceCurrentBoard(): Unit
   def swapFromMem(c: CardInterface, pos: Int): BoardInterface
@@ -104,7 +104,13 @@ trait ControllerInterface extends Observable:
     val base = toCard(x)
     if turned then base.trueCopy else base.falseCopy
 
-
   def isCard(c: Any): Boolean
 
-  def copy_state(mems: Vector[MoveCaretaker] = getMementos, brds: Vector[BoardInterface] = getBrds, d: DeckInterface = getDeck, disc: DiscardPileInterface = getDisc, idx: Int = getPlIdx,currentState: State = currState): GameState
+  def copy_state(
+      mems: Vector[MoveCaretaker] = getMementos,
+      brds: Vector[BoardInterface] = getBrds,
+      d: DeckInterface = getDeck,
+      disc: DiscardPileInterface = getDisc,
+      idx: Int = getPlIdx,
+      currentState: State = currState
+  ): GameState

@@ -3,12 +3,10 @@ package de.htwg.se.skyjo.aView
 import de.htwg.se.skyjo.util.{Memento, MoveCaretaker}
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
 
-import scala.collection.mutable.Stack
 import scala.io.StdIn.readLine
 import de.htwg.se.skyjo.util.utilComponent.{SupportCommand, SupportHandler}
 
 import scala.util.{Try, Success, Failure}
-import scala.util.Random
 import de.htwg.se.skyjo.util.Observer
 import de.htwg.se.skyjo.model.{
   State,
@@ -20,11 +18,12 @@ import de.htwg.se.skyjo.model.{
 }
 import de.htwg.se.skyjo.model.modelInterfaceImplementation.{Deck, Card}
 
-class Tui(ctr: ControllerInterface) extends Observer {
+class Tui(ctr: ControllerInterface, interactive: Boolean = true) extends Observer {
   ctr.add(this)
   private def clearTerm = print("\u001b[2J")
 
   def startGame: Unit =
+    if !interactive then return
 
     turnOfPlayer(ctr.getPlIdx)
     printfBoard
@@ -60,10 +59,10 @@ class Tui(ctr: ControllerInterface) extends Observer {
         var pos = readLine()
         val idx = Try(Integer.parseInt(pos)).getOrElse(0)
         ctr.drawFromDisc(idx)
-        // clearTerm
         printfBoard
         discContent(ctr.getDisc)
         turnOptions
+
       case "1" =>
         inputRequestDeck(ctr.getDeck.turnUpperCard)
         printfBoard
@@ -79,7 +78,6 @@ class Tui(ctr: ControllerInterface) extends Observer {
               cardTurnRq(ctr.getBrds(ctr.getPlIdx))
 
               ctr.tuiSwitch(gs, tmpDeck)
-              // clearTerm
               turnOfPlayer(ctr.getPlIdx)
               printfBoard
               discContent(ctr.getDisc)
@@ -87,7 +85,6 @@ class Tui(ctr: ControllerInterface) extends Observer {
 
             case Failure(_) =>
               println("Discarded Turn.")
-              // clearTerm
               turnOfPlayer(ctr.getPlIdx)
               printfBoard
               discContent(ctr.getDisc)
@@ -96,7 +93,6 @@ class Tui(ctr: ControllerInterface) extends Observer {
         } else {
           val idx = Try(pos.toInt).getOrElse(0)
           ctr.drawFromDeck(idx)
-          // clearTerm
           turnOfPlayer(ctr.getPlIdx)
           printfBoard
           discContent(ctr.getDisc)
@@ -111,16 +107,15 @@ class Tui(ctr: ControllerInterface) extends Observer {
       s"Which BoardCard [0-${b.getSize._1 * b.getSize._2 - 1}] do you want to switch with ${disc}?"
     )
 
-  def inputRequestDeck(deckCard: String) = (
+  def inputRequestDeck(deckCard: String) =
     println(s"You took ${deckCard}")
-  )
 
   def cardTurnRq(b: BoardInterface) =
     println(
       s"Which BoardCard [0-${b.getSize._1 * b.getSize._2 - 1}] do you want to turn around?"
     )
 
-  def turnOfPlayer(i: Int) = (println(s"Player ${i}:"))
+  def turnOfPlayer(i: Int) = println(s"Player ${i}:")
 
   def discContent(disc: DiscardPileInterface) =
     println(s"| ${disc.toString()} |\n")
@@ -149,12 +144,11 @@ class Tui(ctr: ControllerInterface) extends Observer {
     if finished then System.exit(0)
 
   override def update(choose: String): Boolean =
-    // clearTerm
-    turnOfPlayer(ctr.getPlIdx)
-    printfBoard
-    discContent(ctr.getDisc)
-    turnOptions
-    if finished then ending
+    if interactive then
+      turnOfPlayer(ctr.getPlIdx)
+      printfBoard
+      discContent(ctr.getDisc)
+      turnOptions
+      if finished then ending
     true
-
 }

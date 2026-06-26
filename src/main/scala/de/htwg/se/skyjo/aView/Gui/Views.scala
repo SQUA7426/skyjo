@@ -32,7 +32,6 @@ import scalafx.scene.layout.StackPane
 import scalafx.geometry.Pos
 import scalafx.scene.layout.Background
 import scalafx.geometry.Insets
-import sbt.testing.EventHandler
 import de.htwg.se.skyjo.util.{
   MoveCaretaker,
   Memento,
