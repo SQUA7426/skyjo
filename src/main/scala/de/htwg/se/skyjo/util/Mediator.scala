@@ -13,21 +13,21 @@ class ConcreteMediator extends Mediator {
   def add(c: Colleague): Unit = thresholdingColleague =
     thresholdingColleague :+ c
 
-  def remove(c: Colleague): Unit = thresholdingColleague =
-    thresholdingColleague.filterNot(o => o == c)
-
-  override def send(colleague: Colleague, msg: String): Unit = {
+  // def remove(c: Colleague): Unit = thresholdingColleague =
+  //   thresholdingColleague.filterNot(o => o == c)
+  
+  override def send(fromColleague: Colleague, msg: String): Unit = {
     thresholdingColleague.find{c =>
-        c != colleague && c.receive(msg)
+        c != fromColleague && c.receive(msg)
         }
   }
-
-  def requestRmUpperCard(colleague: Colleague): Unit =
-    send(colleague, "REQUEST REMOVE UPPERCARD")
-  def requestPutToDisc(colleague:Colleague): Unit =
-    send(colleague, "REQUEST PUT TO DISCARDPILE")
-  def requestGetUpperCard(colleague: Colleague) =
-    send(colleague, "REQUEST GET UPPERCARD")
-  def requestCardFromDeck(colleague: Colleague) =
-    send(colleague, "REQUEST CARD FROM DECK")
+  //
+  def requestRmUpperCard(fromColleague: Colleague): Unit =
+    send(fromColleague, "REQUEST REMOVE UPPERCARD")
+  def requestPutToDisc(fromColleague:Colleague): Unit =
+    send(fromColleague, "REQUEST PUT TO DISCARDPILE")
+  def requestGetUpperCard(fromColleague: Colleague) =
+    send(fromColleague, "REQUEST GET UPPERCARD")
+  def requestCardFromDeck(fromColleague: Colleague) =
+    send(fromColleague, "REQUEST CARD FROM DECK")
 }

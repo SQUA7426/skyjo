@@ -1,0 +1,45 @@
+# docker-compose.yml
+# Convenience wrapper around docker-run.sh for Linux hosts.
+#
+# Usage:
+#   docker compose up            # start the GUI
+#   docker compose up --build    # rebuild first, then start
+#   docker compose down          # remove the stopped container
+#
+# Prerequisite (Linux):
+#   xhost +local:docker          # run once per desktop session before compose up
+#
+# macOS users: use ./docker-run.sh instead (compose cannot handle XQuartz TCP
+# setup automatically).
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  skyjo:
+    image: skyjo
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: skyjo-game
+
+    # ── X11 display forwarding (Linux) ────────────────────────────────────────
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/tmp}
+
+    volumes:
+      # X11 socket – lets the container draw to the host desktop
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
+
+      # Persistent save files – stored next to docker-compose.yml on the host
+      - ./saves:/home/skyjo/app/saves
+
+    # ── GPU / DRI (optional) ──────────────────────────────────────────────────
+    # Uncomment the two lines below to enable hardware-accelerated rendering.
+    # Remove -Dprism.order=sw from the Dockerfile ENTRYPOINT at the same time.
+    # devices:
+    #   - /dev/dri:/dev/dri
+
+    # ── Container settings ────────────────────────────────────────────────────
+    stdin_open: true   # keep stdin open so TUI thread doesn't exit immediately
+    tty: true
+    restart: "no"      # game containers should not auto-restart

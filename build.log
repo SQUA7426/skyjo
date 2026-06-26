@@ -1,0 +1,111 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 6.41kB done
+#1 DONE 0.0s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#2 DONE 0.6s
+
+#3 docker-image://docker.io/docker/dockerfile:1@sha256:87999aa3d42bdc6bea60565083ee17e86d1f3339802f543c0d03998580f9cb89
+#3 resolve docker.io/docker/dockerfile:1@sha256:87999aa3d42bdc6bea60565083ee17e86d1f3339802f543c0d03998580f9cb89 0.0s done
+#3 CACHED
+
+#4 [internal] load metadata for docker.io/library/eclipse-temurin:21-jdk-jammy
+#4 DONE 1.0s
+
+#5 [internal] load metadata for docker.io/library/eclipse-temurin:21-jre-jammy
+#5 DONE 1.0s
+
+#6 [internal] load .dockerignore
+#6 transferring context: 1.15kB done
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 DONE 0.0s
+
+#8 [stage-1 1/5] FROM docker.io/library/eclipse-temurin:21-jre-jammy@sha256:199aebeb3adcde4910695cdebfe782ada38dadb6cc8013159b58d3724451befd
+#8 resolve docker.io/library/eclipse-temurin:21-jre-jammy@sha256:199aebeb3adcde4910695cdebfe782ada38dadb6cc8013159b58d3724451befd
+#8 resolve docker.io/library/eclipse-temurin:21-jre-jammy@sha256:199aebeb3adcde4910695cdebfe782ada38dadb6cc8013159b58d3724451befd 0.0s done
+#8 DONE 0.1s
+
+#9 [builder 1/9] FROM docker.io/library/eclipse-temurin:21-jdk-jammy@sha256:801b7e1a9c4befaf82bf9a2a58025ef43a7694bbc84779187ad0524d84742772
+#9 resolve docker.io/library/eclipse-temurin:21-jdk-jammy@sha256:801b7e1a9c4befaf82bf9a2a58025ef43a7694bbc84779187ad0524d84742772 0.0s done
+#9 DONE 0.0s
+
+#10 [stage-1 2/5] RUN apt-get update && apt-get install -y --no-install-recommends         libx11-6                  libx11-xcb1               libxext6                  libxrender1               libxi6                    libxtst6                  libxxf86vm1               libgl1                    libgl1-mesa-glx           libgtk-3-0                libfreetype6              libfontconfig1            fonts-dejavu-core     && rm -rf /var/lib/apt/lists/*
+#10 CACHED
+
+#11 [stage-1 3/5] RUN groupadd -r skyjo  && useradd -r -g skyjo -m -d /home/skyjo skyjo
+#11 CACHED
+
+#12 [stage-1 4/5] WORKDIR /home/skyjo/app
+#12 CACHED
+
+#7 [internal] load build context
+#7 transferring context: 5.67kB 0.0s done
+#7 DONE 0.0s
+
+#13 [builder 6/9] COPY build.sbt                .
+#13 CACHED
+
+#14 [builder 5/9] COPY project/plugins.sbt      project/
+#14 CACHED
+
+#15 [builder 7/9] RUN --mount=type=cache,target=/root/.ivy2,sharing=locked     --mount=type=cache,target=/root/.cache/coursier,sharing=locked     --mount=type=cache,target=/root/.sbt,sharing=locked     sbt -batch -Dsbt.server.forcestart=false update
+#15 CACHED
+
+#16 [builder 4/9] COPY project/build.properties project/
+#16 CACHED
+
+#17 [builder 2/9] RUN --mount=type=cache,target=/var/cache/apt,sharing=locked     --mount=type=cache,target=/var/lib/apt,sharing=locked     apt-get update && apt-get install -y --no-install-recommends         curl gnupg ca-certificates apt-transport-https     && mkdir -p /etc/apt/keyrings     && curl -sL        "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823"        | gpg --dearmor -o /etc/apt/keyrings/scalasbt.gpg     && echo "deb [signed-by=/etc/apt/keyrings/scalasbt.gpg] https://repo.scala-sbt.org/scalasbt/debian all main"        > /etc/apt/sources.list.d/sbt.list     && apt-get update     && apt-get install -y --no-install-recommends sbt
+#17 CACHED
+
+#18 [builder 3/9] WORKDIR /app
+#18 CACHED
+
+#19 [builder 8/9] COPY src ./src
+#19 CACHED
+
+#20 [builder 9/9] RUN --mount=type=cache,target=/root/.ivy2,sharing=locked     --mount=type=cache,target=/root/.cache/coursier,sharing=locked     --mount=type=cache,target=/root/.sbt,sharing=locked     mkdir -p /app/target/scala-3.3.7/scoverage-data     && sbt -batch -Dsbt.server.forcestart=false         "set ThisBuild / coverageEnabled := false"         clean         assembly
+#20 0.367 [info] server was not detected. starting an instance
+#20 1.601 [info] welcome to sbt 1.11.7 (Eclipse Adoptium Java 21.0.11)
+#20 2.229 [info] loading settings for project app-build from plugins.sbt...
+#20 2.885 [info] loading project definition from /app/project
+#20 3.910 [info] loading settings for project root from build.sbt...
+#20 4.041 [info] set current project to skyjo (in build file:/app/)
+#20 4.217 [info] sbt server started at local:///root/.sbt/1.0/server/4b695e5f5d8c757de8fc/sock
+#20 4.916 <set>:1: error: value clean is not a member of Boolean
+#20 4.916 ThisBuild / coverageEnabled := false clean assembly
+#20 4.916                                      ^
+#20 4.932 [error] elapsed time: 1 s
+#20 4.948 [0J
+#20 ERROR: process "/bin/sh -c mkdir -p /app/target/scala-3.3.7/scoverage-data     && sbt -batch -Dsbt.server.forcestart=false         \"set ThisBuild / coverageEnabled := false\"         clean         assembly" did not complete successfully: exit code: 1
+------
+ > [builder 9/9] RUN --mount=type=cache,target=/root/.ivy2,sharing=locked     --mount=type=cache,target=/root/.cache/coursier,sharing=locked     --mount=type=cache,target=/root/.sbt,sharing=locked     mkdir -p /app/target/scala-3.3.7/scoverage-data     && sbt -batch -Dsbt.server.forcestart=false         "set ThisBuild / coverageEnabled := false"         clean         assembly:
+4.948 [0J
+4.948 [0J
+1.601 [info] welcome to sbt 1.11.7 (Eclipse Adoptium Java 21.0.11)
+2.229 [info] loading settings for project app-build from plugins.sbt...
+2.885 [info] loading project definition from /app/project
+3.910 [info] loading settings for project root from build.sbt...
+4.041 [info] set current project to skyjo (in build file:/app/)
+4.217 [info] sbt server started at local:///root/.sbt/1.0/server/4b695e5f5d8c757de8fc/sock
+4.916 <set>:1: error: value clean is not a member of Boolean
+4.916 ThisBuild / coverageEnabled := false clean assembly
+4.916                                      ^
+------
+Dockerfile:57
+--------------------
+  56 |     # confusing error if the directory is absent.
+  57 | >>> RUN --mount=type=cache,target=/root/.ivy2,sharing=locked \
+  58 | >>>     --mount=type=cache,target=/root/.cache/coursier,sharing=locked \
+  59 | >>>     --mount=type=cache,target=/root/.sbt,sharing=locked \
+  60 | >>>     mkdir -p /app/target/scala-3.3.7/scoverage-data \
+  61 | >>>     && sbt -batch -Dsbt.server.forcestart=false \
+  62 | >>>         "set ThisBuild / coverageEnabled := false" \
+  63 | >>>         clean \
+  64 | >>>         assembly
+  65 |     
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c mkdir -p /app/target/scala-3.3.7/scoverage-data     && sbt -batch -Dsbt.server.forcestart=false         \"set ThisBuild / coverageEnabled := false\"         clean         assembly" did not complete successfully: exit code: 1

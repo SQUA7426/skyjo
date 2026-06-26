@@ -1,30 +1,73 @@
 package de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation
 
-import de.htwg.se.skyjo.model.DeckInterface
-import de.htwg.se.skyjo.model.DeckImplementation.*
-import de.htwg.se.skyjo.model.DiscardPileImplementation.DiscardPile
-import de.htwg.se.skyjo.model.CardImplementation.*
-import de.htwg.se.skyjo.model.CardInterface
-import de.htwg.se.skyjo.model.BoardInterface
-import de.htwg.se.skyjo.model.BoardImplementation.*
-import de.htwg.se.skyjo.model.GameState
+import de.htwg.se.skyjo.model.{
+  BoardInterface,
+  CardInterface,
+  DiscardPileInterface,
+  DeckInterface,
+  State,
+  GameState
+}
+import de.htwg.se.skyjo.model.modelInterfaceImplementation.{
+  Deck,
+  Card,
+  Board,
+  DiscardPile
+}
+
+import de.htwg.se.skyjo.aView.Gui.Gui
 import de.htwg.se.skyjo.aView.Tui
 import de.htwg.se.skyjo.controller.ControllerComponent._
 import de.htwg.se.skyjo.util.{Observable, Memento, MoveCaretaker}
 import de.htwg.se.skyjo.util.*
 
+import de.htwg.se.skyjo.util.utilComponent.{SupportCommand, SupportHandler}
+
 import scala.io.StdIn.{readInt, readLine}
 import scala.util.Random
 
-class Controller(var state: GameState) extends Observable with ControllerInterface {
-  private val caretaker = new MoveCaretaker()
+import scala.util.{Try, Success, Failure}
+import de.htwg.se.skyjo.aView.Gui.{BoardView, fontname}
 
-  def setup(): Unit = {
-    var currentDeck = state.deck
+import com.google.inject.{Guice, Inject, Injector}
+import de.htwg.se.skyjo.SkyjoModule
+import net.codingwell.scalaguice.InjectorExtensions.*
+import com.google.inject.name.Named
 
-    for (i <- 0 until state.boards.size) {
-      val (x, y) = state.boards(i).getSize
-      val tmpMed = this.getMediator
+import de.htwg.se.skyjo.fileIoComponent.FileIOInterface
+import de.htwg.se.skyjo.fileIoComponent.fileIoJsonImpl.JsonImpl
+import de.htwg.se.skyjo.fileIoComponent.fileIoXmlImpl.XmlImpl
+
+class Controller @Inject() (
+    var state: GameState,
+    @Named("plCount") plCount: Int,
+    val med: Mediator
+) extends Observable
+    with ControllerInterface:
+
+  var mem: Memento = _
+
+  private var pendingDeckCard: Option[CardInterface] = None
+  private var pendingDiscBefore: Option[DiscardPileInterface] = None
+
+  // GAME MECHANICS //
+  def setup(): Unit =
+    val deck = new Deck(fullDeck())
+    val disc = new DiscardPile()
+
+    val plMoveC = Vector.fill(plCount)(new MoveCaretaker(this))
+    val plBoards = Vector.fill(plCount)(new Board(4, 3, Vector.empty))
+
+    this.state = new GameState(plMoveC, plBoards, deck, disc, 0, State.BEGIN)
+    this.state = this.state.copy(
+      deck = Deck(this),
+      disc = DiscardPile()
+    )
+    var currentDeck = getGameState.deck
+
+    for (i <- 0 until getBrds.size) {
+      val (x, y) = getSize
+      // val tmpMed = getMediator
 
       val (afterBoard, nextDeck) = fillBoard(x, y, currentDeck)
       currentDeck = nextDeck
@@ -32,172 +75,96 @@ class Controller(var state: GameState) extends Observable with ControllerInterfa
       val initSize = x * y
       val arr = Random.shuffle((0 until initSize).toList)
       val finalBoard = afterBoard.turnBoardCard(arr(0)).turnBoardCard(arr(1))
-
       state = state.copy(
         boards = state.boards.updated(i, finalBoard),
         deck = currentDeck
       )
     }
-    state = state.copy(playerIdx = 0)
-    notifyObservers
-  }
+    state = state.copy(plIdx = 0)
+    assertGameState(state)
+    // notifyObservers
 
-  def executeMove(moveLogic: => GameState): Unit = {
-    caretaker.save(state)
-    state = moveLogic
-    notifyObservers
-  }
+  def save(mementoSave: Memento): Unit =
+    getMementos(getPlIdx).save(mementoSave)
+    mem = mementoSave
 
-  def save(saveState: GameState):Unit = caretaker.save(saveState)
+  def undo(): Unit =
+    val mv = getMementos(getPlIdx)
+    if mv.undoStack.isEmpty then { println("Empty undoStack!"); return }
 
-  def undo(): Unit = {
-    caretaker.undo(state) match {
-      case Some(oldState) =>
-        state = oldState
-        notifyObservers
-      case None => println("Nothing to undo!")
-    }
-  }
-  def redo(): Unit = {
-    caretaker.redo(state) match {
-      case Some(oldState) =>
-        state = oldState
-        notifyObservers
-      case None => println("Nothing to undo!")
-    }
-  }
+    val mementoToUndo = mv.undoStack.top
+    mv.undo(mementoToUndo, getDeck, getBrds(getPlIdx), getDisc) match {
+      case Some(memBoard, memDeck, memDisc) =>
+        state = state.copy(
+          boards = getBrds.updated(getPlIdx, memBoard),
+          deck = memDeck,
+          disc = memDisc
+        )
 
-  def turnBoardCard(index: Int): Unit = {
-    val board = state.boards(state.playerIdx)
-
-    val cardToFlip = board.getBoardCard(index)
-
-    if (cardToFlip.isTurned) {
-      println(
-        s"Card at index $index is already face up! Choose a hidden card (#)."
-      )
-    } else {
-      caretaker.save(state)
-      val newBoard = board.turnBoardCard(index)
-
-      state = state.copy(
-        boards = state.boards.updated(state.playerIdx, newBoard),
-        isFlippingPhase = false,
-        playerIdx = (state.playerIdx + 1) % state.boards.size
-      )
-      notifyObservers
-    }
-  }
-
-  def putCardOnBoard(pos: Int): Unit = {
-    executeMove {
-      val board = state.boards(state.playerIdx)
-      val newBoard = board.turnBoardCard(pos)
-
-      state.copy(
-        boards = state.boards.updated(state.playerIdx, newBoard),
-        isFlippingPhase = false,
-        playerIdx = (state.playerIdx + 1) % state.boards.size
-      )
+        if mv.undoStack.nonEmpty then
+          state.currentState.pre = mv.undoStack.top.fromDeck match
+            case 0 => "DECK"
+            case 1 => "DISC"
+            case _ => "SWITCH"
+        else state.currentState.pre = "BEGIN"
+      case None => println("Couldn't UNDO")
     }
     notifyObservers
-  }
+
+  def redo(): Unit =
+    val mv = getMementos(getPlIdx)
+    if mv.redoStack.isEmpty then { println("Empty redoStack"); return }
+
+    val mementoToRedo = mv.redoStack.top
+    mv.redo(mementoToRedo, getDeck, getBrds(getPlIdx), getDisc) match {
+      case Some(memBoard, memDeck, memDisc) =>
+        state = state.copy(
+          boards = getBrds.updated(getPlIdx, memBoard),
+          deck = memDeck,
+          disc = memDisc
+        )
+
+        state.currentState.pre = "BEGIN"
+      case None => println("Couldn't REDO")
+    }
+    notifyObservers
+
+  // GAMESTATE MECHANICS //
   def getGameState: GameState = state
-
-  def uptGameState(newState: GameState): Unit = {
+  def assertGameState(newState: GameState): Unit =
     state = newState
     notifyObservers
-  }
 
-  def drawFromDeck(): Unit = {
-    val (card, newDeck) = state.deck.draw()
+  // MEDIATOR //
+  def getMediator: Mediator = med
 
-    state = state.copy(
-      deck = newDeck,
-      drawnCard = Some(card)
-    )
-    notifyObservers
-  }
+  // Memento //
+  def getMementos: Vector[MoveCaretaker] = state.mementos
+  def currMemento: MoveCaretaker = getMementos(getPlIdx)
+  def hasDrawn: Boolean =
+    currMemento.undoStack
+      .lift(getPlIdx)
+      .exists(_._2.isVal)
 
-  def drawFromDisc(): Unit = {
-    state.disc.getDiscCard() match {
-      case Some(card) => {
-        caretaker.save(state)
-        val newDisc = state.disc.remove()
+  def getDrawn: Option[CardInterface] =
+    currMemento.undoStack
+      .lift(getPlIdx)
+      .map(_._2)
 
-        state = state.copy(
-          disc = newDisc,
-          drawnCard = Some(card)
-        )
-        notifyObservers
-      }
-      case None => println("DiscardPile cannot be accessed!")
-    }
-
-  }
-
-  def replaceCard(pos: Int): Unit = {
-    state.drawnCard match {
-      case Some(card) =>
-        caretaker.save(state)
-
-        val currentBoard = state.boards(state.playerIdx).asInstanceOf[Board]
-        val (oldCard, nextBoard) = currentBoard.switch(card, pos)
-
-        val nextDisc =
-          state.disc
-            .putToDiscardPile(oldCard)
-            ._1
-
-        state = state.copy(
-          boards = state.boards.updated(state.playerIdx, nextBoard),
-          disc = nextDisc,
-          drawnCard = None,
-          playerIdx = (state.playerIdx + 1) % state.boards.size
-        )
-        notifyObservers
-      case None => println("You are not holding a card!")
-    }
-  }
-  def SwapHandler(index: Int): Unit = {
-    caretaker.save(state)
-    val board = state.boards(state.playerIdx)
-    val newBoard = board.turnBoardCard(index)
-
-    state = state.copy(
-      boards = state.boards.updated(state.playerIdx, newBoard),
-      isFlippingPhase = false,
-      playerIdx = (state.playerIdx + 1) % state.boards.size
-    )
-    notifyObservers
-  }
-
-  def discardDrawnCard(): Unit = {
-    state.drawnCard.foreach { card =>
-      caretaker.save(state)
-      val (newDisc, _) = state.disc.putToDiscardPile(card)
-      state = state.copy(
-        drawnCard = None,
-        disc = newDisc,
-        isFlippingPhase = true
-      )
-      notifyObservers
-    }
-  }
-
+  // BOARD //
   def fillBoard(
       xSize: Int,
       ySize: Int,
       d: DeckInterface
   ): (BoardInterface, DeckInterface) = {
 
-    if (d.getDeck.isEmpty) {
+    if (d.getDeckCards.isEmpty) {
       val newFullDeck = Deck(this)
       return fillBoard(xSize, ySize, newFullDeck)
     }
 
     def drawOne(currentDeck: DeckInterface): (CardInterface, DeckInterface) = {
-      val (card, nextDeck) = currentDeck.draw()
+      val (card, nextDeck) = currentDeck.draw(this)
       (card.falseCopy, nextDeck)
     }
 
@@ -226,28 +193,58 @@ class Controller(var state: GameState) extends Observable with ControllerInterfa
     }
     val (finalGrid, remainingDeck) = fillRows(d, ySize)
     (
-      new Board(getMediator, xSize, ySize, finalGrid),
+      new Board(xSize, ySize, finalGrid),
       remainingDeck
     )
   }
-  def getMediator: Mediator = this.getGameState.med
 
-  def toCard(x: Any): CardInterface = {
-    val val1d =
-      (for { j <- -2 to 12 } yield j.toString()).toVector
-    x match {
-      case a: Int => Card(a.toInt, true, this)
-      case b: String if val1d.contains(b) =>
-        Card(Integer.parseInt(b), true, this)
-      case other =>
-        throw new IllegalArgumentException(s"Invalid input:$other")
-    }
+  def getSize: (Int, Int) = getBrds(getPlIdx).getSize
+  def peekUpperCard: String = state.deck.peekUpperCard
+  def turnUpperCard: String = state.deck.turnUpperCard
+  def reduce(row: Int, col: Int): (BoardInterface, Boolean, Int, Int) =
+    getBrds(getPlIdx).reduce(row, col)
+  def swapFromMem(c: CardInterface, pos: Int): BoardInterface =
+    val b: BoardInterface = getBrds(state.plIdx).swapFromMem(c, pos)
+    state = state.copy(boards = getBrds.updated(getPlIdx, b))
+    notifyObservers
+    b
+
+  // CTRL - BOARD //
+  def getBrds: Vector[BoardInterface] = state.boards
+  def getBoard: Vector[Vector[CardInterface]] =
+    state.boards(state.plIdx).getBoard
+
+  def getReducedBrd(updatedBoard: BoardInterface): (BoardInterface, Int, Int) =
+    val (x, y) = updatedBoard.getSize
+    val reducedBoards: Array[(BoardInterface, Boolean, Int, Int)] = new Array(
+      x + y
+    )
+    // REDUCE through all rows
+    for i <- 0 until x do reducedBoards(i) = updatedBoard.reduce(-1, i)
+    // REDUCE through all cols
+    for j <- 0 until y do reducedBoards(j + x) = updatedBoard.reduce(j, -1)
+    val r = reducedBoards.map(_._2).exists(_ == true)
+    val endBoard: (BoardInterface, Int, Int) = if r == true then
+      val allUpdatedBrds =
+        reducedBoards
+          .filter((brds, bools, row, col) => bools == true)
+          .map((brd, bool, row, col) => (brd, row, col))
+          .toArray
+      allUpdatedBrds(0)
+    else (updatedBoard, -1, -1)
+    endBoard
+
+  def reduceCurrentBoard(): Unit = {
+    val board = getBrds(getPlIdx)
+    val (reduced, row, col) = getReducedBrd(board)
+    val newState = state.copy(
+      boards = getBrds.updated(getPlIdx, reduced)
+    )
+    assertGameState(newState)
   }
 
-  def isCard(c: Any): Boolean = c match {
-    case _: Card => true
-    case _       => false
-  }
+  // DECK //
+  def getDeck: DeckInterface = state.deck
   def fullDeck(): Vector[CardInterface] = {
     val seqCards = Seq.empty[CardInterface]
     val v1: Vector[CardInterface] =
@@ -261,32 +258,435 @@ class Controller(var state: GameState) extends Observable with ControllerInterfa
     shuffled
   }
 
-  // NOT IMPL //
-  def draw(): (
-      de.htwg.se.skyjo.model.CardInterface,
-      de.htwg.se.skyjo.model.DeckInterface
-  ) = state.deck.draw()
-  // def falseCopy: de.htwg.se.skyjo.model.CardInterface
-  // def trueCopy: de.htwg.se.skyjo.model.CardInterface
-
-  // def getCard: de.htwg.se.skyjo.model.CardInterface
-  def getDeck: Vector[de.htwg.se.skyjo.model.CardInterface] = state.deck.getDeck
-  def getDiscCard(): Option[de.htwg.se.skyjo.model.CardInterface] =
-    state.disc.getDiscCard()
-  // def isTurned: Boolean
-  def putToDiscardPile(from: Any): (
-      de.htwg.se.skyjo.model.DiscardPileInterface,
-      de.htwg.se.skyjo.model.DeckInterface
-  ) = state.disc.putToDiscardPile(from)
-  def remove(amount: Int): Vector[de.htwg.se.skyjo.model.CardInterface] =
+  def getDeckCards: Vector[CardInterface] = state.deck.getDeckCards
+  def remove(amount: Int): Vector[CardInterface] =
     state.deck.remove(amount)
-  def remove(): de.htwg.se.skyjo.model.DiscardPileInterface =
+  def draw(): (
+      CardInterface,
+      DeckInterface
+  ) = state.deck.draw(this)
+
+  def drawFromDeck(pos: Int): Unit = {
+    val (card, newDeck) = state.deck.draw(this)
+    val (swCard, tmpBrd) = getBrds(getPlIdx).switch(card, pos)
+    val (reduced_brd, _, _) = getReducedBrd(tmpBrd)
+    val currPlayer = getPlIdx
+    val newDisc = putToDiscardPile(swCard)._1
+
+    mem = Memento(0, card, pos, swCard, getDisc, swCard.isTurned)
+    save(mem)
+
+    val newState = state.copy(
+      boards = getBrds.updated(currPlayer, reduced_brd),
+      deck = newDeck,
+      disc = newDisc,
+      plIdx = (currPlayer + 1) % getBrds.size,
+      currentState = currState.reset()
+    )
+    assertGameState(newState)
+  }
+
+  // DISCARDPILE //
+  def putToDiscardPile(from: Any): (
+      DiscardPileInterface,
+      DeckInterface
+  ) = state.disc.putToDiscardPile(from, this)
+  def remove(): DiscardPileInterface =
     state.disc.remove()
-  // def turn: Unit
-  def turnUpperCard: String = state.deck.turnUpperCard
 
-  def getBoard: Vector[Vector[CardInterface]] = getGameState.boards(getGameState.playerIdx).getBoard
+  // CTR - DISCARDPILE //
+  def getDisc: DiscardPileInterface = state.disc
+  def getDiscCard(): Option[CardInterface] =
+    state.disc.getDiscCard(this)
 
-  def reduce(row: Int, col: Int): (BoardInterface, Boolean) =
-    getGameState.boards(getGameState.playerIdx).reduce(row,col)
-}
+  def drawFromDisc(pos: Int): Unit = {
+    getDiscCard() match {
+      case Some(card) => {
+        mem = Memento(
+          1,
+          card,
+          pos,
+          getBrds(getPlIdx).getBoardCard(
+            pos
+          ),
+          getDisc,
+          getBrds(getPlIdx).getBoardCard(pos).isTurned
+        )
+        save(mem)
+
+        val (newCard, newBrd) = getBrds(getPlIdx).switch(card, pos)
+        val (reduced_brd, _, _) = getReducedBrd(newBrd)
+        val newDisc = new DiscardPile(
+          newCard.getValue.toString,
+          true
+        )
+        val currPlayer = getPlIdx
+        val newState = state.copy(
+          boards = getBrds.updated(currPlayer, reduced_brd),
+          disc = newDisc,
+          plIdx = (currPlayer + 1) % getBrds.size,
+          currentState = currState.reset()
+        )
+        assertGameState(newState)
+      }
+      case None => println("DISC EMPTY"); assertGameState(getGameState)
+    }
+  }
+
+  def switchDeckDisc(
+      gs: GameState,
+      b: BoardInterface,
+      tmpDeck: DeckInterface,
+      idx: Int
+  ): Unit =
+    val (oldCard, tmpBrd) = b.switch(b.getBoardCard(idx), idx)
+    val newBrd = getReducedBrd(tmpBrd)._1
+    val gottenMem = getMementos(getPlIdx).undoStack(0)
+    val uptMem = gottenMem.copy(
+      boardIndex = idx,
+      takenCard = Card(Integer.parseInt(tmpDeck.toString())),
+      replacedCard = oldCard
+    )
+    save(uptMem)
+    println(currMemento.undoStack.toString())
+    val newGameState = gs.copy(
+      boards = getBrds.updated(getPlIdx, newBrd),
+      currentState = currState.reset()
+    )
+
+    println(s"Controller switchDeckDisc: uptMem:\n${uptMem}\n");
+
+    assertGameState(newGameState)
+
+  def tuiSwitch(gs: GameState, tmpDeck: DeckInterface): Unit =
+    printf(">> turn Position: ")
+    val pos2 = readLine()
+    val idx = Try(Integer.parseInt(pos2)).getOrElse(0)
+    println(s"Controller tuiSwitch: pos2: ${idx}");
+    val newGS =
+      switchDeckDisc(gs, getBrds(getPlIdx), tmpDeck, idx)
+
+  def tuiNotSwitch(input: String, pos: String): Unit =
+    val pos2 = if pos == "" then "0" else pos
+    val h = SupportHandler(
+      this,
+      getBrds(getPlIdx),
+      getDeck,
+      getDisc
+    )
+    val return_H = h.handle(input, pos2.toInt)
+    return_H match {
+      case Success(gs) =>
+        val newBrd = getReducedBrd(gs.boards(getPlIdx))._1
+        val copyGameState = gs.copy(
+          boards = gs.boards.updated(getPlIdx, newBrd)
+        )
+        assertGameState(copyGameState)
+      case Failure(exception) => assertGameState(getGameState)
+    }
+
+  // PLAYER //
+  def getPlIdx: Int = state.plIdx
+  def nextPlayer: Unit = copy_state(idx = (getPlIdx + 1) % getBrds.size)
+
+  // STATE //
+  def currState: State = state.currentState
+
+  // FILEIO //
+  val injector = Guice.createInjector(SkyjoModule(getBrds.size))
+  val xmlFileName = "game_state_data.xml"
+  val jsonFileName = "game_state_data.json"
+
+  def syncControllerGui(b: BoardView): Unit =
+    b.termBoard = getGameState.boards(getPlIdx)
+    b.aDeck = getDeck
+    b.aDisc = getDisc
+
+    b.manyCards = b.BOARD_INIT(false)
+    b.vDeck.cCard = toCard(b.aDeck.turnUpperCard)
+    b.vDiscard.cCard = getDiscCard().getOrElse(toCard(0).falseCopy)
+    b.vDiscard.turned = getDiscCard().isDefined
+
+  def xml_save: Unit = {
+    val xml_IO = injector.instance[XmlImpl]
+    xml_IO.save(getGameState, xmlFileName)
+  }
+  def json_save: Unit = {
+    val json_IO = injector.instance[JsonImpl]
+    json_IO.save(getGameState, jsonFileName)
+  }
+
+  def xml_load(b: Any): Unit = {
+    val xml_IO = injector.instance[XmlImpl]
+
+    val newState = xml_IO.load(xmlFileName)
+
+    require(newState.deck != null, "Loaded GameState has null deck!")
+    require(newState.disc != null, "Loaded GameState has null disc!")
+
+    val cleanState = newState.copy(currentState = State.BEGIN)
+
+    assertGameState(cleanState)
+
+    // view
+    b match {
+      case bv: BoardView => syncControllerGui(bv)
+      case _             => {}
+    }
+  }
+  def json_load(b: Any): Unit = {
+    val json_IO = injector.instance[JsonImpl]
+    val newState = json_IO.load(jsonFileName)
+
+    val cleanState = newState.copy(currentState = State.BEGIN)
+
+    assertGameState(cleanState)
+
+    b match {
+      case bv: BoardView => syncControllerGui(bv)
+      case _             => {}
+    }
+  }
+
+  // OUTSIDE FUNCTIONS //
+
+  def toCard(x: Any): CardInterface = {
+    val valRange = (-2 to 12).toSet
+
+    x match {
+      case c: CardInterface => c
+
+      case a: Int =>
+        if (valRange.contains(a)) Card(a, true)
+        else Card(0, false)
+
+      case b: String =>
+        val tryInt = scala.util.Try(b.toInt)
+        if (tryInt.isSuccess) {
+          Card(tryInt.get, true)
+        } else {
+          Card(0, false)
+        }
+      case scala.util.Success(value) => toCard(value)
+      case scala.util.Failure(_)     => Card(0, false)
+
+      case Some(value) => toCard(value)
+      case None        => Card(0, false)
+
+      case d: DeckInterface =>
+        d.getCard.map(toCard).getOrElse(Card(0, false))
+
+      case disc: DiscardPileInterface =>
+        disc.getDiscCard(this).map(toCard).getOrElse(Card(0, false))
+
+      case _ => Card(0, false)
+    }
+  }
+
+  def isCard(c: Any): Boolean = c match {
+    case _: CardInterface => true
+    case _                => false
+  }
+
+  def copy_state(
+      // med: Mediator = getMediator,
+      mems: Vector[MoveCaretaker] = getMementos,
+      brds: Vector[BoardInterface] = getBrds,
+      d: DeckInterface = getDeck,
+      disc: DiscardPileInterface = getDisc,
+      idx: Int = getPlIdx,
+      anotherState: State = currState
+  ): GameState = {
+    state.copy(
+      // med = med,
+      mementos = mems,
+      boards = brds,
+      deck = d,
+      disc = disc,
+      plIdx = idx,
+      currentState = anotherState
+    )
+  }
+
+  // GUI //
+  def guiUndo(
+      resBoard: BoardInterface,
+      resDeck: DeckInterface,
+      resDisc: DiscardPileInterface,
+      b: BoardView
+  ): Unit =
+    b.termBoard = resBoard
+    b.aDeck = resDeck
+    b.aDisc = resDisc
+
+    assertGameState(
+      getGameState.copy(
+        boards = getBrds.updated(getPlIdx, resBoard),
+        deck = resDeck,
+        disc = resDisc
+      )
+    )
+
+    b.manyCards = b.BOARD_INIT(false)
+    b.vDeck.cCard = toCard(b.aDeck.turnUpperCard)
+    b.vDiscard.cCard =
+      toCard(state.disc, if state.disc.pre == "Disc" then true else false)
+
+  def guiRedo(
+      resBoard: BoardInterface,
+      resDeck: DeckInterface,
+      resDisc: DiscardPileInterface,
+      b: BoardView
+  ): Unit =
+    val lDisc = currMemento.undoStack(0).lastDisc
+
+    b.termBoard = resBoard
+    b.aDeck = resDeck
+    b.aDisc = lDisc
+    assertGameState(
+      getGameState.copy(
+        boards = getBrds.updated(getPlIdx, resBoard),
+        deck = resDeck,
+        disc = resDisc
+      )
+    )
+
+  def guiPreviewDeckCard(): Unit = {
+    println("Controller.guiPreviewDeckCard aufgerufen")
+    val (card, newDeck) = state.deck.draw(this)
+    val s = State.MID
+    s.pre = "DECK"
+    val newState = state.copy(
+      deck = newDeck,
+      previewDeckCard = Some(card),
+      currentState = s
+    )
+    assertGameState(newState)
+  }
+
+  def guiConfirmDeckSwitch(pos: Int): Unit = {
+    state.previewDeckCard match {
+      case Some(card) =>
+        println(
+          s"\nguiConfirmDeckSwitch CARD => ${card} ; turned: ${card.isTurned}"
+        )
+        val (swCard, tmpBrd) = getBrds(getPlIdx).switch(card, pos)
+        println(s"swCard: ${swCard}; turned: ${swCard.isTurned}")
+        val (reduced_brd, _, _) = getReducedBrd(tmpBrd)
+        mem = Memento(0, card, pos, swCard, getDisc, swCard.isTurned)
+
+        save(mem)
+
+        val currPlayer = getPlIdx
+        val newDisc = putToDiscardPile(swCard)._1
+        val newState = state.copy(
+          boards = getBrds.updated(currPlayer, reduced_brd),
+          disc = newDisc,
+          previewDeckCard = None,
+          plIdx = (currPlayer + 1) % getBrds.size,
+          currentState = currState.reset()
+        )
+        assertGameState(newState)
+      case None =>
+        println("Keine Preview-Deckkarte vorhanden.")
+    }
+  }
+
+  def guiConfirmDeckToDiscAndTurn(pos: Int): Unit = {
+    state.previewDeckCard match {
+      case Some(card) =>
+        val currPlayer = getPlIdx
+        val board = getBrds(currPlayer)
+
+        val boardCardBefore = board.getBoardCard(pos)
+
+        val newDisc = putToDiscardPile(card)._1
+        val newBoard = board.turnBoardCard(pos)
+        val (reduced_brd, _, _) = getReducedBrd(newBoard)
+
+        mem = Memento(
+          2,
+          card,
+          pos,
+          boardCardBefore,
+          getDisc,
+          boardCardBefore.isTurned
+        )
+        save(mem)
+
+        val e = State.END
+        e.pre = "DISC"
+
+        val newState = state.copy(
+          boards = getBrds.updated(currPlayer, reduced_brd),
+          disc = newDisc,
+          previewDeckCard = None,
+          plIdx = (currPlayer + 1) % getBrds.size,
+          currentState = e
+        )
+        assertGameState(newState)
+
+      case None =>
+        println("Keine Preview-Deckkarte vorhanden.")
+    }
+  }
+
+  override def guiTurnBrdCard(pos: Int): Unit = {
+    val currPlayer = getPlIdx
+    val board = getBrds(currPlayer)
+    val boardCardBefore = board.getBoardCard(pos)
+    val newBoard = board.turnBoardCard(pos)
+    val (reduced_brd, _, _) = getReducedBrd(newBoard)
+
+    pendingDeckCard match {
+      case Some(deckCard) =>
+        mem = Memento(
+          2,
+          deckCard,
+          pos,
+          boardCardBefore,
+          pendingDiscBefore.getOrElse(getDisc),
+          boardCardBefore.isTurned
+        )
+        save(mem)
+        pendingDeckCard = None
+        pendingDiscBefore = None
+      case None => ()
+    }
+
+    val newState = state.copy(
+      boards = getBrds.updated(currPlayer, reduced_brd),
+      plIdx = (currPlayer + 1) % getBrds.size,
+      currentState = currState.reset(),
+      previewDeckCard = None
+    )
+    assertGameState(newState)
+  }
+
+  def guiSelectDisc(): Unit = {
+    val s = State.MID
+    s.pre = "DISC"
+    val newState = state.copy(currentState = s)
+    assertGameState(newState)
+  }
+
+  def guiDeckToDisc(): Unit = {
+    state.previewDeckCard match {
+      case Some(card) =>
+        pendingDeckCard = Some(card)
+        pendingDiscBefore = Some(getDisc)
+
+        val newDisc = DiscardPile(card.getValue.toString, true)
+        val e = State.END
+        e.pre = "DISC_TURN"
+
+        val newState = state.copy(
+          disc = newDisc,
+          previewDeckCard = None,
+          currentState = e
+        )
+        assertGameState(newState)
+
+      case None => println("Keine Preview-Deckkarte vorhanden.")
+    }
+  }

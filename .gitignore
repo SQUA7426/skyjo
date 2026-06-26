@@ -54,3 +54,8 @@ project/.bloop/
 project/metals.sbt
 project/project/metals.sbt
 .scalafmt.conf
+
+### saves ###
+saves/
+saves/game_state_data.json
+saves/game_state_data.xml
