@@ -31,5 +31,5 @@ runnung test:       `sbt test`
 
 ### DOCKER
 
-build from docker:  `DOCKER_BUILDKIT=0 docker build --no-cache --network=host -t skyjo .` \
-running docker: `./docker-run.sh`
+build from docker:  `sudo docker build -t skyjo .`
+running docker: `sudo docker run --rm   --net=host   -e DISPLAY=$DISPLAY   -v /tmp/.X11-unix:/tmp/.X11-unix   -v skyjo_saves:/home/skyjo/app/saves   skyjo`
