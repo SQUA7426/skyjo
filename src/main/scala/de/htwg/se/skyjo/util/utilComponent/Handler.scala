@@ -39,7 +39,6 @@ class SwitchHandler(ctrl: ControllerInterface, b: BoardInterface, d: DeckInterfa
       Try {
         println("Switch")
         val (swDisc, swDeck) = ctrl.putToDiscardPile(d)
-        // println(s"swDisc: ${swDisc}")
         val tmpMem = Memento(fromDeck = 2, takenCard = swDisc.getDiscCard(ctrl).get, boardIndex = pos, replacedCard = disc.getDiscCard(ctrl).get, disc, disc.isTurned)
         
         println(s"SwitchHandler: tmpMem:\n${tmpMem}\n");
@@ -49,7 +48,7 @@ class SwitchHandler(ctrl: ControllerInterface, b: BoardInterface, d: DeckInterfa
         val newGameState = ctrl.getGameState.copy(
           deck = swDeck,
           disc = new DiscardPile(swDisc.toString()),
-          currentState = ctrl.currState.nextState() // END-STATE
+          currentState = ctrl.currState.nextState()
           )
         newGameState
       }

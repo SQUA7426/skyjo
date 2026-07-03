@@ -1,14 +1,6 @@
 package de.htwg.se.skyjo.aView
 
 import de.htwg.se.skyjo.aView.Tui
-<<<<<<< HEAD
-import de.htwg.se.skyjo.controller.ControllerComponent.ControllerImplementation.*
-import de.htwg.se.skyjo.model.DeckImplementation.*
-import de.htwg.se.skyjo.model.BoardImplementation.*
-import de.htwg.se.skyjo.model.DiscardPileImplementation.*
-import de.htwg.se.skyjo.util.*
-import de.htwg.se.skyjo.model.GameState
-=======
 import de.htwg.se.skyjo.controller.ControllerComponent.ControllerInterface
 import de.htwg.se.skyjo.util.*
 import de.htwg.se.skyjo.model.{GameState}
@@ -18,7 +10,6 @@ import de.htwg.se.skyjo.model.modelInterfaceImplementation.{
   Card,
   DiscardPile
 }
->>>>>>> origin/docker
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -33,39 +24,14 @@ import de.htwg.se.skyjo.util.utilComponent.{SupportCommand, LastHandler, LoadSav
 class TuiTest extends AnyWordSpec with Matchers {
   "A Tui " when {
     val plCount = 1
-<<<<<<< HEAD
-    val med = new ConcreteMediator()
-
-    val tempState = new GameState(med, Vector.empty, null, null, 0, None)
-    val ctr = new Controller(tempState)
-
-    val deck = new Deck(ctr.fullDeck(), ctr)
-    val disc = new DiscardPile(ctr)
-
-    val plBoards = Vector.fill(plCount)(new Board(med, 4, 3, Vector.empty))
-
-    ctr.state = new GameState(med, plBoards, deck, disc, 0, None)
-=======
     val injector = Guice.createInjector(SkyjoModule(plCount))
 
     val ctr = injector.getInstance(classOf[ControllerInterface])
 
->>>>>>> origin/docker
     ctr.setup()
 
     val tui = new Tui(ctr)
     "an Input Request is done, it" should:
-<<<<<<< HEAD
-      "process an Input" in:
-        tui.processInput("1")
-        tui.processInput("x")
-      "update shouldBe true" in:
-        tui.update shouldBe true
-        ctr.state = ctr.state.copy(isFlippingPhase = true)
-        tui.update shouldBe true
-      "can quit the game" in:
-        val simulatedInput = "1\nquit"
-=======
       "execute an unsigned input" in:
         val cmd = new SupportCommand(ctr, ctr.getBrds(0), ctr.getDeck, ctr.getDisc)
         cmd.execute("last")
@@ -87,13 +53,10 @@ class TuiTest extends AnyWordSpec with Matchers {
 
       "process an 1-0-Input" in:
         val simulatedInput = "undo\nredo\n1\n0\n0\n0\nquit\n"
->>>>>>> origin/docker
         val in = new ByteArrayInputStream(simulatedInput.getBytes())
         Console.withIn(in) {
           tui.startGame
         }
-<<<<<<< HEAD
-=======
         
       "process an undo-redo-help-Input" in:
         val simulatedInput = "undo\nredo\n1\n1\n0\n0\nundo\nredo\nhelp\nquit\n"
@@ -119,6 +82,5 @@ class TuiTest extends AnyWordSpec with Matchers {
         tui.ending
       "can update" in:
         tui.update("") shouldBe a[Boolean]
->>>>>>> origin/docker
   }
 }

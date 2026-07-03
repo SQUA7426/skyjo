@@ -11,6 +11,5 @@ import scala.util.Try
 
 trait HandlerInterface:
   val next: HandlerInterface
-  // def handle(request: String): Option[(BoardInterface, DeckInterface, DiscardPileInterface)]
   def handle(request: String, pos: Int): Try[GameState]
 

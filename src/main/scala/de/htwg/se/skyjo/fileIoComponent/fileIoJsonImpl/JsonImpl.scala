@@ -33,27 +33,18 @@ class JsonImpl(ctrl: ControllerInterface) extends FileIOInterface:
   def load(filename: String): GameState =
     val input = Files.readString(Paths.get(f"${ctrl.path}$filename"))
     val out = Json.parse(input)
-    // println("Searching for json")
     val mems: Vector[MoveCaretaker] = (out \ "mementos").get.as[Vector[MoveCaretaker]]
     val boards = (out \ "boards").get.as[Vector[BoardInterface]]
-    // boards.foreach(println)
     val deck = (out \ "deck").get.as[DeckInterface]
-    // println(f"Dck loaded:\n${deck.getDeckCards}")
     val disc = (out \ "disc").get.as[DiscardPileInterface]
-    // println(f"disc: $disc")
     val idx = (out \ "plIdx").get.as[Int]
-    // println(f"idx: $idx")
     val cs = (out \ "currentState").get.as[State]
-    // println(f"State loaded = ${cs.toString()}")
     val gs: GameState = GameState(mems,boards, deck,disc,idx,cs)
-    // println(f"gs loaded: ${gs.toString}")
     gs
 
   def save(gs: GameState,filename: String): Unit =
     val gsJsonData = Json.toJson(gs)
     val jsonString = Json.prettyPrint(gsJsonData)
-    // println("Saves as Json:")
-    // println(jsonString)
     Files.write(Paths.get(f"${ctrl.path}$filename"), jsonString.getBytes)
 
   implicit val cardIntWrites: Writes[CardInterface] = Writes { card =>

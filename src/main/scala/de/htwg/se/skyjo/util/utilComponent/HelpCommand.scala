@@ -12,9 +12,7 @@ class HelpCommand(
     val disc: DiscardPileInterface
 ) extends CommandInterface:
   override val cmd: String = "help"
-  // override val next: CommandInterface = UndoCommand(ctrl, b, d, disc)
 
-  // override def execute(command: String): Option[(Board, Deck, DiscardPile)] =
   override def execute(command: String): Boolean =
     if command.compareTo(cmd) == 0 then {
       println(s"RedoCommand executed command: ${command}")
@@ -23,9 +21,7 @@ class HelpCommand(
       println("[redo] redoing the undone changes")
       println("[quit] exit game")
       println("-----------------------------------------")
-      // None
       true
     }
-    // else this.next.execute(command)
     else
       false

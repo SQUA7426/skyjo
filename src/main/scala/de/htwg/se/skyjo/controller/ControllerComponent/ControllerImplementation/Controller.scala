@@ -82,7 +82,6 @@ class Controller @Inject() (
     }
     state = state.copy(plIdx = 0)
     assertGameState(state)
-    // notifyObservers
 
   def save(mementoSave: Memento): Unit =
     getMementos(getPlIdx).save(mementoSave)
@@ -348,13 +347,13 @@ class Controller @Inject() (
       replacedCard = oldCard
     )
     save(uptMem)
-    println(currMemento.undoStack.toString())
+    // println(currMemento.undoStack.toString())
     val newGameState = gs.copy(
       boards = getBrds.updated(getPlIdx, newBrd),
       currentState = currState.reset()
     )
 
-    println(s"Controller switchDeckDisc: uptMem:\n${uptMem}\n");
+    // println(s"Controller switchDeckDisc: uptMem:\n${uptMem}\n");
 
     assertGameState(newGameState)
 
@@ -552,7 +551,7 @@ class Controller @Inject() (
     )
 
   def guiPreviewDeckCard(): Unit = {
-    println("Controller.guiPreviewDeckCard aufgerufen")
+    // println("Controller.guiPreviewDeckCard aufgerufen")
     val (card, newDeck) = state.deck.draw(this)
     val s = State.MID
     s.pre = "DECK"
@@ -567,11 +566,11 @@ class Controller @Inject() (
   def guiConfirmDeckSwitch(pos: Int): Unit = {
     state.previewDeckCard match {
       case Some(card) =>
-        println(
-          s"\nguiConfirmDeckSwitch CARD => ${card} ; turned: ${card.isTurned}"
-        )
+        // println(
+        //   s"\nguiConfirmDeckSwitch CARD => ${card} ; turned: ${card.isTurned}"
+        // )
         val (swCard, tmpBrd) = getBrds(getPlIdx).switch(card, pos)
-        println(s"swCard: ${swCard}; turned: ${swCard.isTurned}")
+        // println(s"swCard: ${swCard}; turned: ${swCard.isTurned}")
         val (reduced_brd, _, _) = getReducedBrd(tmpBrd)
         mem = Memento(0, card, pos, swCard, getDisc, swCard.isTurned)
 

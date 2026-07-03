@@ -12,11 +12,8 @@ class XmlImpl(ctrl: ControllerInterface) extends FileIOInterface {
   def load(filename: String): GameState =
     val tempState = new GameState(Vector.empty, Vector.empty, null, null, 0, State.BEGIN)
     val loaded = (XML.loadFile(f"${ctrl.path}$filename") \\ "gamestate").head
-    // println(f"loaded:\n$loaded")
     val gs = tempState.fromXml(loaded)
 
-    // println("GS loaded from xml:")
-    // println(gs)
     if gs==tempState then println("game_state_data not converted!") else println("game_state_data converted!")
     gs
 
